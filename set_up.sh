@@ -10,6 +10,7 @@ pip3 install urllib3 --user
 pip3 install spacy --user
 pip3 install tqdm --user
 pip3 install nltk --user
+pip3 install spacy --user
 
 # creates directories
 echo "#################################"

@@ -6,6 +6,7 @@ pip3 install pandas --user
 pip3 install numpy --user
 pip3 install torch --user
 pip3 install ujson --user
+pip3 install tensorflow --user
 pip3 install urllib3 --user
 pip3 install spacy --user
 pip3 install tqdm --user
@@ -16,5 +17,4 @@ pip3 install spacy --user
 echo "#################################"
 echo "## setting up data directories ##"
 echo "#################################"
-mkdir data_v2/dev/ -p
-mkdir data_v2/train/ -p
+mkdir data -p

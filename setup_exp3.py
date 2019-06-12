@@ -31,21 +31,21 @@ def download_url(url, output_path, show_progress=True):
     unchanged from @chrischute
     """
     class DownloadProgressBar(tqdm):
-    def update_to(self, b=1, bsize=1, tsize=None):
-        if tsize is not None:
-        self.total = tsize
-        self.update(b * bsize - self.n)
+        def update_to(self, b=1, bsize=1, tsize=None):
+            if tsize is not None:
+                self.total = tsize
+                self.update(b * bsize - self.n)
 
-    if show_progress:
-    # Download with a progress bar
-    with DownloadProgressBar(unit='B', unit_scale=True,
-                 miniters=1, desc=url.split('/')[-1]) as t:
-        urllib.request.urlretrieve(url,
-                       filename=output_path,
-                       reporthook=t.update_to)
-    else:
-    # Simple download with no progress bar
-    urllib.request.urlretrieve(url, output_path)
+            if show_progress:
+                # Download with a progress bar
+                with DownloadProgressBar(unit='B', unit_scale=True,
+                             miniters=1, desc=url.split('/')[-1]) as t:
+                    urllib.request.urlretrieve(url,
+                                   filename=output_path,
+                                   reporthook=t.update_to)
+            else:
+            # Simple download with no progress bar
+                urllib.request.urlretrieve(url, output_path)
 
 
 def url_to_data_path(url):
@@ -59,23 +59,22 @@ def download(args):
     """
     unchanged from @chrischute
     """
-    downloads = [
-    # Can add other downloads here (e.g., other word vectors)
-    ('GloVe word vectors', args.glove_url),
-    ]
+
+        # Can add other downloads here (e.g., other word vectors)(
+    downloads = [('GloVe word vectors', args.glove_url),]
 
     for name, url in downloads:
-    output_path = url_to_data_path(url)
-    if not os.path.exists(output_path):
-        print('Downloading {}...'.format(name))
-        download_url(url, output_path)
+        output_path = url_to_data_path(url)
+        if not os.path.exists(output_path):
+            print('Downloading {}...'.format(name))
+            download_url(url, output_path)
 
-    if os.path.exists(output_path) and output_path.endswith('.zip'):
-        extracted_path = output_path.replace('.zip', '')
-        if not os.path.exists(extracted_path):
-        print('Unzipping {}...'.format(name))
-        with ZipFile(output_path, 'r') as zip_fh:
-            zip_fh.extractall(extracted_path)
+        if os.path.exists(output_path) and output_path.endswith('.zip'):
+            extracted_path = output_path.replace('.zip', '')
+            if not os.path.exists(extracted_path):
+                print('Unzipping {}...'.format(name))
+                with ZipFile(output_path, 'r') as zip_fh:
+                    zip_fh.extractall(extracted_path)
 
     print('Downloading spacy language model...')
     run(['python', '-m', 'spacy', 'download', 'en'])
@@ -96,12 +95,12 @@ def convert_idx(text, tokens):
     current = 0
     spans = []
     for token in tokens:
-    current = text.find(token, current)
-    if current < 0:
-        print("Token {} cannot be found".format(token))
-        raise Exception()
-    spans.append((current, current + len(token)))
-    current += len(token)
+        current = text.find(token, current)
+        if current < 0:
+            print("Token {} cannot be found".format(token))
+            raise Exception()
+        spans.append((current, current + len(token)))
+        current += len(token)
     return spans
 
 
@@ -114,70 +113,86 @@ def process_file(filename, data_type, word_counter, char_counter):
     eval_examples = {}
     total = 0
     with open(filename, "r") as fh:
-    source = json.load(fh)
-    for article in tqdm(source["data"]):
-        for para in article["paragraphs"]:
+        source = json.load(fh)
+        print("NEW: Parsing contexts")
+        contexts = [para["context"] for article in tqdm(source["data"]) for para in article["paragraphs"]]
+        super_context = "".join(contexts)
+        print("NEW: Finished making super context")
+        for article in tqdm(source["data"]):
+            for para in article["paragraphs"]:
         #####
         # add context merging here
         #####
 
-        context = para["context"].replace(
-            "''", '" ').replace("``", '" ')
-        context_tokens = word_tokenize(context)
-        context_chars = [list(token) for token in context_tokens]
-        spans = convert_idx(context, context_tokens)
-        for token in context_tokens:
-            word_counter[token] += len(para["qas"])
-            for char in token:
-            char_counter[char] += len(para["qas"])
+
+        #####
+        # General idea:
+        # contexts = []
+        # buffer = 0
+        # for i in range len(article["paragraphs"]):
+        #   contexts.append(article['paragraphs']['context]) # this adds the new context to the lists of contexts
+        #   buffer += len(article['paragraphs']['context]) # this adds to the buffer to make sure that everything stays adjusted when the script joins the contexts
+        #   
+        # super_context = ''.join(contexts) 
+        #####
+
+                context = para["context"].replace(
+                    "''", '" ').replace("``", '" ')
+                context_tokens = word_tokenize(context)
+                context_chars = [list(token) for token in context_tokens]
+                spans = convert_idx(context, context_tokens)
+                for token in context_tokens:
+                    word_counter[token] += len(para["qas"])
+                    for char in token:
+                        char_counter[char] += len(para["qas"])
 
         #####
         # once this is done, the above code can probably be re-used 
         #####
 
-        for qa in para["qas"]:
-            total += 1
-            ques = qa["question"].replace(
-            "''", '" ').replace("``", '" ')
-            ques_tokens = word_tokenize(ques)
-            ques_chars = [list(token) for token in ques_tokens]
-            for token in ques_tokens:
-            word_counter[token] += 1
-            for char in token:
-                char_counter[char] += 1
-            y1s, y2s = [], []
-            answer_texts = []
-            for answer in qa["answers"]:
-            answer_text = answer["text"]
-            answer_start = answer['answer_start']
-            answer_end = answer_start + len(answer_text)
-            answer_texts.append(answer_text)
-            answer_span = []
-            for idx, span in enumerate(spans):
-                if not (answer_end <= span[0] or answer_start >= span[1]):
-                answer_span.append(idx)
-            y1, y2 = answer_span[0], answer_span[-1]
-            y1s.append(y1)
-            y2s.append(y2)
-            
+                for qa in para["qas"]:
+                    total += 1
+                    ques = qa["question"].replace(
+                    "''", '" ').replace("``", '" ')
+                    ques_tokens = word_tokenize(ques)
+                    ques_chars = [list(token) for token in ques_tokens]
+                    for token in ques_tokens:
+                        word_counter[token] += 1
+                    for char in token:
+                        char_counter[char] += 1
+                    y1s, y2s = [], []
+                    answer_texts = []
+                    for answer in qa["answers"]:
+                        answer_text = answer["text"]
+                        answer_start = answer['answer_start']
+                        answer_end = answer_start + len(answer_text)
+                        answer_texts.append(answer_text)
+                        answer_span = []
+                        for idx, span in enumerate(spans):
+                            if not (answer_end <= span[0] or answer_start >= span[1]):
+                                answer_span.append(idx)
+                        y1, y2 = answer_span[0], answer_span[-1]
+                        y1s.append(y1)
+                        y2s.append(y2)
+
         #####
         # can probably modify the two below data structures to take 
         # advantage of the smart new context stuff
         #####
 
-            example = {"context_tokens": context_tokens,
-                   "context_chars": context_chars,
-                   "ques_tokens": ques_tokens,
-                   "ques_chars": ques_chars,
-                   "y1s": y1s,
-                   "y2s": y2s,
-                   "id": total}
-            examples.append(example)
-            eval_examples[str(total)] = {"context": context,
-                         "question": ques,
-                         "spans": spans,
-                         "answers": answer_texts,
-                         "uuid": qa["id"]}
+                example = {"context_tokens": context_tokens,
+                       "context_chars": context_chars,
+                       "ques_tokens": ques_tokens,
+                       "ques_chars": ques_chars,
+                       "y1s": y1s,
+                       "y2s": y2s,
+                       "id": total}
+                examples.append(example)
+                eval_examples[str(total)] = {"context": context,
+                             "question": ques,
+                             "spans": spans,
+                             "answers": answer_texts,
+                             "uuid": qa["id"]}
         #####
         # end mod
         #####
@@ -195,23 +210,23 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
     embedding_dict = {}
     filtered_elements = [k for k, v in counter.items() if v > limit]
     if emb_file is not None:
-    assert vec_size is not None
-    with open(emb_file, "r", encoding="utf-8") as fh:
-        for line in tqdm(fh, total=num_vectors):
-        array = line.split()
-        word = "".join(array[0:-vec_size])
-        vector = list(map(float, array[-vec_size:]))
-        if word in counter and counter[word] > limit:
-            embedding_dict[word] = vector
-    print("{} / {} tokens have corresponding {} embedding vector".format(
-        len(embedding_dict), len(filtered_elements), data_type))
+        assert vec_size is not None
+        with open(emb_file, "r", encoding="utf-8") as fh:
+            for line in tqdm(fh, total=num_vectors):
+                array = line.split()
+                word = "".join(array[0:-vec_size])
+                vector = list(map(float, array[-vec_size:]))
+                if word in counter and counter[word] > limit:
+                    embedding_dict[word] = vector
+        print("{} / {} tokens have corresponding {} embedding vector".format(
+            len(embedding_dict), len(filtered_elements), data_type))
     else:
-    assert vec_size is not None
-    for token in filtered_elements:
-        embedding_dict[token] = [np.random.normal(
-        scale=0.1) for _ in range(vec_size)]
-    print("{} tokens have corresponding {} embedding vector".format(
-        len(filtered_elements), data_type))
+        assert vec_size is not None
+        for token in filtered_elements:
+            embedding_dict[token] = [np.random.normal(
+            scale=0.1) for _ in range(vec_size)]
+        print("{} tokens have corresponding {} embedding vector".format(
+            len(filtered_elements), data_type))
 
     NULL = "--NULL--"
     OOV = "--OOV--"
@@ -255,11 +270,10 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
     #####
     # room for mod here
     #####
-    return len(example["context_tokens"]) > para_limit or \ 
-           len(example["ques_tokens"]) > ques_limit
+        return len(example["context_tokens"]) > para_limit or len(example["ques_tokens"]) > ques_limit
 
     if filter_func(example):
-    raise ValueError("Context/Questions lengths are over the limit")
+        raise ValueError("Context/Questions lengths are over the limit")
 
     context_idxs = np.zeros([para_limit], dtype=np.int32)
     #####
@@ -270,39 +284,39 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
     ques_char_idxs = np.zeros([ques_limit, char_limit], dtype=np.int32)
 
     def _get_word(word):
-    for each in (word, word.lower(), word.capitalize(), word.upper()):
-        if each in word2idx_dict:
-        return word2idx_dict[each]
-    return 1
+        for each in (word, word.lower(), word.capitalize(), word.upper()):
+            if each in word2idx_dict:
+                return word2idx_dict[each]
+        return 1
 
     def _get_char(char):
-    if char in char2idx_dict:
-        return char2idx_dict[char]
-    return 1
+        if char in char2idx_dict:
+            return char2idx_dict[char]
+        return 1
 
     for i, token in enumerate(example["context_tokens"]):
     #####
     # room for reuse here
     #####
-    context_idxs[i] = _get_word(token)
+        context_idxs[i] = _get_word(token)
 
     for i, token in enumerate(example["ques_tokens"]):
-    ques_idxs[i] = _get_word(token)
+        ques_idxs[i] = _get_word(token)
 
     #####
     # room for reuse here
     #####
     for i, token in enumerate(example["context_chars"]):
-    for j, char in enumerate(token):
-        if j == char_limit:
-        break
-        context_char_idxs[i, j] = _get_char(char)
+        for j, char in enumerate(token):
+            if j == char_limit:
+                break
+            context_char_idxs[i, j] = _get_char(char)
 
     for i, token in enumerate(example["ques_chars"]):
-    for j, char in enumerate(token):
-        if j == char_limit:
-        break
-        ques_char_idxs[i, j] = _get_char(char)
+        for j, char in enumerate(token):
+            if j == char_limit:
+                break
+            ques_char_idxs[i, j] = _get_char(char)
 
     #####
     # room for reuse here; definitely need to modify this return statement to make the memory better
@@ -320,6 +334,7 @@ def is_answerable(example):
 def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_dict, is_test=False):
     """
     TODO: modify to fit the super context experiment
+    a little bit less urgent since it is used for metas, not really important yet
     """
     para_limit = args.test_para_limit if is_test else args.para_limit
     ques_limit = args.test_ques_limit if is_test else args.ques_limit
@@ -327,15 +342,15 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     char_limit = args.char_limit
 
     def drop_example(ex, is_test_=False):
-    if is_test_:
-        drop = False
-    else:
-        drop = len(ex["context_tokens"]) > para_limit or \
-           len(ex["ques_tokens"]) > ques_limit or \
-           (is_answerable(ex) and
-            ex["y2s"][0] - ex["y1s"][0] > ans_limit)
+        if is_test_:
+            drop = False
+        else:
+            drop = len(ex["context_tokens"]) > para_limit or \
+               len(ex["ques_tokens"]) > ques_limit or \
+               (is_answerable(ex) and
+                ex["y2s"][0] - ex["y1s"][0] > ans_limit)
 
-    return drop
+        return drop
 
     print("Converting {} examples to indices...".format(data_type))
     total = 0
@@ -349,23 +364,23 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     y2s = []
     ids = []
     for n, example in tqdm(enumerate(examples)):
-    total_ += 1
+        total_ += 1
 
-    if drop_example(example, is_test):
-        continue
+        if drop_example(example, is_test):
+            continue
 
-    total += 1
+        total += 1
 
-    def _get_word(word):
-        for each in (word, word.lower(), word.capitalize(), word.upper()):
-        if each in word2idx_dict:
-            return word2idx_dict[each]
-        return 1
+        def _get_word(word):
+            for each in (word, word.lower(), word.capitalize(), word.upper()):
+                if each in word2idx_dict:
+                    return word2idx_dict[each]
+            return 1
 
-    def _get_char(char):
-        if char in char2idx_dict:
-        return char2idx_dict[char]
-        return 1
+        def _get_char(char):
+            if char in char2idx_dict:
+                return char2idx_dict[char]
+            return 1
 
     context_idx = np.zeros([para_limit], dtype=np.int32)
     context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
@@ -388,16 +403,16 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     #####
     for i, token in enumerate(example["context_chars"]):
         for j, char in enumerate(token):
-        if j == char_limit:
-            break
-        context_char_idx[i, j] = _get_char(char)
+            if j == char_limit:
+                break
+            context_char_idx[i, j] = _get_char(char)
     context_char_idxs.append(context_char_idx)
 
     for i, token in enumerate(example["ques_chars"]):
         for j, char in enumerate(token):
-        if j == char_limit:
-            break
-        ques_char_idx[i, j] = _get_char(char)
+            if j == char_limit:
+                break
+            ques_char_idx[i, j] = _get_char(char)
     ques_char_idxs.append(ques_char_idx)
 
     if is_answerable(example):
@@ -427,9 +442,9 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
 
 def save(filename, obj, message=None):
     if message is not None:
-    print("Saving {}...".format(message))
-    with open(filename, "w") as fh:
-        json.dump(obj, fh)
+        print("Saving {}...".format(message))
+        with open(filename, "w") as fh:
+            json.dump(obj, fh)
 
 
 def pre_process(args):
@@ -450,11 +465,11 @@ def pre_process(args):
     build_features(args, train_examples, "train", args.train_record_file, word2idx_dict, char2idx_dict)
     dev_meta = build_features(args, dev_examples, "dev", args.dev_record_file, word2idx_dict, char2idx_dict)
     if args.include_test_examples:
-    test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
-    save(args.test_eval_file, test_eval, message="test eval")
-    test_meta = build_features(args, test_examples, "test",
-                   args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)
-    save(args.test_meta_file, test_meta, message="test meta")
+        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
+        save(args.test_eval_file, test_eval, message="test eval")
+        test_meta = build_features(args, test_examples, "test",
+                       args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)
+        save(args.test_meta_file, test_meta, message="test meta")
 
     save(args.word_emb_file, word_emb_mat, message="word embedding")
     save(args.char_emb_file, char_emb_mat, message="char embedding")
@@ -479,7 +494,7 @@ if __name__ == '__main__':
     args_.train_file = url_to_data_path(args_.train_url)
     args_.dev_file = url_to_data_path(args_.dev_url)
     if args_.include_test_examples:
-    args_.test_file = url_to_data_path(args_.test_url)
+        args_.test_file = url_to_data_path(args_.test_url)
     glove_dir = url_to_data_path(args_.glove_url.replace('.zip', ''))
     glove_ext = '.txt' if glove_dir.endswith('d') else '.{}d.txt'.format(args_.glove_dim)
     args_.glove_file = os.path.join(glove_dir, os.path.basename(glove_dir) + glove_ext)

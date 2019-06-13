@@ -5,18 +5,9 @@ author: @rohitmusti
 """
 import ujson as json
 from tqdm import tqdm
-from toolkit import fancyprint, save
+from toolkit import fancyprint, save, quick_clean
 import config
 
-def quick_clean(raw_str):
-    """
-    args:
-        - context: a string to be quickly cleaned
-
-    return
-        - the original string w/ all quotes replaced as double quotes
-    """
-    return raw_str.replace("''", '" ').replace("``", '" ')
 
 def exp2_transformer(in_file, out_file):
     """
@@ -34,12 +25,12 @@ def exp2_transformer(in_file, out_file):
         source = json.load(fh)
         new_data["version"] = source["version"]
         new_data["data"] = []
+        topic_dict["topic_context"] = "".join([quick_clean(raw_str=para["context"]) for topic in source["data"] for para in topic["paragraphs"]])
         for topic in tqdm(source["data"]):
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             # merge the contexts within each topic into a giant string
             # save the topic_context above the paragraphs
-            topic_dict["topic_context"] = "".join([quick_clean(raw_str=para["context"]) for para in topic["paragraphs"]])
             context_buffer = 0
             topic_dict["qas"] = []
             for para in topic["paragraphs"]:

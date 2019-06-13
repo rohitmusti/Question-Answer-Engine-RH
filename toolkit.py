@@ -16,3 +16,13 @@ def save(filename, obj, message=None):
         fancyprint("Saving {}!".format(message))
         with open(filename, "w") as fh:
             json.dump(obj, fh)
+
+def quick_clean(raw_str):
+    """
+    args:
+        - context: a string to be quickly cleaned
+
+    return
+        - the original string w/ all quotes replaced as double quotes
+    """
+    return raw_str.replace("''", '" ').replace("``", '" ')

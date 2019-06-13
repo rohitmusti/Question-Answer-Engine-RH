@@ -5,18 +5,8 @@ author: @rohitmusti
 """
 import ujson as json
 from tqdm import tqdm
-from toolkit import fancyprint, save
+from toolkit import fancyprint, save, quick_clean
 import config
-
-def quick_clean(raw_str):
-    """
-    args:
-        - context: a string to be quickly cleaned
-
-    return
-        - the original string w/ all quotes replaced as double quotes
-    """
-    return raw_str.replace("''", '" ').replace("``", '" ')
 
 def exp2_transformer(in_file, out_file):
     """

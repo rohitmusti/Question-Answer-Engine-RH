@@ -9,7 +9,7 @@ from toolkit import fancyprint, save, quick_clean
 import config
 
 
-def exp2_transformer(in_file, out_file):
+def exp3_transformer(in_file, out_file):
     """
     args:
         - in_file: the file name of the data to be transformed to experiment 2
@@ -19,18 +19,18 @@ def exp2_transformer(in_file, out_file):
         none, the data is written to an output
     """
     new_data = {}
-    new_data['experiment'] = 2
+    new_data['experiment'] = 3
     with open(in_file, "r") as fh:
         fancyprint(in_str=("Importing: " + in_file))
         source = json.load(fh)
+        fancyprint(in_str="Converting into experiment 3 format")
         new_data["version"] = source["version"]
         new_data["data"] = []
-        topic_dict["topic_context"] = "".join([quick_clean(raw_str=para["context"]) for topic in source["data"] for para in topic["paragraphs"]])
+        # Merge all the `contexts` into one giant string
+        new_data["super_context"] = "".join([quick_clean(raw_str=para["context"]) for topic in source["data"] for para in topic["paragraphs"]])
         for topic in tqdm(source["data"]):
             topic_dict = {}
             topic_dict["title"] = topic["title"]
-            # merge the contexts within each topic into a giant string
-            # save the topic_context above the paragraphs
             context_buffer = 0
             topic_dict["qas"] = []
             for para in topic["paragraphs"]:
@@ -51,10 +51,10 @@ def exp2_transformer(in_file, out_file):
                 context_buffer += len(para["context"])
             new_data["data"].append(topic_dict)
 
-    save(filename=out_file, obj=new_data, message="saving experiment 2 data")
+    save(filename=out_file, obj=new_data, message="saving experiment 3 data")
 
 
 
 if __name__ == "__main__":
     data = config.data()
-    exp2_transformer(in_file=data.train_data_orig, out_file=data.train_data_exp2)
+    exp3_transformer(in_file=data.train_data_orig, out_file=data.train_data_exp3)

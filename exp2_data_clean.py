@@ -22,6 +22,7 @@ def exp2_transformer(in_file, out_file):
     with open(in_file, "r") as fh:
         fancyprint(in_str=("Importing: " + in_file))
         source = json.load(fh)
+        fancyprint(in_str="Converting into experiment 2 format")
         new_data["version"] = source["version"]
         new_data["data"] = []
         for topic in tqdm(source["data"]):

@@ -15,7 +15,7 @@ The idea is to combine all of the contexts into one large "super context". Then 
 
 ### Data Re-Structure
 
-### Original Data Structure
+#### Original Data Structure
 
 The squad data comes in a json format. Run `python3 data_discovery.py` to verify this.
 
@@ -46,7 +46,7 @@ At the highest level, it has two fields `version` and `data`.
 
                 - `answer_start`: an integer indicating the start a valid answer.:w
 
-### Experiment 2 (topic contexts) Restructure
+#### Experiment 2 (topic contexts) Restructure
 
 Restructuring steps:
 
@@ -55,7 +55,7 @@ Restructuring steps:
 1. I can also be more space efficient by storing the new `topic_context` above the paragraphs on the same level as its corresponding `topic`.
 1. Within `paragraphs`, I can make all the elements of `qas` elements of `paragraph` and  rename `paragraphs` to `qas`.
 
-### Experiment 3 (super contexts) Restructure
+#### Experiment 3 (super contexts) Restructure
 
 Restructuring steps:
 

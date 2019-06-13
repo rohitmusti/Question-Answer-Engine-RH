@@ -39,7 +39,7 @@ def exp2_transformer(in_file, out_file):
             topic_dict["title"] = topic["title"]
             # merge the contexts within each topic into a giant string
             # save the topic_context above the paragraphs
-            topic_dict["topic_context"] = [quick_clean(raw_str=para["context"]) for para in topic["paragraphs"]]
+            topic_dict["topic_context"] = "".join([quick_clean(raw_str=para["context"]) for para in topic["paragraphs"]])
             context_buffer = 0
             topic_dict["qas"] = []
             for para in topic["paragraphs"]:

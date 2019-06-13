@@ -6,10 +6,18 @@ This is a baseline implementation of the [SQuAD](https://rajpurkar.github.io/SQu
 1. Run the set up shell script to ensure that you have all of the local dependencies needed. `sh set_up.sh`. Note, this script is based on `pip3` and you may need to modify if if you are using `conda` or some other package management system.
 
 1. Run `python3 setup.py` to get all of the data into a usable format. 
+
+## Super Context Experiment
+
+Please email me at rmusti@redhat.com if you want to learn more about the idea. I might try and turn this into a research paper so be advised that that may be coming soon.
+
+The idea is to combine all of the contexts into one large "super context". Then train the question and answering system using the "super context" as the context for every question and answer pair. I will train on the test set and see how I perform on the dev set. 
+
+Some short 
 	
 
 ## Credits
 
 Thank you to @chrischute for his work in creating the `layers.py`, `setup.py` files and setting up the original model I started training from.
 
-Thank you to Knowledge Computation Group@HKUST for their original code [here](https://github.com/HKUST-KnowComp/R-Net)
+Thank you to Knowledge Computation Group@HKUST for their original code [here](https://github.com/HKUST-KnowComp/R-Net) that I borrowed a lot of structure from.

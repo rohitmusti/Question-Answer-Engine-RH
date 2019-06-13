@@ -15,6 +15,8 @@ The idea is to combine all of the contexts into one large "super context". Then 
 
 ### Data Re-Structure
 
+### Original Data Structure
+
 The squad data comes in a json format. Run `python3 data_discovery.py` to verify this.
 
 
@@ -44,11 +46,28 @@ At the highest level, it has two fields `version` and `data`.
 
                 - `answer_start`: an integer indicating the start a valid answer.:w
 
+### Experiment 2 Restructure
 
+Restructuring steps:
 
+1. Merge all the `contexts` within each `topic` into one giant string
+1. I need to update `answer_start` indexes to account for their movement based on their new context location.
+1. I can also be more space efficient by storing the new `super_contexts` above the paragraphs on the same level as its corresponding `topic`.
+1. Within `paragraphs`, I can make all the elements of `qas` elements of `paragraph` and  rename `paragraphs` to `qas`.
+
+### Experiment 3 Restructure
+
+Restructuring steps:
+
+1. Merge all the `contexts` into one giant string
+1. I need to update `answer_start` indexes to account for their movement based on where they're appended.
+1. I can also be more space efficient by storing the new `super_context` above the paragraphs.
+1. Within `paragraphs`, I can make all the elements of `qas` elements of `paragraph` and rename `paragraphs` to `qas`.
 
 ## Credits
 
 Thank you to @chrischute for his work in creating the `layers.py`, `setup.py` files and setting up the original model I started training from.
 
 Thank you to Knowledge Computation Group@HKUST for their original code [here](https://github.com/HKUST-KnowComp/R-Net) that I borrowed a lot of structure from.
+
+Thank you to Sanjay Arora for his mentorship throughout this effort and the Red Hat AI Center of Excellence for making this research project possible.

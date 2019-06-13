@@ -1,11 +1,8 @@
 import ujson as json
+from toolkit import fancyprint
+import config
 
-def fancyprint(in_str):
-    print()
-    print("#"*20)
-    print("# " + in_str)
-    print("#"*20)
-    print()
+
 
 def data_discovery(filename):
     """
@@ -33,6 +30,7 @@ def data_discovery(filename):
                     print(tab*3,"the keys of each element of qas:",qa.keys())
                     print(tab*3,"the type of id:",type(qa['id']))
                     print(tab*3,"the type of is_impossible:",type(qa['is_impossible']))
+
                     print(tab*3,"the type of question:",type(qa['question']))
                     print(tab*3,"the type of answers:",type(qa['answers']))
                     for answer in qa["answers"]:
@@ -44,5 +42,6 @@ def data_discovery(filename):
 
 
 if __name__ == '__main__':
+    data = config.data()
     fancyprint(in_str="Original Data")
-    data_discovery(filename="./data/train/train-v2.0.json")
+    data_discovery(filename=data.train_data_orig)

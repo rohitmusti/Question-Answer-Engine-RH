@@ -46,16 +46,16 @@ At the highest level, it has two fields `version` and `data`.
 
                 - `answer_start`: an integer indicating the start a valid answer.:w
 
-### Experiment 2 Restructure
+### Experiment 2 (topic contexts) Restructure
 
 Restructuring steps:
 
 1. Merge all the `contexts` within each `topic` into one giant string
 1. I need to update `answer_start` indexes to account for their movement based on their new context location.
-1. I can also be more space efficient by storing the new `super_contexts` above the paragraphs on the same level as its corresponding `topic`.
+1. I can also be more space efficient by storing the new `topic_context` above the paragraphs on the same level as its corresponding `topic`.
 1. Within `paragraphs`, I can make all the elements of `qas` elements of `paragraph` and  rename `paragraphs` to `qas`.
 
-### Experiment 3 Restructure
+### Experiment 3 (super contexts) Restructure
 
 Restructuring steps:
 

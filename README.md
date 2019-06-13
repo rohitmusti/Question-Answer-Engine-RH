@@ -15,7 +15,7 @@ The idea is to combine all of the contexts into one large "super context". Then 
 
 ### Data Re-Structure
 
-The original data structure is a json. Run `python3 data_discovery.py` to verify this.
+The squad data comes in a json format. Run `python3 data_discovery.py` to verify this.
 
 
 At the highest level, it has two fields `version` and `data`.

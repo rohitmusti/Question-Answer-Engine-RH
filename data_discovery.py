@@ -4,7 +4,7 @@ def data_discovery(filename):
     """
     just a function to explore some data
     """
-    tab = "    "
+    tab = " -> "
     with open(filename, "r") as fh:
         source = json.load(fh)
         print("the type of source:", type(source))
@@ -35,5 +35,13 @@ def data_discovery(filename):
                         print(tab*4,"the type of answer_start:",type(answer['answer_start']))
                         return None
 
+def fancyprint(in_str):
+    print()
+    print("#"*20)
+    print("# " + in_str)
+    print("#"*20)
+    print()
+
 if __name__ == '__main__':
+    fancyprint(in_str="Original Data")
     data_discovery(filename="./data/train-v2.0.json")

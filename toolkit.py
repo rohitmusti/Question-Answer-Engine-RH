@@ -13,6 +13,6 @@ def save(filename, obj, message=None):
     author: @wzhouad
     """
     if message is not None:
-        print("Saving {}...".format(message))
+        fancyprint("Saving {}!".format(message))
         with open(filename, "w") as fh:
             json.dump(obj, fh)

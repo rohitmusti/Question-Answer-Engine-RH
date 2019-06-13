@@ -50,12 +50,12 @@ def exp2_transformer(in_file, out_file):
                     qas_dict["question"] = quick_clean(raw_str=qas["question"])
                     qas_dict["answers"] = []
                     if not qas["is_impossible"]:
-                        for answer in qas:
+                        for answer in qas["answers"]:
                             answer_dict = {}
                             # update the answer start index
                             answer_dict["answer_start"] = answer["answer_start"] + context_buffer
-                            answer_dict["text"] = answer["context"]
-                            qas_dict["answers"].append()
+                            answer_dict["text"] = answer["text"]
+                            qas_dict["answers"].append(answer_dict)
                     topic_dict["qas"].append(qas_dict)
                 context_buffer += len(para["context"])
             new_data["data"].append(topic_dict)

@@ -1,5 +1,6 @@
+data/*
+data_temp/*
 data_v2/*
 .ipynb_checkpoints/*
 __pycache__/*
-data/*
-data_temp/*
+save/*

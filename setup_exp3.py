@@ -134,7 +134,7 @@ def process_file(filename, data_type, word_counter, char_counter):
         #####
 
         #####
-        # once this is done, the above code can probably be re-used 
+        # once this is done, the above code can probably be re-used
         #####
 
                 for qa in para["qas"]:
@@ -160,11 +160,11 @@ def process_file(filename, data_type, word_counter, char_counter):
                                 answer_span.append(idx)
                         y1, y2 = answer_span[0], answer_span[-1]
                         # adding the buffer allows us to keep track within the super context
-                        y1s.append(y1 + buffer) 
+                        y1s.append(y1 + buffer)
                         y2s.append(y2 + buffer)
 
         #####
-        # can probably modify the two below data structures to take 
+        # can probably modify the two below data structures to take
         # advantage of the smart new context stuff
         #####
 
@@ -482,8 +482,8 @@ if __name__ == '__main__':
     nlp.max_length = 100000000
 
     # Preprocess dataset
-    args_.train_file = url_to_data_path(args_.train_url)
-    args_.dev_file = url_to_data_path(args_.dev_url)
+    args_.train_file = url_to_data_path(url="https://github.com/chrischute/squad/data/train-v2.0.json")
+    args_.dev_file = url_to_data_path(url="https://github.com/chrischute/squad/data/dev-v2.0.json")
     if args_.include_test_examples:
         args_.test_file = url_to_data_path(args_.test_url)
     glove_dir = url_to_data_path(args_.glove_url.replace('.zip', ''))

@@ -5,16 +5,47 @@ This is a baseline implementation of the [SQuAD](https://rajpurkar.github.io/SQu
 
 1. Run the set up shell script to ensure that you have all of the local dependencies needed. `sh set_up.sh`. Note, this script is based on `pip3` and you may need to modify if if you are using `conda` or some other package management system.
 
-1. Run `python3 setup.py` to get all of the data into a usable format. 
+1. Run `python3 setup.py` to get all of the data into a usable format.
 
 ## Super Context Experiment
 
 Please email me at rmusti@redhat.com if you want to learn more about the idea. I might try and turn this into a research paper so be advised that that may be coming soon.
 
-The idea is to combine all of the contexts into one large "super context". Then train the question and answering system using the "super context" as the context for every question and answer pair. I will train on the test set and see how I perform on the dev set. 
+The idea is to combine all of the contexts into one large "super context". Then train the question and answering system using the "super context" as the context for every question and answer pair. I will train on the test set and see how I perform on the dev set.
 
-Some short 
-	
+### Data Re-Structure
+
+The original data structure is a json. Run `python3 data_discovery.py` to verify this.
+
+
+At the highest level, it has two fields `version` and `data`.
+
+- `version`: string indicating whether the data is v1 or v2; we are working with v2.
+
+- `data`: a list of dictionaries and contains all of the data; each dictionary has two keys: `title` and `paragraphs`.
+
+    - `title`: title of the article the paragraphs came from.
+
+    - `paragraphs`: a list of dictionaries with two keys: `qas` and `context`.
+
+        - `context`: a string representing a context paragraph.
+
+        - `qas`: a list of dictionaries. Each dictionary as 4 keys: `id`, `is_impossible`, `question`, `answers`.
+
+            - `id`: just a string representing the id of the question
+
+            - `is_impossible`: a boolean that is True if it answerable and False if not
+
+            - `question`: a string representing a question
+
+            - `answers`: a list of dictionaries, each with two fields: `text`, `answer_start`.
+
+                - `text`: a string indicating the text of a valid answer
+
+                - `answer_start`: an integer indicating the start a valid answer.:w
+
+
+
 
 ## Credits
 

@@ -64,6 +64,18 @@ Restructuring steps:
 1. I can also be more space efficient by storing the new `super_context` above the paragraphs.
 1. Within `paragraphs`, I can make all the elements of `qas` elements of `paragraph` and rename `paragraphs` to `qas`.
 
+### Experiment 2 set up
+
+1. Convert word indices to word embeddings for the context and the questions.
+    - efficiency here, I only need to calculate the context embeddings once
+1. Project each embedding vector into dimensionality H.
+    - to do this, you multiply each vector by a matrix of dimensions H x V, this will be a learnable matrix of parameters.
+1. Then, we apply a highway network to transform each hidden vector using learnable parameters.
+1. Encoder Layer
+1. Attention Layer
+1. Modeling Layer
+
+
 ## Credits
 
 Thank you to @chrischute for his work in creating the `layers.py`, `setup.py` files and setting up the original model I started training from.

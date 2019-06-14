@@ -17,4 +17,7 @@ pip3 install spacy --user
 echo "#################################"
 echo "## setting up data directories ##"
 echo "#################################"
-mkdir data -p
+mkdir data/train -p
+mkdir data/dev -p
+mkdir data/test -p
+mkdir data/embeddings -p

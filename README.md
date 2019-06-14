@@ -66,6 +66,8 @@ Restructuring steps:
 
 ### Experiment 2 set up
 
+test  what the softmaxed entries of the similarity matrix look like when you train with larger context; so a distribution of the softmaxed entries (row-wise and column-wise) across all questions in (train, dev) for (usual context, larger context sizes)
+
 1. Convert word indices to word embeddings for the context and the questions.
     - efficiency here, I only need to calculate the context embeddings once
 1. Project each embedding vector into dimensionality H.

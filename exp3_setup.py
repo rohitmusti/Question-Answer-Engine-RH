@@ -418,6 +418,7 @@ def pre_process(args):
 
 if __name__ == '__main__':
     # Get command-line args
+    # TODO: swap args with config
     args_ = get_setup_args()
 
     # Download resources
@@ -428,11 +429,4 @@ if __name__ == '__main__':
     nlp.max_length = 100000000
 
     # Preprocess dataset
-    args_.train_file = url_to_data_path(url="https://github.com/chrischute/squad/data/train-v2.0.json")
-    args_.dev_file = url_to_data_path(url="https://github.com/chrischute/squad/data/dev-v2.0.json")
-    if args_.include_test_examples:
-        args_.test_file = url_to_data_path(args_.test_url)
-    glove_dir = url_to_data_path(args_.glove_url.replace('.zip', ''))
-    glove_ext = '.txt' if glove_dir.endswith('d') else '.{}d.txt'.format(args_.glove_dim)
-    args_.glove_file = os.path.join(glove_dir, os.path.basename(glove_dir) + glove_ext)
     pre_process(args_)

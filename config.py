@@ -19,3 +19,5 @@ class data():
         self.embed_folder = self.folder + "embeddings/"
         self.word_embeddings = self.embed_folder + "glove.840B.300d.txt"
         self.char_embeddings = self.embed_folder + "glove.840B.300d-char.txt"
+
+        self.random_seed = 3716

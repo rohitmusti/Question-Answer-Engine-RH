@@ -19,6 +19,7 @@ import spacy
 import ujson as json
 import urllib.request
 import config
+from toolkit import quick_clean
 
 from codecs import open
 from collections import Counter
@@ -58,7 +59,8 @@ def convert_idx(text, tokens):
 
 def process_file(filename, data_type, word_counter, char_counter):
     """
-    TODO: modify to fit the super context experiment
+    modified to fit the super context experiment
+    author: @rohitmusti
     """
     examples = []
     eval_examples = {}
@@ -66,19 +68,65 @@ def process_file(filename, data_type, word_counter, char_counter):
     with open(filename, "r") as fh:
         source = json.load(fh)
         sc = source["super_context"]
-        sc_tokens = [word_tokenize(sc)]
+        sc_tokens = word_tokenize(sc)
         sc_chars = [list(token) for token in sc_tokens]
         sc_spans = convert_idx(sc, sc_tokens)
-    print('made it w/ no errors')
-    return 0
-        # for token in sc_tokens:
-        #     word_counter[token] += len(para["qas"])
-        #     for char in token:
-        #         char_counter[char] += len(para["qas"])
-#        print("Pre-processing {} examples...".format(data_type))
-#        buffer = 0
-#        for article in tqdm(source["data"]):
-#            for para in article["paragraphs"]:
+        print("Creating the word indices from the contexts")
+        print()
+        for token in tqdm(sc_tokens):
+            word_counter[token] += 1
+            # I changed this to 1 instead of the len(para["qas"]) it was originally.
+            for char in token:
+                char_counter[char] += 1
+            # I changed this to 1 instead of the len(para["qas"]) it was originally.
+        examples.append({"super_context_tokens": sc_tokens,
+                         "super_context_chars": sc_chars,
+                         "spans": sc_spans})
+        print()
+        print("Pre-processing {} examples...".format(data_type))
+        for topic in tqdm(source["data"]):
+            for qas in topic["qas"]:
+                total += 1
+                ques = quick_clean(qas["question"])
+                ques_tokens = word_tokenize(ques)
+                ques_chars = [list(token) for token in ques_tokens]
+                for token in ques_tokens:
+                    word_counter[token] += 1
+                    for char in token:
+                        char_counter[char] += 1
+                y1s, y2s = [], []
+                answer_texts = []
+                for answer in qas["answers"]:
+                    answer_text = answer["text"]
+                    answer_start = answer["answer_start"]
+                    answer_end = answer_start + len(answer_text)
+                    answer_texts.append(answer_text)
+                    answer_span = []
+                    if not qas["is_impossible"]:
+                        [answer_span.append(idx) for idx, span in enumerate(sc_spans)]
+#                        for idx, span in enumerate(sc_spans):
+#                            if not (answer_end <= span[0] or answer_start >= span[1]):
+# I may come to regret this comment but I think it is useful for now
+# hopefully the is_impossible check helps
+#                            answer_span.append(idx)
+
+                        y1, y2 = answer_span[0], answer_span[-1]
+                    else:
+                        y1, y2 = -1, -1 #signifying no answer
+                    y1s.append(y1)
+                    y2s.append(y2)
+
+                example = {"ques_tokens": ques_tokens,
+                           "ques_chars": ques_chars,
+                           "y1s": y1s,
+                           "y2s": y2s,
+                           "id": total}
+                examples.append(example)
+                eval_examples[str(total)] = {"question": ques,
+                                             "answers": answer_texts,
+                                             "uuid": qas["id"]}
+        print("{} questions in total".format(len(examples)))
+    return examples, eval_examples
 #        #####
 #        # add context merging here
 #        # I need some way to keep track of each article and use that to make the buffer, should be as easy as adding a counter`
@@ -397,8 +445,7 @@ def pre_process(data):
 
     # Process training set and use it to decide on the word/character vocabularies
     word_counter, char_counter = Counter(), Counter()
-    dummy_ret = process_file(data.train_data_exp3, "train", word_counter, char_counter)
-#    train_examples, train_eval, train_super_context = process_file(data.train_data_exp3, "train", word_counter, char_counter)
+    train_examples, train_eval, train_super_context = process_file(data.train_data_exp3, "train", word_counter, char_counter)
 #    word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=args.glove_file, vec_size=args.glove_dim, num_vectors=args.glove_num_vecs)
 #    char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=None, vec_size=args.char_dim)
 #
@@ -415,7 +462,7 @@ def pre_process(data):
 #
 #    save(args.word_emb_file, word_emb_mat, message="word embedding")
 #    save(args.char_emb_file, char_emb_mat, message="char embedding")
-#    save(args.train_eval_file, train_eval, message="train eval")
+    save(data.train_eval_exp3, train_eval, message="train eval")
 #    save(args.dev_eval_file, dev_eval, message="dev eval")
 #    save(args.word2idx_file, word2idx_dict, message="word dictionary")
 #    save(args.char2idx_file, char2idx_dict, message="char dictionary")

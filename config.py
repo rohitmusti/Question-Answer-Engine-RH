@@ -7,6 +7,8 @@ class data():
         self.train_data_orig = self.train_folder + "train-v2.0.json"
         self.train_data_exp2 = self.train_folder + "train-exp2.json"
         self.train_data_exp3 = self.train_folder + "train-exp3.json"
+        self.train_eval_exp2 = self.train_folder + "train-eval-exp2.json"
+        self.train_eval_exp3 = self.train_folder + "train-eval-exp3.json"
         # development data
         #  - usually reserved for hypertuning or for training locally to ensure models work
         self.dev_folder = self.folder + "dev/"

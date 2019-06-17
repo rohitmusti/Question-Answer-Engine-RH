@@ -1,4 +1,5 @@
-"""Download and pre-process SQuAD and GloVe.
+"""
+Pre-process SQuAD and GloVe.
 
 Usage:
     > source activate squad
@@ -17,8 +18,8 @@ import os
 import spacy
 import ujson as json
 import urllib.request
+import config
 
-from args import get_setup_args
 from codecs import open
 from collections import Counter
 from subprocess import run
@@ -41,12 +42,17 @@ def convert_idx(text, tokens):
     current = 0
     spans = []
     for token in tokens:
-        current = text.find(token, current)
-        if current < 0:
-            print("Token {} cannot be found".format(token))
-            raise Exception()
-        spans.append((current, current + len(token)))
-        current += len(token)
+        for small_token in token:
+        # unclear why this is necessary, but I'll just appease it for now.
+        # the functions should all be sending and receiving the same type
+        # but for some reason word_tokenize is receiving a string and sending
+        # back a list of lists.
+            current = text.find(small_token, current)
+            if current < 0:
+                print("Token {} cannot be found".format(small_token))
+                raise Exception()
+            spans.append((current, current + len(small_token)))
+            current += len(small_token)
     return spans
 
 
@@ -59,84 +65,83 @@ def process_file(filename, data_type, word_counter, char_counter):
     total = 0
     with open(filename, "r") as fh:
         source = json.load(fh)
-        print("NEW: Creating the SuperContext")
-        contexts = [para["context"].replace("''", '" ').replace("``", '" ') for article in tqdm(source["data"]) for para in article["paragraphs"]]
-        sc = "".join(contexts)
+        sc = source["super_context"]
         sc_tokens = [word_tokenize(sc)]
         sc_chars = [list(token) for token in sc_tokens]
         sc_spans = convert_idx(sc, sc_tokens)
+    print('made it w/ no errors')
+    return 0
         # for token in sc_tokens:
         #     word_counter[token] += len(para["qas"])
         #     for char in token:
         #         char_counter[char] += len(para["qas"])
-        print("NEW: Finished building the SuperContext")
-        print("Pre-processing {} examples...".format(data_type))
-        buffer = 0
-        for article in tqdm(source["data"]):
-            for para in article["paragraphs"]:
-        #####
-        # add context merging here
-        # I need some way to keep track of each article and use that to make the buffer, should be as easy as adding a counter`
-        #####
-
-        #####
-        # once this is done, the above code can probably be re-used
-        #####
-
-                for qa in para["qas"]:
-                    total += 1
-                    ques = qa["question"].replace(
-                    "''", '" ').replace("``", '" ')
-                    ques_tokens = word_tokenize(ques)
-                    ques_chars = [list(token) for token in ques_tokens]
-                    for token in ques_tokens:
-                        word_counter[token] += 1
-                    for char in token:
-                        char_counter[char] += 1
-                    y1s, y2s = [], []
-                    answer_texts = []
-                    for answer in qa["answers"]:
-                        answer_text = answer["text"]
-                        answer_start = answer['answer_start']
-                        answer_end = answer_start + len(answer_text)
-                        answer_texts.append(answer_text)
-                        answer_span = []
-                        for idx, span in enumerate(spans):
-                            if not (answer_end <= span[0] or answer_start >= span[1]):
-                                answer_span.append(idx)
-                        y1, y2 = answer_span[0], answer_span[-1]
-                        # adding the buffer allows us to keep track within the super context
-                        y1s.append(y1 + buffer)
-                        y2s.append(y2 + buffer)
-
-        #####
-        # can probably modify the two below data structures to take
-        # advantage of the smart new context stuff
-        #####
-
-                example = {
-                       # "context_tokens": context_tokens, # removing this to avoid repeats
-                       # "context_chars": context_chars, # removing this to avoid repeats
-                       "ques_tokens": ques_tokens,
-                       "ques_chars": ques_chars,
-                       "y1s": y1s,
-                       "y2s": y2s,
-                       "id": total}
-                examples.append(example)
-                eval_examples[str(total)] = {
-                            # "context": context, # removing this to avoid repeats
-                             "question": ques,
-                             "spans": spans,
-                             "answers": answer_texts,
-                             "uuid": qa["id"]}
-                # we do this at the end so the first buffer doesn't get thrown off
-                buffer += len(context)
-        #####
-        # end mod
-        #####
-
-    print("{} questions in total".format(len(examples)))
-    return examples, eval_examples, super_context
+#        print("Pre-processing {} examples...".format(data_type))
+#        buffer = 0
+#        for article in tqdm(source["data"]):
+#            for para in article["paragraphs"]:
+#        #####
+#        # add context merging here
+#        # I need some way to keep track of each article and use that to make the buffer, should be as easy as adding a counter`
+#        #####
+#
+#        #####
+#        # once this is done, the above code can probably be re-used
+#        #####
+#
+#                for qa in para["qas"]:
+#                    total += 1
+#                    ques = qa["question"].replace(
+#                    "''", '" ').replace("``", '" ')
+#                    ques_tokens = word_tokenize(ques)
+#                    ques_chars = [list(token) for token in ques_tokens]
+#                    for token in ques_tokens:
+#                        word_counter[token] += 1
+#                    for char in token:
+#                        char_counter[char] += 1
+#                    y1s, y2s = [], []
+#                    answer_texts = []
+#                    for answer in qa["answers"]:
+#                        answer_text = answer["text"]
+#                        answer_start = answer['answer_start']
+#                        answer_end = answer_start + len(answer_text)
+#                        answer_texts.append(answer_text)
+#                        answer_span = []
+#                        for idx, span in enumerate(spans):
+#                            if not (answer_end <= span[0] or answer_start >= span[1]):
+#                                answer_span.append(idx)
+#                        y1, y2 = answer_span[0], answer_span[-1]
+#                        # adding the buffer allows us to keep track within the super context
+#                        y1s.append(y1 + buffer)
+#                        y2s.append(y2 + buffer)
+#
+#        #####
+#        # can probably modify the two below data structures to take
+#        # advantage of the smart new context stuff
+#        #####
+#
+#                example = {
+#                       # "context_tokens": context_tokens, # removing this to avoid repeats
+#                       # "context_chars": context_chars, # removing this to avoid repeats
+#                       "ques_tokens": ques_tokens,
+#                       "ques_chars": ques_chars,
+#                       "y1s": y1s,
+#                       "y2s": y2s,
+#                       "id": total}
+#                examples.append(example)
+#                eval_examples[str(total)] = {
+#                            # "context": context, # removing this to avoid repeats
+#                             "question": ques,
+#                             "spans": spans,
+#                             "answers": answer_texts,
+#                             "uuid": qa["id"]}
+#                # we do this at the end so the first buffer doesn't get thrown off
+#                buffer += len(context)
+#        #####
+#        # end mod
+#        #####
+#
+#    print("{} questions in total".format(len(examples)))
+#    return examples, eval_examples, super_context
 
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
@@ -385,48 +390,45 @@ def save(filename, obj, message=None):
             json.dump(obj, fh)
 
 
-def pre_process(args):
+def pre_process(data):
     """
     unchanged from @chrischute
     """
 
     # Process training set and use it to decide on the word/character vocabularies
     word_counter, char_counter = Counter(), Counter()
-    train_examples, train_eval, train_super_context = process_file(args.train_file, "train", word_counter, char_counter)
-    word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=args.glove_file, vec_size=args.glove_dim, num_vectors=args.glove_num_vecs)
-    char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=None, vec_size=args.char_dim)
-
-    # Process dev and test sets
-    dev_examples, dev_eval, dev_super_context = process_file(args.dev_file, "dev", word_counter, char_counter)
-    build_features(args, train_examples, "train", args.train_record_file, word2idx_dict, char2idx_dict)
-    dev_meta = build_features(args, dev_examples, "dev", args.dev_record_file, word2idx_dict, char2idx_dict)
-    if args.include_test_examples:
-        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
-        save(args.test_eval_file, test_eval, message="test eval")
-        test_meta = build_features(args, test_examples, "test",
-                       args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)
-        save(args.test_meta_file, test_meta, message="test meta")
-
-    save(args.word_emb_file, word_emb_mat, message="word embedding")
-    save(args.char_emb_file, char_emb_mat, message="char embedding")
-    save(args.train_eval_file, train_eval, message="train eval")
-    save(args.dev_eval_file, dev_eval, message="dev eval")
-    save(args.word2idx_file, word2idx_dict, message="word dictionary")
-    save(args.char2idx_file, char2idx_dict, message="char dictionary")
-    save(args.dev_meta_file, dev_meta, message="dev meta")
+    dummy_ret = process_file(data.train_data_exp3, "train", word_counter, char_counter)
+#    train_examples, train_eval, train_super_context = process_file(data.train_data_exp3, "train", word_counter, char_counter)
+#    word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=args.glove_file, vec_size=args.glove_dim, num_vectors=args.glove_num_vecs)
+#    char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=None, vec_size=args.char_dim)
+#
+#    # Process dev and test sets
+#    dev_examples, dev_eval, dev_super_context = process_file(args.dev_file, "dev", word_counter, char_counter)
+#    build_features(args, train_examples, "train", args.train_record_file, word2idx_dict, char2idx_dict)
+#    dev_meta = build_features(args, dev_examples, "dev", args.dev_record_file, word2idx_dict, char2idx_dict)
+#    if args.include_test_examples:
+#        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
+#        save(args.test_eval_file, test_eval, message="test eval")
+#        test_meta = build_features(args, test_examples, "test",
+#                       args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)
+#        save(args.test_meta_file, test_meta, message="test meta")
+#
+#    save(args.word_emb_file, word_emb_mat, message="word embedding")
+#    save(args.char_emb_file, char_emb_mat, message="char embedding")
+#    save(args.train_eval_file, train_eval, message="train eval")
+#    save(args.dev_eval_file, dev_eval, message="dev eval")
+#    save(args.word2idx_file, word2idx_dict, message="word dictionary")
+#    save(args.char2idx_file, char2idx_dict, message="char dictionary")
+#    save(args.dev_meta_file, dev_meta, message="dev meta")
 
 
 if __name__ == '__main__':
     # Get command-line args
-    # TODO: swap args with config
-    args_ = get_setup_args()
-
-    # Download resources
-    download(args_)
+    data = config.data()
 
     # Import spacy language model
     nlp = spacy.blank("en")
     nlp.max_length = 100000000
 
     # Preprocess dataset
-    pre_process(args_)
+    pre_process(data)

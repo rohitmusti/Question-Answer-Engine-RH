@@ -461,6 +461,9 @@ def pre_process(data, flags):
         exp3_data = data.toy_data_exp3
         eval_file = data.toy_eval_exp3
         record_file = data.toy_record_file_exp3
+    else:
+        print("Small error: no valid flags were passed in")
+        print("Valid flags: dev, train, toy")
 
 
 

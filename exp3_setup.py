@@ -457,10 +457,10 @@ def pre_process(data, flags):
         eval_file = data.train_eval_exp3
         record_file = data.train_record_file_exp3
 
-    elif flags[1] == "train":
-        exp3_data = data.train_data_exp3
-        eval_file = data.train_eval_exp3
-        record_file = data.train_record_file_exp3
+    elif flags[1] == "toy":
+        exp3_data = data.toy_data_exp3
+        eval_file = data.toy_eval_exp3
+        record_file = data.toy_record_file_exp3
 
 
 

@@ -47,10 +47,10 @@ class data():
         # word embeddings
         self.embed_folder = self.folder + "embeddings/"
         self.glove_word_file = self.embed_folder + "glove.840B.300d.txt"
-        self.glove_word_dim = self.embed_folder + "glove.840B.300d.txt"
-        self.glove_word_num_vecs = self.embed_folder + "glove.840B.300d.txt"
+        self.glove_word_dim = 300
+        self.glove_word_num_vecs = 2196017
         self.glove_char_file = self.embed_folder + "glove.840B.300d-char.txt"
-        self.char_emb_size = self.embed_folder + "glove.840B.300d-char.txt"
+        self.char_emb_size = 64
         self.word2idx_file = self.embed_folder + "word2idx.json"
         self.char2idx_file = self.embed_folder + "char2idx.json"
         self.word_emb_file = self.embed_folder + "word_emb.json"

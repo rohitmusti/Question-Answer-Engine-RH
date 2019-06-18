@@ -131,7 +131,6 @@ def process_file(filename, data_type, word_counter, char_counter):
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
     """
     TODO: modify to fit the super context experiment
-    NOTE: it looks like there actually aren't changes needed to be made here for the super context idea. I will need to examine the function calls to be sure.
     """
     print("Pre-processing {} vectors...".format(data_type))
     embedding_dict = {}
@@ -263,17 +262,16 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     TODO: modify to fit the super context experiment
     a little bit less urgent since it is used for metas, not really important yet
     """
-    para_limit = args.test_para_limit if is_test else args.para_limit
-    ques_limit = args.test_ques_limit if is_test else args.ques_limit
-    ans_limit = args.ans_limit
-    char_limit = args.char_limit
+    para_limit = sys.maxsize # I don't want any limits on the number of words, this may be too small anyway
+    ques_limit = 1000
+    ans_limit = 30
+    char_limit = 16
 
     def drop_example(ex, is_test_=False):
         if is_test_:
             drop = False
         else:
-            drop = len(ex["context_tokens"]) > para_limit or \
-               len(ex["ques_tokens"]) > ques_limit or \
+            drop = len(ex["ques_tokens"]) > ques_limit or \
                (is_answerable(ex) and
                 ex["y2s"][0] - ex["y1s"][0] > ans_limit)
 
@@ -293,6 +291,8 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     for n, example in tqdm(enumerate(examples)):
         total_ += 1
 
+        print(type(example))
+        print(example.keys())
         if drop_example(example, is_test):
             continue
 
@@ -314,9 +314,6 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     ques_idx = np.zeros([ques_limit], dtype=np.int32)
     ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
 
-    #####
-    # room for reuse here
-    #####
     for i, token in enumerate(example["context_tokens"]):
         context_idx[i] = _get_word(token)
     context_idxs.append(context_idx)
@@ -325,9 +322,6 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
         ques_idx[i] = _get_word(token)
     ques_idxs.append(ques_idx)
 
-    #####
-    # room for reuse here
-    #####
     for i, token in enumerate(example["context_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:

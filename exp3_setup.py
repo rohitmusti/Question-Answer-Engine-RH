@@ -262,7 +262,9 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     TODO: modify to fit the super context experiment
     a little bit less urgent since it is used for metas, not really important yet
     """
-    para_limit = sys.maxsize # I don't want any limits on the number of words, this may be too small anyway
+    para_limit = 49999900
+    # I don't want any limits on the number of words, this may be too small anyway
+    # I am limited by memory here
     ques_limit = 1000
     ans_limit = 30
     char_limit = 16
@@ -288,62 +290,62 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     y1s = []
     y2s = []
     ids = []
-    for n, example in tqdm(enumerate(examples)):
-        total_ += 1
 
-        print(type(example))
-        print(example.keys())
-        if drop_example(example, is_test):
-            continue
+    def _get_word(word):
+        for each in (word, word.lower(), word.capitalize(), word.upper()):
+            if each in word2idx_dict:
+                return word2idx_dict[each]
+        return 1
+    def _get_char(char):
+        if char in char2idx_dict:
+            return char2idx_dict[char]
+        return 1
 
-        total += 1
-
-        def _get_word(word):
-            for each in (word, word.lower(), word.capitalize(), word.upper()):
-                if each in word2idx_dict:
-                    return word2idx_dict[each]
-            return 1
-
-        def _get_char(char):
-            if char in char2idx_dict:
-                return char2idx_dict[char]
-            return 1
-
-    context_idx = np.zeros([para_limit], dtype=np.int32)
     context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
-    ques_idx = np.zeros([ques_limit], dtype=np.int32)
-    ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
+    context_idxs = [token for token in examples[0]["super_context_tokens"]]
 
-    for i, token in enumerate(example["context_tokens"]):
-        context_idx[i] = _get_word(token)
-    context_idxs.append(context_idx)
-
-    for i, token in enumerate(example["ques_tokens"]):
-        ques_idx[i] = _get_word(token)
-    ques_idxs.append(ques_idx)
-
-    for i, token in enumerate(example["context_chars"]):
+    for i, token in enumerate(examples[0]["super_context_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:
                 break
             context_char_idx[i, j] = _get_char(char)
     context_char_idxs.append(context_char_idx)
 
-    for i, token in enumerate(example["ques_chars"]):
-        for j, char in enumerate(token):
-            if j == char_limit:
-                break
-            ques_char_idx[i, j] = _get_char(char)
-    ques_char_idxs.append(ques_char_idx)
+    for n, example in tqdm(enumerate(examples)):
+        total_ += 1
 
-    if is_answerable(example):
-        start, end = example["y1s"][-1], example["y2s"][-1]
-    else:
-        start, end = -1, -1
+        if n == 0:
+            continue
 
-    y1s.append(start)
-    y2s.append(end)
-    ids.append(example["id"])
+#        if drop_example(example, is_test):
+#            continue
+
+        print("made it here")
+
+        total += 1
+
+        ques_idx = np.zeros([ques_limit], dtype=np.int32)
+        ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
+
+        for i, token in enumerate(example["ques_tokens"]):
+            ques_idx[i] = _get_word(token)
+        ques_idxs.append(ques_idx)
+
+        for i, token in enumerate(example["ques_chars"]):
+            for j, char in enumerate(token):
+                if j == char_limit:
+                    break
+                ques_char_idx[i, j] = _get_char(char)
+        ques_char_idxs.append(ques_char_idx)
+
+        if is_answerable(example):
+            start, end = example["y1s"][-1], example["y2s"][-1]
+        else:
+            start, end = -1, -1
+
+        y1s.append(start)
+        y2s.append(end)
+        ids.append(example["id"])
 
     #####
     # room for space optimization

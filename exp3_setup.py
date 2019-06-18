@@ -412,7 +412,7 @@ def pre_process(data, flags):
             save(data.char_emb_file, char_emb_mat, message="char embedding")
             save(data.word2idx_file, word2idx_dict, message="word dictionary")
             save(data.char2idx_file, char2idx_dict, message="char dictionary")
-        elif flags[1] == "train":
+        elif flags[1] == "toy":
             save(data.toy_word_emb_file, word_emb_mat, message="word embedding")
             save(data.toy_char_emb_file, char_emb_mat, message="char embedding")
             save(data.toy_word2idx_file, word2idx_dict, message="word dictionary")

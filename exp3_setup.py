@@ -475,10 +475,16 @@ def pre_process(data, flags):
         word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=data.glove_word_file, vec_size=data.glove_word_dim, num_vectors=data.glove_word_num_vecs)
         char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=data.glove_char_file, vec_size=data.char_emb_size)
 
-        save(data.word_emb_file, word_emb_mat, message="word embedding")
-        save(data.char_emb_file, char_emb_mat, message="char embedding")
-        save(data.word2idx_file, word2idx_dict, message="word dictionary")
-        save(data.char2idx_file, char2idx_dict, message="char dictionary")
+        if flags[1] == "train":
+            save(data.word_emb_file, word_emb_mat, message="word embedding")
+            save(data.char_emb_file, char_emb_mat, message="char embedding")
+            save(data.word2idx_file, word2idx_dict, message="word dictionary")
+            save(data.char2idx_file, char2idx_dict, message="char dictionary")
+        elif flags[1] == "train":
+            save(data.toy_word_emb_file, word_emb_mat, message="word embedding")
+            save(data.toy_char_emb_file, char_emb_mat, message="char embedding")
+            save(data.toy_word2idx_file, word2idx_dict, message="word dictionary")
+            save(data.toy_char2idx_file, char2idx_dict, message="char dictionary")
 
     build_features(data, examples, flags[1], record_file, word2idx_dict, char2idx_dict)
 

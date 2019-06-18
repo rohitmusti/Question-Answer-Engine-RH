@@ -14,7 +14,7 @@ Author:
 """
 
 import numpy as np
-import os
+import sys
 import spacy
 import ujson as json
 import urllib.request
@@ -438,44 +438,59 @@ def save(filename, obj, message=None):
             json.dump(obj, fh)
 
 
-def pre_process(data):
+def pre_process(data, flags):
     """
-    unchanged from @chrischute
+    authors:
+        @rohitmusti
+        @chrischute
     """
+
+    data = config.data()
+
+    if flags[1] == "dev":
+        exp3_data = data.dev_data_exp3
+        eval_file = data.dev_eval_exp3
+        record_file = data.dev_record_file_exp3
+
+    elif flags[1] == "train":
+        exp3_data = data.train_data_exp3
+        eval_file = data.train_eval_exp3
+        record_file = data.train_record_file_exp3
+
+    elif flags[1] == "train":
+        exp3_data = data.train_data_exp3
+        eval_file = data.train_eval_exp3
+        record_file = data.train_record_file_exp3
+
+
 
     # Process training set and use it to decide on the word/character vocabularies
     word_counter, char_counter = Counter(), Counter()
-    train_examples, train_eval, train_super_context = process_file(data.train_data_exp3, "train", word_counter, char_counter)
-#    word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=args.glove_file, vec_size=args.glove_dim, num_vectors=args.glove_num_vecs)
-#    char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=None, vec_size=args.char_dim)
-#
-#    # Process dev and test sets
-#    dev_examples, dev_eval, dev_super_context = process_file(args.dev_file, "dev", word_counter, char_counter)
-#    build_features(args, train_examples, "train", args.train_record_file, word2idx_dict, char2idx_dict)
-#    dev_meta = build_features(args, dev_examples, "dev", args.dev_record_file, word2idx_dict, char2idx_dict)
-#    if args.include_test_examples:
-#        test_examples, test_eval = process_file(args.test_file, "test", word_counter, char_counter)
-#        save(args.test_eval_file, test_eval, message="test eval")
-#        test_meta = build_features(args, test_examples, "test",
-#                       args.test_record_file, word2idx_dict, char2idx_dict, is_test=True)
-#        save(args.test_meta_file, test_meta, message="test meta")
-#
-#    save(args.word_emb_file, word_emb_mat, message="word embedding")
-#    save(args.char_emb_file, char_emb_mat, message="char embedding")
-    save(data.train_eval_exp3, train_eval, message="train eval")
-#    save(args.dev_eval_file, dev_eval, message="dev eval")
-#    save(args.word2idx_file, word2idx_dict, message="word dictionary")
-#    save(args.char2idx_file, char2idx_dict, message="char dictionary")
-#    save(args.dev_meta_file, dev_meta, message="dev meta")
+
+    examples, eval_obj = process_file(exp3_data, flags[1], word_counter, char_counter)
+
+    save(eval_file, eval_obj, message=(flags[1] + " eval"))
+
+    if flags[1] == "train" or flags[1] == "toy":
+        word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=data.glove_word_file, vec_size=data.glove_word_dim, num_vectors=data.glove_word_num_vecs)
+        char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=data.glove_char_file, vec_size=data.char_emb_size)
+
+        save(data.word_emb_file, word_emb_mat, message="word embedding")
+        save(data.char_emb_file, char_emb_mat, message="char embedding")
+        save(data.word2idx_file, word2idx_dict, message="word dictionary")
+        save(data.char2idx_file, char2idx_dict, message="char dictionary")
+
+    build_features(data, examples, flags[1], record_file, word2idx_dict, char2idx_dict)
 
 
 if __name__ == '__main__':
     # Get command-line args
     data = config.data()
+    flags = sys.argv
 
     # Import spacy language model
     nlp = spacy.blank("en")
     nlp.max_length = 100000000
 
     # Preprocess dataset
-    pre_process(data)
+    pre_process(data, flags)

@@ -19,7 +19,7 @@ import spacy
 import ujson as json
 import urllib.request
 import config
-from toolkit import quick_clean
+from toolkit import quick_clean, save
 
 from codecs import open
 from collections import Counter
@@ -127,70 +127,6 @@ def process_file(filename, data_type, word_counter, char_counter):
                                              "uuid": qas["id"]}
         print("{} questions in total".format(len(examples)))
     return examples, eval_examples
-#        #####
-#        # add context merging here
-#        # I need some way to keep track of each article and use that to make the buffer, should be as easy as adding a counter`
-#        #####
-#
-#        #####
-#        # once this is done, the above code can probably be re-used
-#        #####
-#
-#                for qa in para["qas"]:
-#                    total += 1
-#                    ques = qa["question"].replace(
-#                    "''", '" ').replace("``", '" ')
-#                    ques_tokens = word_tokenize(ques)
-#                    ques_chars = [list(token) for token in ques_tokens]
-#                    for token in ques_tokens:
-#                        word_counter[token] += 1
-#                    for char in token:
-#                        char_counter[char] += 1
-#                    y1s, y2s = [], []
-#                    answer_texts = []
-#                    for answer in qa["answers"]:
-#                        answer_text = answer["text"]
-#                        answer_start = answer['answer_start']
-#                        answer_end = answer_start + len(answer_text)
-#                        answer_texts.append(answer_text)
-#                        answer_span = []
-#                        for idx, span in enumerate(spans):
-#                            if not (answer_end <= span[0] or answer_start >= span[1]):
-#                                answer_span.append(idx)
-#                        y1, y2 = answer_span[0], answer_span[-1]
-#                        # adding the buffer allows us to keep track within the super context
-#                        y1s.append(y1 + buffer)
-#                        y2s.append(y2 + buffer)
-#
-#        #####
-#        # can probably modify the two below data structures to take
-#        # advantage of the smart new context stuff
-#        #####
-#
-#                example = {
-#                       # "context_tokens": context_tokens, # removing this to avoid repeats
-#                       # "context_chars": context_chars, # removing this to avoid repeats
-#                       "ques_tokens": ques_tokens,
-#                       "ques_chars": ques_chars,
-#                       "y1s": y1s,
-#                       "y2s": y2s,
-#                       "id": total}
-#                examples.append(example)
-#                eval_examples[str(total)] = {
-#                            # "context": context, # removing this to avoid repeats
-#                             "question": ques,
-#                             "spans": spans,
-#                             "answers": answer_texts,
-#                             "uuid": qa["id"]}
-#                # we do this at the end so the first buffer doesn't get thrown off
-#                buffer += len(context)
-#        #####
-#        # end mod
-#        #####
-#
-#    print("{} questions in total".format(len(examples)))
-#    return examples, eval_examples, super_context
-
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
     """
@@ -429,13 +365,6 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     print("Built {} / {} instances of features in total".format(total, total_))
     meta["total"] = total
     return meta
-
-
-def save(filename, obj, message=None):
-    if message is not None:
-        print("Saving {}...".format(message))
-        with open(filename, "w") as fh:
-            json.dump(obj, fh)
 
 
 def pre_process(data, flags):

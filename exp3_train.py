@@ -42,9 +42,25 @@ def main(data, flags):
     torch.manual_seed(data.random_seed)
     torch.cuda.manual_seed_all(data.random_seed)
 
+    if flags[1] == "toy":
+        word_emb_file = data.toy_word_emb_file
+        training_data = data.toy_record_file_exp3
+        test_data = data.dev_record_file_exp3
+        eval_file = data.toy_eval_exp3
+    elif flags[1] == "train":
+        word_emb_file = data.word_emb_file
+        training_data = data.train_record_file_exp3
+        test_data = data.dev_record_file_exp3
+        eval_file = data.train_eval_exp3
+    elif flags[1] == "dev":
+        word_emb_file = data.word_emb_file
+        training_data = data.dev_record_file_exp3
+        test_data = data.toy_record_file_exp3
+        eval_file = data.dev_eval_exp3
+
     # Get embeddings
     log.info('Loading embeddings...')
-    word_vectors = util.torch_from_json(data.toy_word_emb_file)
+    word_vectors = util.torch_from_json(word_emb_file)
 
     # Get model
     log.info('Building model...')
@@ -75,14 +91,16 @@ def main(data, flags):
 
     # Get data loader
     log.info('Building dataset...')
-    toy_dataset = SQuAD(data.toy_record_file_exp3, use_v2=True)
-    toy_loader = torchdata.DataLoader(toy_dataset,
+    # np.load(data.toy_record_file_exp3)
+    train_dataset = SQuAD(training_data, use_v2=True)
+    train_loader = torchdata.DataLoader(train_dataset,
                                    batch_size=data.batch_size,
                                    shuffle=True,
                                    num_workers=data.num_workers,
                                    collate_fn=collate_fn)
-    dev_dataset = SQuAD(data.dev_record_file_exp3, use_v2=True)
-    dev_loader = torchdata.DataLoader(dev_dataset,
+
+    test_dataset = SQuAD(test_data, use_v2=True)
+    test_loader = torchdata.DataLoader(dev_dataset,
                                  batch_size=data.batch_size,
                                  shuffle=False,
                                  num_workers=data.num_workers,
@@ -91,13 +109,13 @@ def main(data, flags):
     # Train
     log.info('Training...')
     steps_till_eval = data.eval_steps
-    epoch = step // len(toy_dataset)
+    epoch = step // len(test_dataset)
     while epoch != data.num_epochs:
         epoch += 1
         log.info('Starting epoch {}...'.format(epoch))
         with torch.enable_grad(), \
-                tqdm(total=len(toy_loader.dataset)) as progress_bar:
-            for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in toy_loader:
+                tqdm(total=len(train_loader.dataset)) as progress_bar:
+            for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:
                 # Setup for forward
                 cw_idxs = cw_idxs.to(device)
                 qw_idxs = qw_idxs.to(device)
@@ -134,8 +152,8 @@ def main(data, flags):
                     # Evaluate and save checkpoint
                     log.info('Evaluating at step {}...'.format(step))
                     ema.assign(model)
-                    results, pred_dict = evaluate(model, dev_loader, device,
-                                                  data.toy_eval_exp3,
+                    results, pred_dict = evaluate(model, test_loader, device,
+                                                  eval_path=eval_file,
                                                   max_len=sys.maxsize,
                                                   use_squad_v2=True)
                     saver.save(step, model, results[data.metric_name], device)
@@ -152,7 +170,7 @@ def main(data, flags):
                         tbx.add_scalar('dev/{}'.format(k), v, step)
                     util.visualize(tbx,
                                    pred_dict=pred_dict,
-                                   eval_path=data.dev_eval_exp3,
+                                   eval_path=eval_file,
                                    step=step,
                                    split='dev',
                                    num_visuals=data.num_visuals)

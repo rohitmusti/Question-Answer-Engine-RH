@@ -7,8 +7,8 @@ import ujson as json
 from tqdm import tqdm
 from toolkit import fancyprint, save, quick_clean
 import config
-from exp2_data_clean import exp2_transformer
-from exp3_data_clean import exp3_transformer
+from data_clean_exp2 import exp2_transformer
+from data_clean_exp3 import exp3_transformer
 
 def toy_transformer(in_file, out_file):
     """

@@ -22,6 +22,7 @@ mkdir data/train -p
 mkdir data/dev -p
 mkdir data/test -p
 mkdir data/embeddings -p
+mkdir logs
 
 # downloading data
 echo "##########################"

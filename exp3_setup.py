@@ -224,10 +224,10 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
     #####
     # room for reuse here
     #####
-        context_idxs[i] = _get_word(token)
+        context_idxs[i] = (_get_word(token))
 
     for i, token in enumerate(example["ques_tokens"]):
-        ques_idxs[i] = _get_word(token)
+        ques_idxs[i] = (_get_word(token))
 
     #####
     # room for reuse here
@@ -236,13 +236,13 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
         for j, char in enumerate(token):
             if j == char_limit:
                 break
-            context_char_idxs[i, j] = _get_char(char)
+            context_char_idxs[i, j] = (_get_char(char))
 
     for i, token in enumerate(example["ques_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:
                 break
-            ques_char_idxs[i, j] = _get_char(char)
+            ques_char_idxs[i, j] = (_get_char(char))
 
     #####
     # room for reuse here; definitely need to modify this return statement to make the memory better
@@ -302,13 +302,13 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
         return 1
 
     context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
-    context_idxs = [token for token in examples[0]["super_context_tokens"]]
+    context_idxs = [_get_word(token) for token in examples[0]["super_context_tokens"]]
 
     for i, token in enumerate(examples[0]["super_context_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:
                 break
-            context_char_idx[i, j] = _get_char(char)
+            context_char_idx[i, j] = (_get_char(char))
     context_char_idxs.append(context_char_idx)
 
     for n, example in tqdm(enumerate(examples)):
@@ -320,22 +320,20 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
 #        if drop_example(example, is_test):
 #            continue
 
-        print("made it here")
-
         total += 1
 
         ques_idx = np.zeros([ques_limit], dtype=np.int32)
         ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
 
         for i, token in enumerate(example["ques_tokens"]):
-            ques_idx[i] = _get_word(token)
+            ques_idx[i] = (_get_word(token))
         ques_idxs.append(ques_idx)
 
         for i, token in enumerate(example["ques_chars"]):
             for j, char in enumerate(token):
                 if j == char_limit:
                     break
-                ques_char_idx[i, j] = _get_char(char)
+                ques_char_idx[i, j] = (_get_char(char))
         ques_char_idxs.append(ques_char_idx)
 
         if is_answerable(example):
@@ -399,20 +397,19 @@ def pre_process(data, flags):
 
     save(eval_file, eval_obj, message=(flags[1] + " eval"))
 
-    if flags[1] == "train" or flags[1] == "toy":
-        word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=data.glove_word_file, vec_size=data.glove_word_dim, num_vectors=data.glove_word_num_vecs)
-        char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=data.glove_char_file, vec_size=data.char_emb_size)
+    word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', emb_file=data.glove_word_file, vec_size=data.glove_word_dim, num_vectors=data.glove_word_num_vecs)
+    char_emb_mat, char2idx_dict = get_embedding(char_counter, 'char', emb_file=data.glove_char_file, vec_size=data.char_emb_size)
 
-        if flags[1] == "train":
-            save(data.word_emb_file, word_emb_mat, message="word embedding")
-            save(data.char_emb_file, char_emb_mat, message="char embedding")
-            save(data.word2idx_file, word2idx_dict, message="word dictionary")
-            save(data.char2idx_file, char2idx_dict, message="char dictionary")
-        elif flags[1] == "toy":
-            save(data.toy_word_emb_file, word_emb_mat, message="word embedding")
-            save(data.toy_char_emb_file, char_emb_mat, message="char embedding")
-            save(data.toy_word2idx_file, word2idx_dict, message="word dictionary")
-            save(data.toy_char2idx_file, char2idx_dict, message="char dictionary")
+    if flags[1] == "train":
+        save(data.word_emb_file, word_emb_mat, message="word embedding")
+        save(data.char_emb_file, char_emb_mat, message="char embedding")
+        save(data.word2idx_file, word2idx_dict, message="word dictionary")
+        save(data.char2idx_file, char2idx_dict, message="char dictionary")
+    elif flags[1] == "toy":
+        save(data.toy_word_emb_file, word_emb_mat, message="word embedding")
+        save(data.toy_char_emb_file, char_emb_mat, message="char embedding")
+        save(data.toy_word2idx_file, word2idx_dict, message="word dictionary")
+        save(data.toy_char2idx_file, char2idx_dict, message="char dictionary")
 
     build_features(data, examples, flags[1], record_file, word2idx_dict, char2idx_dict)
 

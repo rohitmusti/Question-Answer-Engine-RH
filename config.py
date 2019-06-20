@@ -37,8 +37,8 @@ class data():
         self.toy_data_exp3 = self.toy_folder + "toy-exp3.json"
         self.toy_eval_exp2 = self.toy_folder + "toy-eval-exp2.json"
         self.toy_eval_exp3 = self.toy_folder + "toy-eval-exp3.json"
-        self.toy_record_file_exp2 = self.toy_folder + "toy-exp2.dev"
-        self.toy_record_file_exp3 = self.toy_folder + "toy-exp3.dev"
+        self.toy_record_file_exp2 = self.toy_folder + "toy-exp2.npz"
+        self.toy_record_file_exp3 = self.toy_folder + "toy-exp3.npz"
         self.toy_word2idx_file = self.toy_folder + "toy_word2idx.json"
         self.toy_char2idx_file = self.toy_folder + "toy_char2idx.json"
         self.toy_word_emb_file = self.toy_folder + "toy_word_emb.json"
@@ -58,6 +58,22 @@ class data():
 
         # random seed for consistent runs
         self.random_seed = 3716
+        self.gpu_ids = []
+        self.batch_size = 64
+        self.ema_decay = 0.999
+        self.metric_name = "F1"
+        self.maximize_metric = True
+        self.learning_rate = 0.2
+        self.learning_weight_decay = 0
+        self.num_workers = 1
+        self.eval_steps = 50000
+        self.num_epochs = 30
+        self.max_grad_norm = 5.0
+        self.num_visuals = 10
+
+        self.hidden_size = 100
+        self.drop_prob = 0.2
 
         # save file to save logs
-        self.logging_dir = "./save/"
+        self.logging_dir = "./logs/"
+        self.load_path = None

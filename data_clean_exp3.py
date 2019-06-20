@@ -58,3 +58,4 @@ def exp3_transformer(in_file, out_file):
 if __name__ == "__main__":
     data = config.data()
     exp3_transformer(in_file=data.train_data_orig, out_file=data.train_data_exp3)
+    exp3_transformer(in_file=data.dev_data_orig, out_file=data.dev_data_exp3)

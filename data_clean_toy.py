@@ -29,7 +29,7 @@ def toy_transformer(in_file, out_file):
         fancyprint(in_str="Converting into toy format")
         new_data["version"] = source["version"]
         new_data["data"] = []
-        topic_counter = 15
+        topic_counter = 5
         for topic in tqdm(source["data"]):
             topic_dict = {}
             topic_dict["title"] = topic["title"]

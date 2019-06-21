@@ -167,73 +167,6 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
     return emb_mat, token2idx_dict
 
 
-def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
-    """
-    TODO: modify to fit the super context experiment
-    """
-    example = {}
-
-    #####
-    # Since I am re-using the same context, I can probably hard code some optimization here
-    #####
-
-    context, question = data
-    context = context.replace("''", '" ').replace("``", '" ')
-    question = question.replace("''", '" ').replace("``", '" ')
-    example['context_tokens'] = word_tokenize(context)
-    example['ques_tokens'] = word_tokenize(question)
-    #####
-    # same here
-    #####
-    example['context_chars'] = [list(token) for token in example['context_tokens']]
-    example['ques_chars'] = [list(token) for token in example['ques_tokens']]
-
-    para_limit = args.test_para_limit if is_test else args.para_limit
-    ques_limit = args.test_ques_limit if is_test else args.ques_limit
-    char_limit = args.char_limit
-
-#    def filter_func(example):
-#        return len(example["context_tokens"]) > para_limit or len(example["ques_tokens"]) > ques_limit
-#
-#    if filter_func(example):
-#        raise ValueError("Context/Questions lengths are over the limit")
-
-    context_idxs = np.zeros([para_limit], dtype=np.int32)
-    context_char_idxs = np.zeros([para_limit, char_limit], dtype=np.int32)
-    ques_idxs = np.zeros([ques_limit], dtype=np.int32)
-    ques_char_idxs = np.zeros([ques_limit, char_limit], dtype=np.int32)
-
-    def _get_word(word):
-        for each in (word, word.lower(), word.capitalize(), word.upper()):
-            if each in word2idx_dict:
-                return word2idx_dict[each]
-        return 1
-
-    def _get_char(char):
-        if char in char2idx_dict:
-            return char2idx_dict[char]
-        return 1
-
-    for i, token in enumerate(example["context_tokens"]):
-        context_idxs[i] = (_get_word(token))
-
-    for i, token in enumerate(example["ques_tokens"]):
-        ques_idxs[i] = (_get_word(token))
-
-    for i, token in enumerate(example["context_chars"]):
-        for j, char in enumerate(token):
-            if j == char_limit:
-                break
-            context_char_idxs[i, j] = (_get_char(char))
-
-    for i, token in enumerate(example["ques_chars"]):
-        for j, char in enumerate(token):
-            if j == char_limit:
-                break
-            ques_char_idxs[i, j] = (_get_char(char))
-
-    return context_idxs, context_char_idxs, ques_idxs, ques_char_idxs
-
 
 def is_answerable(example):
     """
@@ -329,29 +262,6 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
         y1s.append(start)
         y2s.append(end)
         ids.append(example["id"])
-
-#
-#    print("type of context_idxs:", type(context_idxs))
-#    print("size of context_idxs:", sys.getsizeof(np.array(context_idxs)))
-#
-#    print("type of context_char_idxs:", type(context_char_idxs))
-#    print("size of context_char_idxs:", sys.getsizeof(context_char_idxs))
-#
-#    print("type of ques_idxs:", type(ques_idxs))
-#    print("size of ques_idxs:", sys.getsizeof(np.array(ques_idxs)))
-#
-#    print("type of ques_char_idxs:", type(ques_char_idxs))
-#    print("size of ques_char_idxs:", sys.getsizeof(np.array(ques_char_idxs)))
-#
-#    print("type of y1s:", type(y1s))
-#    print("size of y1s", sys.getsizeof(np.array(y1s)))
-#
-#    print("type of y2s:", type(y2s))
-#    print("size of y2s", sys.getsizeof(np.array(y1s)))
-#
-#    print("type of ids:", type(ids))
-#    print("size of ids", sys.getsizeof(np.array(ids)))
-#
 
     np.savez(out_file,
          context_idxs=np.array(context_idxs),

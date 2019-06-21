@@ -54,23 +54,21 @@ class SQuAD(data.Dataset):
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)
-            batch_size, c_len, w_len = self.context_char_idxs.size()
+            batch_size = self.context_idxs.shape[0]
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
-            self.context_idxs = torch.unsqueeze(self.context_idxs, 1).t()
+            self.context_idxs = torch.unsqueeze(self.context_idxs, 1)
             self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
 
-            batch_size, q_len = self.question_idxs.size()
+            batch_size = self.question_idxs.shape[0]
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
 
-            batch_size, c_len, w_len = self.context_char_idxs.size()
-            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
+            #batch_size, c_len, w_len = self.context_char_idxs.size()
+            #ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+            #self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
 
-            batch_size, q_len, topics_len = self.question_char_idxs.size()
-            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            print("ones size:", ones.shape)
-            print("question_char_size",self.question_char_idxs.size())
+#            batch_size, q_len, topics_len = self.question_char_idxs.size()
+#            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
 #            self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
 
             self.y1s += 1
@@ -83,8 +81,8 @@ class SQuAD(data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]
-        example = (self.context_idxs[idx],
-                   self.context_char_idxs[idx],
+        example = (self.context_idxs,
+                   self.context_char_idxs,
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],
@@ -125,6 +123,15 @@ def collate_fn(examples):
             padded[i, :end] = seq[:end]
         return padded
 
+#    def sc_merge_2d(matrix, dtype=torch.int64, pad_value=0):
+#        height = (matrix.sum(1) != pad_value).sum()
+#        width = (matrix.sum(0) != pad_value).sum()
+#        padded = torch.zeros(len(matrices), height, width, dtype=dtype)
+#        for i, seq in enumerate(matrices):
+#            height, width = heights[i], widths[i]
+#            padded[i, :height, :width] = seq[:height, :width]
+#        return padded
+
     def merge_2d(matrices, dtype=torch.int64, pad_value=0):
         heights = [(m.sum(1) != pad_value).sum() for m in matrices]
         widths = [(m.sum(0) != pad_value).sum() for m in matrices]
@@ -140,7 +147,7 @@ def collate_fn(examples):
         y1s, y2s, ids = zip(*examples)
 
     # Merge into batch tensors
-    context_idxs = merge_1d(context_idxs)
+    context_idxs = merge_2d(context_idxs)
     context_char_idxs = merge_2d(context_char_idxs)
     question_idxs = merge_1d(question_idxs)
     question_char_idxs = merge_2d(question_char_idxs)

@@ -72,7 +72,6 @@ def process_file(filename, data_type, word_counter, char_counter):
         sc_chars = [list(token) for token in sc_tokens]
         sc_spans = convert_idx(sc, sc_tokens)
         print("Creating the word indices from the contexts")
-        print()
         for token in tqdm(sc_tokens):
             word_counter[token] += 1
             # I changed this to 1 instead of the len(para["qas"]) it was originally.
@@ -125,6 +124,7 @@ def process_file(filename, data_type, word_counter, char_counter):
                 eval_examples[str(total)] = {"question": ques,
                                              "answers": answer_texts,
                                              "uuid": qas["id"]}
+
         print("{} questions in total".format(len(examples)))
     return examples, eval_examples
 
@@ -192,19 +192,13 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
     ques_limit = args.test_ques_limit if is_test else args.ques_limit
     char_limit = args.char_limit
 
-    def filter_func(example):
-    #####
-    # room for mod here
-    #####
-        return len(example["context_tokens"]) > para_limit or len(example["ques_tokens"]) > ques_limit
-
-    if filter_func(example):
-        raise ValueError("Context/Questions lengths are over the limit")
+#    def filter_func(example):
+#        return len(example["context_tokens"]) > para_limit or len(example["ques_tokens"]) > ques_limit
+#
+#    if filter_func(example):
+#        raise ValueError("Context/Questions lengths are over the limit")
 
     context_idxs = np.zeros([para_limit], dtype=np.int32)
-    #####
-    # room for reuse here
-    #####
     context_char_idxs = np.zeros([para_limit, char_limit], dtype=np.int32)
     ques_idxs = np.zeros([ques_limit], dtype=np.int32)
     ques_char_idxs = np.zeros([ques_limit, char_limit], dtype=np.int32)
@@ -269,21 +263,22 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     ans_limit = 30
     char_limit = 16
 
-    def drop_example(ex, is_test_=False):
+    def drop_example(n, ex, is_test_=False):
+        if n == 0:
+            return True
         if is_test_:
-            drop = False
+            return False
+#        else:
+#            return len(ex["ques_tokens"]) > ques_limit or \
+#               (is_answerable(ex) and
+#                ex["y2s"][0] - ex["y1s"][0] > ans_limit)
         else:
-            drop = len(ex["ques_tokens"]) > ques_limit or \
-               (is_answerable(ex) and
-                ex["y2s"][0] - ex["y1s"][0] > ans_limit)
-
-        return drop
+            return False
 
     print("Converting {} examples to indices...".format(data_type))
     total = 0
     total_ = 0
     meta = {}
-    context_idxs = []
     context_char_idxs = []
     ques_idxs = []
     ques_char_idxs = []
@@ -301,24 +296,21 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
             return char2idx_dict[char]
         return 1
 
-    context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
     context_idxs = [_get_word(token) for token in examples[0]["super_context_tokens"]]
+    context_char_idxs = np.zeros([len(examples[0]["super_context_chars"]), char_limit], dtype=np.int32)
 
     for i, token in enumerate(examples[0]["super_context_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:
                 break
-            context_char_idx[i, j] = (_get_char(char))
-    context_char_idxs.append(context_char_idx)
+            context_char_idxs[i, j] = (_get_char(char))
+
 
     for n, example in tqdm(enumerate(examples)):
         total_ += 1
 
-        if n == 0:
+        if drop_example(n, example, is_test):
             continue
-
-#        if drop_example(example, is_test):
-#            continue
 
         total += 1
 
@@ -329,12 +321,14 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
             ques_idx[i] = (_get_word(token))
         ques_idxs.append(ques_idx)
 
+
         for i, token in enumerate(example["ques_chars"]):
             for j, char in enumerate(token):
                 if j == char_limit:
                     break
                 ques_char_idx[i, j] = (_get_char(char))
         ques_char_idxs.append(ques_char_idx)
+
 
         if is_answerable(example):
             start, end = example["y1s"][-1], example["y2s"][-1]
@@ -345,12 +339,32 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
         y2s.append(end)
         ids.append(example["id"])
 
-    #####
-    # room for space optimization
-    #####
+#
+#    print("type of context_idxs:", type(context_idxs))
+#    print("size of context_idxs:", sys.getsizeof(np.array(context_idxs)))
+#
+#    print("type of context_char_idxs:", type(context_char_idxs))
+#    print("size of context_char_idxs:", sys.getsizeof(context_char_idxs))
+#
+#    print("type of ques_idxs:", type(ques_idxs))
+#    print("size of ques_idxs:", sys.getsizeof(np.array(ques_idxs)))
+#
+#    print("type of ques_char_idxs:", type(ques_char_idxs))
+#    print("size of ques_char_idxs:", sys.getsizeof(np.array(ques_char_idxs)))
+#
+#    print("type of y1s:", type(y1s))
+#    print("size of y1s", sys.getsizeof(np.array(y1s)))
+#
+#    print("type of y2s:", type(y2s))
+#    print("size of y2s", sys.getsizeof(np.array(y1s)))
+#
+#    print("type of ids:", type(ids))
+#    print("size of ids", sys.getsizeof(np.array(ids)))
+#
+
     np.savez(out_file,
          context_idxs=np.array(context_idxs),
-         context_char_idxs=np.array(context_char_idxs),
+         context_char_idxs=(context_char_idxs),
          ques_idxs=np.array(ques_idxs),
          ques_char_idxs=np.array(ques_char_idxs),
          y1s=np.array(y1s),

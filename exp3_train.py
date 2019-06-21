@@ -100,7 +100,7 @@ def main(data, flags):
                                    collate_fn=collate_fn)
 
     test_dataset = SQuAD(test_data, use_v2=True)
-    test_loader = torchdata.DataLoader(dev_dataset,
+    test_loader = torchdata.DataLoader(test_dataset,
                                  batch_size=data.batch_size,
                                  shuffle=False,
                                  num_workers=data.num_workers,

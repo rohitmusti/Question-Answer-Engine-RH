@@ -28,10 +28,10 @@ def exp3_transformer(in_file, out_file):
         new_data["data"] = []
         # Merge all the `contexts` into one giant string
         new_data["super_context"] = "".join([quick_clean(raw_str=para["context"]) for topic in source["data"] for para in topic["paragraphs"]])
+        context_buffer = 0
         for topic in tqdm(source["data"]):
             topic_dict = {}
             topic_dict["title"] = topic["title"]
-            context_buffer = 0
             topic_dict["qas"] = []
             for para in topic["paragraphs"]:
                 for qas in para['qas']:

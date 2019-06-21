@@ -19,7 +19,7 @@ import ujson as json
 from collections import Counter
 
 
-class SQuAD(data.Dataset):
+class SQuAD3(data.Dataset):
     """Stanford Question Answering Dataset (SQuAD).
 
     Each item in the dataset is a tuple with the following entries (in order):
@@ -42,7 +42,7 @@ class SQuAD(data.Dataset):
         use_v2 (bool): Whether to use SQuAD 2.0 questions. Otherwise only use SQuAD 1.1.
     """
     def __init__(self, data_path, use_v2=True):
-        super(SQuAD, self).__init__()
+        super(SQuAD3, self).__init__()
 
         dataset = np.load(data_path)
         self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
@@ -63,13 +63,13 @@ class SQuAD(data.Dataset):
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
 
-            #batch_size, c_len, w_len = self.context_char_idxs.size()
-            #ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            #self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
+            batch_size, w_len = self.context_char_idxs.size()
+            ones = torch.ones((batch_size, w_len), dtype=torch.int64)
+            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
 
-#            batch_size, q_len, topics_len = self.question_char_idxs.size()
-#            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-#            self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
+            batch_size, q_len, topics_len = self.question_char_idxs.size()
+            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+            self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
 
             self.y1s += 1
             self.y2s += 1

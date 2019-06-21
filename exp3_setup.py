@@ -215,17 +215,11 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
         return 1
 
     for i, token in enumerate(example["context_tokens"]):
-    #####
-    # room for reuse here
-    #####
         context_idxs[i] = (_get_word(token))
 
     for i, token in enumerate(example["ques_tokens"]):
         ques_idxs[i] = (_get_word(token))
 
-    #####
-    # room for reuse here
-    #####
     for i, token in enumerate(example["context_chars"]):
         for j, char in enumerate(token):
             if j == char_limit:
@@ -238,9 +232,6 @@ def convert_to_features(args, data, word2idx_dict, char2idx_dict, is_test):
                 break
             ques_char_idxs[i, j] = (_get_char(char))
 
-    #####
-    # room for reuse here; definitely need to modify this return statement to make the memory better
-    #####
     return context_idxs, context_char_idxs, ques_idxs, ques_char_idxs
 
 

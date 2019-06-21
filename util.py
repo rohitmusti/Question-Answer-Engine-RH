@@ -123,15 +123,6 @@ def collate_fn(examples):
             padded[i, :end] = seq[:end]
         return padded
 
-#    def sc_merge_2d(matrix, dtype=torch.int64, pad_value=0):
-#        height = (matrix.sum(1) != pad_value).sum()
-#        width = (matrix.sum(0) != pad_value).sum()
-#        padded = torch.zeros(len(matrices), height, width, dtype=dtype)
-#        for i, seq in enumerate(matrices):
-#            height, width = heights[i], widths[i]
-#            padded[i, :height, :width] = seq[:height, :width]
-#        return padded
-
     def merge_2d(matrices, dtype=torch.int64, pad_value=0):
         heights = [(m.sum(1) != pad_value).sum() for m in matrices]
         widths = [(m.sum(0) != pad_value).sum() for m in matrices]

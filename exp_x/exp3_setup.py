@@ -283,7 +283,6 @@ def pre_process(data, flags):
         @chrischute
     """
 
-    data = config.data()
 
     if flags[1] == "dev":
         exp3_data = data.dev_data_exp3

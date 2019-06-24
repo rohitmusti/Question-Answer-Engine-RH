@@ -23,7 +23,7 @@ from models import BiDAF
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 import ujson as json
-from util import collate_fn, SQuAD
+from util import collate_fn, SQuAD3
 
 
 def main(data, flags):
@@ -92,14 +92,14 @@ def main(data, flags):
     # Get data loader
     log.info('Building dataset...')
     # np.load(data.toy_record_file_exp3)
-    train_dataset = SQuAD(training_data, use_v2=True)
+    train_dataset = SQuAD3(training_data, use_v2=True)
     train_loader = torchdata.DataLoader(train_dataset,
                                    batch_size=data.batch_size,
                                    shuffle=True,
                                    num_workers=data.num_workers,
                                    collate_fn=collate_fn)
 
-    test_dataset = SQuAD(test_data, use_v2=True)
+    test_dataset = SQuAD3(test_data, use_v2=True)
     test_loader = torchdata.DataLoader(test_dataset,
                                  batch_size=data.batch_size,
                                  shuffle=False,
@@ -123,6 +123,13 @@ def main(data, flags):
                 optimizer.zero_grad()
 
                 # Forward
+                log.info("cw_idxs length: {}".format(str(len(cw_idxs))))
+                log.info("qw_idxs length: {}".format(str(len(qw_idxs))))
+                log.info("cw_idxs size: {}".format(str(sys.getsizeof(cw_idxs))))
+                log.info("qw_idxs size: {}".format(str(sys.getsizeof(qw_idxs))))
+                log.info("cw_idxs shape: {}".format(str(cw_idxs.shape)))
+                log.info("qw_idxs shape: {}".format(str(qw_idxs.shape)))
+
                 log_p1, log_p2 = model(cw_idxs, qw_idxs)
                 y1, y2 = y1.to(device), y2.to(device)
                 loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)

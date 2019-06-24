@@ -55,9 +55,12 @@ class SQuAD3(data.Dataset):
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)
             batch_size = self.context_idxs.shape[0]
-            ones = torch.ones((batch_size, 1), dtype=torch.int64)
-            self.context_idxs = torch.unsqueeze(self.context_idxs, 1)
-            self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
+            ones = torch.ones((batch_size), dtype=torch.int64)
+#            print(ones.shape)
+#            print(self.question_idxs.shape)
+#            self.context_idxs = torch.unsqueeze(self.context_idxs, 1)
+            self.context_idxs = torch.cat((ones, self.context_idxs), dim=0)
+#            self.question_idxs = torch.cat((ones, self.question_idxs), dim=0)
 
             batch_size = self.question_idxs.shape[0]
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
@@ -124,6 +127,8 @@ def collate_fn(examples):
         return padded
 
     def merge_2d(matrices, dtype=torch.int64, pad_value=0):
+
+        print("shape of matrices[0]", (matrices[0].shape))
         heights = [(m.sum(1) != pad_value).sum() for m in matrices]
         widths = [(m.sum(0) != pad_value).sum() for m in matrices]
         padded = torch.zeros(len(matrices), max(heights), max(widths), dtype=dtype)

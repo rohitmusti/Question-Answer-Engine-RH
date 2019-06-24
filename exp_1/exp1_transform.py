@@ -35,14 +35,14 @@ def exp_1_transformer(in_file, out_file, logger):
     new_data["experiment"] = 1
     counter = 0
     with open(in_file, "r") as fh:
-        logger.info("Importing {}".format(fh.name))
+        logger.info(f"Importing {fh.name}")
         source = json.load(fh)
         new_data["version"] = source["version"]
         new_data["data"] = []
         logger.info("Creating all context list")
         all_contexts = [para["context"] for topic in source["data"] for para in topic["paragraphs"]]
         for topic in tqdm(source["data"]):
-            logger.info("Processing: {}".format(topic["title"]))
+            logger.info(f"Processing: {topic["title"]}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []
@@ -68,8 +68,8 @@ def exp_1_transformer(in_file, out_file, logger):
                 topic_dict["paragraphs"].append(paragraph)
             new_data["data"].append(topic_dict)
 
-    logger.info("Processed {} question, answer pairs".format(counter))
-    logger.info("Saving to {}".format(out_file))
+    logger.info(f"Processed {counter} question, answer pairs")
+    logger.info(f"Saving to {out_file}")
     save(filename=out_file, obj=new_data)
 
 if __name__ == "__main__":
@@ -79,17 +79,17 @@ if __name__ == "__main__":
     valid_args = ["test", "train", "dev", "toy", "all"]
 
     if flags[1] not in valid_args:
-        print("Not a valid args")
-        print("Valid args are: {}".format(valid_args))
+        logger.info("Not a valid args")
+        logger.info(f"Valid args are: {valid_args}")
     else:
 
         if flags[1]=="test":
             c, b = get_new_context("test", ["test1", "test2", "test3", "test4", "test5",
                             "test6", "test7", "test8", "test9"])
-            print("New context: {}".format(c))
-            print("Index of start of 'test': {}".format(b))
+            logger.info(f"New context: {c}")
+            logger.info(f"Index of start of 'test': {b}")
             test = "test" == c[b:b+4]
-            print("Checking if the indexes line up: {}".format(test))
+            logger.info(f"Checking if the indexes line up: {test}")
         if flags[1]=="train" or flags[1]=="all":
             exp_1_transformer(c.train_data_orig, c.train_data_exp1, logger)
         if flags[1]=="dev" or flags[1]=="all":

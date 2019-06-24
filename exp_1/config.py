@@ -76,8 +76,7 @@ class config():
             # Best checkpoint is the one that maximizes EM or F1
             self.maximize_metric = True
         else:
-            raise ValueError('Unrecognized metric name: "{}"'
-                             .format(self.metric_name))
+            raise ValueError(f'Unrecognized metric name: "{self.metric_name}"')
 
         self.hidden_size = 100
         self.drop_prob = 0.2

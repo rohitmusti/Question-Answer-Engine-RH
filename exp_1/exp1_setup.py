@@ -37,7 +37,7 @@ def convert_idx(text, tokens):
     for token in tokens:
         current = text.find(token, current)
         if current < 0:
-            print("Token {} cannot be found".format(token))
+            print(f"Token {token} cannot be found")
             raise Exception()
         spans.append((current, current + len(token)))
         current += len(token)
@@ -45,7 +45,7 @@ def convert_idx(text, tokens):
 
 
 def process_file(filename, data_type, word_counter, char_counter, logger):
-    logger.info("Pre-processing {} examples...".format(data_type))
+    logger.info(f"Pre-processing {data_type} examples...")
     examples = []
     eval_examples = {}
     total = 0
@@ -99,12 +99,12 @@ def process_file(filename, data_type, word_counter, char_counter, logger):
                                                  "spans": spans,
                                                  "answers": answer_texts,
                                                  "uuid": qa["id"]}
-        logger.info("{} questions in total".format(len(examples)))
+        logger.info(f"{len(examples)} questions in total")
     return examples, eval_examples
 
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
-    logger.info("Pre-processing {} vectors...".format(data_type))
+    logger.info(f"Pre-processing {data_type} vectors...")
     embedding_dict = {}
     filtered_elements = [k for k, v in counter.items() if v > limit]
     if emb_file is not None:
@@ -116,15 +116,13 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
                 vector = list(map(float, array[-vec_size:]))
                 if word in counter and counter[word] > limit:
                     embedding_dict[word] = vector
-        logger.info("{} / {} tokens have corresponding {} embedding vector".format(
-            len(embedding_dict), len(filtered_elements), data_type))
+        logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {} embedding vector")
     else:
         assert vec_size is not None
         for token in filtered_elements:
             embedding_dict[token] = [np.random.normal(
                 scale=0.1) for _ in range(vec_size)]
-        logger.info("{} tokens have corresponding {} embedding vector".format(
-            len(filtered_elements), data_type))
+        logger.info(f"{len(filtered_elements)} tokens have corresponding {data_type} embedding vector")
 
     NULL = "--NULL--"
     OOV = "--OOV--"
@@ -218,7 +216,7 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
 
         return drop
 
-    print("Converting {} examples to indices...".format(data_type))
+    print(f"Converting {data_type} examples to indices...")
     total = 0
     total_ = 0
     meta = {}
@@ -292,7 +290,7 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
              y1s=np.array(y1s),
              y2s=np.array(y2s),
              ids=np.array(ids))
-    logger.info("Built {} / {} instances of features in total".format(total, total_))
+    logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     return meta
 

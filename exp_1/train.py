@@ -154,14 +154,13 @@ def main(c, flags):
                     ema.resume(model)
 
                     # Log to console
-                    results_str = ', '.join('{}: {:05.2f}'.format(k, v)
-                                            for k, v in results.items())
+                    results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
                     log.info(f"Dev {results_str}")
 
                     # Log to TensorBoard
                     log.info('Visualizing in TensorBoard...')
                     for k, v in results.items():
-                        tbx.add_scalar(f"dev/{k}".format(k), v, step)
+                        tbx.add_scalar(f"dev/{k}", v, step)
                     util.visualize(tbx,
                                    pred_dict=pred_dict,
                                    eval_path=c.dev_eval_file,

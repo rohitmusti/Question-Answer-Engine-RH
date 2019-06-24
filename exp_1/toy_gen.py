@@ -19,18 +19,18 @@ def toy_transformer(in_file="data/train/train-v2.0.json", out_file="data/toy/toy
     return:
         none, the data is written to an output
     """
-    logger.info("This toy data set will be compromised of {0} topics, each containing {1} paragraphs, which each contain {2} qas".format(topic_num, paragraph_num, qas_num))
+    logger.info(f"This toy data set will be compromised of {topic_num} topics, each containing {paragraph_num} paragraphs, which each contain {qas_num} qas")
     new_data = {}
     new_data['experiment'] = "toy"
     with open(in_file, "r") as fh:
-        logger.info("Importing: {}".format(in_file))
+        logger.info(f"Importing: {in_file}")
         source = json.load(fh)
         logger.info("Converting into toy format")
         new_data["version"] = source["version"]
         new_data["data"] = []
         topic_counter = topic_num
         for topic in tqdm(source["data"]):
-            logger.info("Processing: {}".format(topic["title"]))
+            logger.info(f"Processing: {topic["title"]}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []
@@ -69,7 +69,7 @@ def toy_transformer(in_file="data/train/train-v2.0.json", out_file="data/toy/toy
             if topic_counter == 0:
                 break
 
-    logger.info("Saving to {}".format(out_file))
+    logger.info(f"Saving to {out_file}")
     save(filename=out_file, obj=new_data)
 
 

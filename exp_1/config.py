@@ -11,6 +11,7 @@ class config():
         self.train_folder = self.folder + "train/"
         self.train_data_orig = self.train_folder + "train-v2.0.json"
         self.train_data_exp1 = self.train_folder + "train-exp1.json"
+        self.train_eval_file = self.train_folder + "train-eval.json"
         self.train_record_file_exp1 = self.train_folder + "train-exp1.npz"
 
         # development data
@@ -18,13 +19,16 @@ class config():
         self.dev_folder = self.folder + "dev/"
         self.dev_data_orig = self.dev_folder + "dev-v2.0.json"
         self.dev_data_exp1 = self.dev_folder + "dev-exp1.json"
+        self.dev_eval_file = self.dev_folder + "dev-eval.json"
         self.dev_record_file_exp1 = self.dev_folder + "dev-exp1.npz"
+        self.dev_meta_file = self.dev_folder + "dev-meta.json"
 
         # toy data
         # -  just to see if things are working
         self.toy_folder = self.folder + "toy/"
         self.toy_data_orig = self.toy_folder + "toy-v2.0.json"
         self.toy_data_exp1 = self.toy_folder + "toy-exp1.json"
+        self.toy_eval_file = self.toy_folder + "toy-eval.json"
         self.toy_record_file_exp1 = self.toy_folder + "toy-exp1.npz"
         self.toy_word2idx_file = self.toy_folder + "toy_word2idx.json"
         self.toy_char2idx_file = self.toy_folder + "toy_char2idx.json"
@@ -37,7 +41,7 @@ class config():
         self.glove_word_dim = 300
         self.glove_word_num_vecs = 2196017
         self.glove_char_file = self.embed_folder + "glove.840B.300d-char.txt"
-        self.char_emb_size = 64
+        self.char_dim = 64
         self.word2idx_file = self.embed_folder + "word2idx.json"
         self.char2idx_file = self.embed_folder + "char2idx.json"
         self.word_emb_file = self.embed_folder + "word_emb.json"
@@ -57,6 +61,10 @@ class config():
         self.num_epochs = 30
         self.max_grad_norm = 5.0
         self.num_visuals = 10
+        self.para_limit = 3800
+        self.ques_limit = 50
+        self.ans_limit = 30
+        self.char_limit = 16
 
         self.hidden_size = 100
         self.drop_prob = 0.2

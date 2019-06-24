@@ -19,7 +19,7 @@ import ujson as json
 from collections import Counter
 
 
-class SQuAD3(data.Dataset):
+class SQuAD(data.Dataset):
     """Stanford Question Answering Dataset (SQuAD).
 
     Each item in the dataset is a tuple with the following entries (in order):
@@ -42,7 +42,7 @@ class SQuAD3(data.Dataset):
         use_v2 (bool): Whether to use SQuAD 2.0 questions. Otherwise only use SQuAD 1.1.
     """
     def __init__(self, data_path, use_v2=True):
-        super(SQuAD3, self).__init__()
+        super(SQuAD, self).__init__()
 
         dataset = np.load(data_path)
         self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
@@ -54,24 +54,15 @@ class SQuAD3(data.Dataset):
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)
-            batch_size = self.context_idxs.shape[0]
-            ones = torch.ones((batch_size), dtype=torch.int64)
-#            print(ones.shape)
-#            print(self.question_idxs.shape)
-#            self.context_idxs = torch.unsqueeze(self.context_idxs, 1)
-            self.context_idxs = torch.cat((ones, self.context_idxs), dim=0)
-#            self.question_idxs = torch.cat((ones, self.question_idxs), dim=0)
-
-            batch_size = self.question_idxs.shape[0]
+            batch_size, c_len, w_len = self.context_char_idxs.size()
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
+            print(ones.shape)
+            print(self.context_idxs.shape)
+            self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
             self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
 
-            batch_size, w_len = self.context_char_idxs.size()
-            ones = torch.ones((batch_size, w_len), dtype=torch.int64)
-            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
-
-            batch_size, q_len, topics_len = self.question_char_idxs.size()
             ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
             self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
 
             self.y1s += 1
@@ -84,8 +75,8 @@ class SQuAD3(data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]
-        example = (self.context_idxs,
-                   self.context_char_idxs,
+        example = (self.context_idxs[idx],
+                   self.context_char_idxs[idx],
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],
@@ -127,8 +118,6 @@ def collate_fn(examples):
         return padded
 
     def merge_2d(matrices, dtype=torch.int64, pad_value=0):
-
-        print("shape of matrices[0]", (matrices[0].shape))
         heights = [(m.sum(1) != pad_value).sum() for m in matrices]
         widths = [(m.sum(0) != pad_value).sum() for m in matrices]
         padded = torch.zeros(len(matrices), max(heights), max(widths), dtype=dtype)
@@ -143,7 +132,7 @@ def collate_fn(examples):
         y1s, y2s, ids = zip(*examples)
 
     # Merge into batch tensors
-    context_idxs = merge_2d(context_idxs)
+    context_idxs = merge_1d(context_idxs)
     context_char_idxs = merge_2d(context_char_idxs)
     question_idxs = merge_1d(question_idxs)
     question_char_idxs = merge_2d(question_char_idxs)
@@ -154,6 +143,7 @@ def collate_fn(examples):
     return (context_idxs, context_char_idxs,
             question_idxs, question_char_idxs,
             y1s, y2s, ids)
+
 
 
 class AverageMeter:

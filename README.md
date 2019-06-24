@@ -13,9 +13,29 @@ Please email me at rmusti@redhat.com if you want to learn more about the idea. I
 
 The idea is to combine all of the contexts into one large "super context". Then train the question and answering system using the "super context" as the context for every question and answer pair. I will train on the test set and see how I perform on the dev set.
 
+## Repo Set Up
+
+This repo is divided into exp_1, exp_2, etc. folders and an exp_x folder.
+The exp_1, exp_2, etc. folders all contain "memory inefficient" experiments that would not be used in a production setting.
+They are primarily divised to see how well this idea of context merging works.
+The exp_x folder contains the code to create memory efficient "production" versions of this code.
+This generally means that they are more memory efficient and have more robust data ingestion setups.
+
+### Experiment 1
+
+This experiment is running the original SQuAD baseline implementation with 1 change: each context has 10 other random contexts tied to it.
+
+### Experiment 2
+
+This experiment is running the original SQuAD baseline implementation with 1 change: each context has all the contexts from its topic merged together into one.
+
+### Experiment 3
+
+This experiment is running the original SQuAD baseline implementation with 1 change: each context has all the contexts merged together.
+
 ### Data Re-Structure
 
-#### Original Data Structure
+#### Original Data Structure (exp_x efficiency adjustments)
 
 The squad data comes in a json format. Run `python3 data_discovery.py` to verify this.
 
@@ -80,8 +100,8 @@ test  what the softmaxed entries of the similarity matrix look like when you tra
 
 ## Credits
 
-Thank you to @chrischute for his work in creating the `layers.py`, `setup.py` files and setting up the original model I started training from.
+- Thank you to @chrischute for his work in creating the `layers.py`, `setup.py` files and setting up the original model I started training from.
 
-Thank you to Knowledge Computation Group@HKUST for their original code [here](https://github.com/HKUST-KnowComp/R-Net) that I borrowed a lot of structure from.
+- Thank you to Knowledge Computation Group@HKUST for their original code [here](https://github.com/HKUST-KnowComp/R-Net) that I borrowed a lot of structure from.
 
-Thank you to Sanjay Arora for his mentorship throughout this effort and the Red Hat AI Center of Excellence for making this research project possible.
+- Thank you to Sanjay Arora for his mentorship throughout this effort and the Red Hat AI Center of Excellence for making this research project possible.

@@ -43,17 +43,17 @@ def convert_idx(text, tokens):
     current = 0
     spans = []
     for token in tokens:
-        for small_token in token:
+        #for small_token in token:
         # unclear why this is necessary, but I'll just appease it for now.
         # the functions should all be sending and receiving the same type
         # but for some reason word_tokenize is receiving a string and sending
         # back a list of lists.
-            current = text.find(small_token, current)
-            if current < 0:
-                print("Token {} cannot be found".format(small_token))
-                raise Exception()
-            spans.append((current, current + len(small_token)))
-            current += len(small_token)
+        current = text.find(token, current)
+        if current < 0:
+            print("Token {} cannot be found".format(token))
+            raise Exception()
+        spans.append((current, current + len(token)))
+        current += len(token)
     return spans
 
 
@@ -265,7 +265,7 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
 
     np.savez(out_file,
          context_idxs=np.array(context_idxs),
-         context_char_idxs=(context_char_idxs),
+         context_char_idxs=(context_char_idxs), # this one is already a numpy array
          ques_idxs=np.array(ques_idxs),
          ques_char_idxs=np.array(ques_char_idxs),
          y1s=np.array(y1s),

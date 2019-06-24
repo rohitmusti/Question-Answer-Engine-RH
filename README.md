@@ -11,7 +11,9 @@ This is a baseline implementation of the [SQuAD](https://rajpurkar.github.io/SQu
 
 Please email me at rmusti@redhat.com if you want to learn more about the idea. I might try and turn this into a research paper so be advised that that may be coming soon.
 
-The idea is to combine all of the contexts into one large "super context". Then train the question and answering system using the "super context" as the context for every question and answer pair. I will train on the test set and see how I perform on the dev set.
+The idea is to combine all of the contexts into one large "super context".
+Then train the question and answering system using the "super context" as the context for every question and answer pair.
+I will train on the test set and see how I perform on the dev set.
 
 ## Repo Set Up
 
@@ -20,6 +22,10 @@ The exp_1, exp_2, etc. folders all contain "memory inefficient" experiments that
 They are primarily divised to see how well this idea of context merging works.
 The exp_x folder contains the code to create memory efficient "production" versions of this code.
 This generally means that they are more memory efficient and have more robust data ingestion setups.
+
+I originally started on the exp_x work and have shifted to the other experiments for now.
+The overhead/headache of the efficiency adjustments outweighed any benefits I might be gaining from it.
+I will return to it when I have more information about what the most effective approaches are.
 
 ### Experiment 1
 

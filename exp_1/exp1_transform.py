@@ -42,7 +42,7 @@ def exp_1_transformer(in_file, out_file, logger):
         logger.info("Creating all context list")
         all_contexts = [para["context"] for topic in source["data"] for para in topic["paragraphs"]]
         for topic in tqdm(source["data"]):
-            logger.info(f"Processing: {topic["title"]}")
+            logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []

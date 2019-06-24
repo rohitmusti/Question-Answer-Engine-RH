@@ -116,7 +116,7 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
                 vector = list(map(float, array[-vec_size:]))
                 if word in counter and counter[word] > limit:
                     embedding_dict[word] = vector
-        logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {} embedding vector")
+        logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {data_type} embedding vector")
     else:
         assert vec_size is not None
         for token in filtered_elements:
@@ -321,22 +321,25 @@ def pre_process(c, flags, logger):
 
     word_counter, char_counter = Counter(), Counter()
     examples, eval_obj = process_file(exp1_data, flags[1], word_counter, char_counter, logger)
+
+    save(eval_file, eval_obj)
+
     word_emb_mat, word2idx_dict = get_embedding(
         word_counter, 'word', emb_file=c.glove_word_file, vec_size=c.glove_word_dim, num_vectors=c.glove_word_num_vecs)
     char_emb_mat, char2idx_dict = get_embedding(
         char_counter, 'char', emb_file=None, vec_size=c.char_dim)
+
+    save(word_emb_file, word_emb_mat)
+    save(char_emb_file, char_emb_mat)
+    save(word2idx_file, word2idx_dict)
+    save(char2idx_file, char2idx_dict)
 
     # Process dev and test sets
     dev_examples, dev_eval = process_file(c.dev_data_exp1, "dev", word_counter, char_counter, logger)
     build_features(c, examples, flags[1], record_file, word2idx_dict, char2idx_dict)
     dev_meta = build_features(c, dev_examples, "dev", c.dev_record_file_exp1, word2idx_dict, char2idx_dict)
 
-    save(word_emb_file, word_emb_mat)
-    save(char_emb_file, char_emb_mat)
-    save(eval_file, eval_obj)
     save(c.dev_eval_file, dev_eval)
-    save(word2idx_file, word2idx_dict)
-    save(char2idx_file, char2idx_dict)
     save(c.dev_meta_file, dev_meta)
 
 

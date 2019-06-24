@@ -60,7 +60,7 @@ def exp_1_transformer(in_file, out_file, logger):
                     if not qas["is_impossible"]:
                         for answer in qas["answers"]:
                             answer_dict = {}
-                            answer_dict["answer_start"] = answer["answer_start"] + context_buffer
+                            answer_dict["answer_start"] = context_buffer + answer["answer_start"]
                             answer_dict["text"] = answer["text"]
 
                             qas_dict["answers"].append(answer_dict)

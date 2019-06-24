@@ -66,9 +66,23 @@ class config():
         self.ans_limit = 30
         self.char_limit = 16
 
+        self.max_checkpoints = 5
+        self.max_ans_len = 25
+        self.metric_name = "F1"
+        if self.metric_name == 'NLL':
+            # Best checkpoint is the one that minimizes negative log-likelihood
+            self.maximize_metric = False
+        elif self.metric_name in ('EM', 'F1'):
+            # Best checkpoint is the one that maximizes EM or F1
+            self.maximize_metric = True
+        else:
+            raise ValueError('Unrecognized metric name: "{}"'
+                             .format(self.metric_name))
+
         self.hidden_size = 100
         self.drop_prob = 0.2
 
         # save file to save logs
         self.logging_dir = "./logs/"
+        self.save_dir = "./save/"
         self.load_path = None

@@ -260,7 +260,7 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         ques_idxs.append(ques_idx)
 
         for i, token in enumerate(example["context_chars"]):
-            for j, char in enumerate(token)
+            for j, char in enumerate(token):
                 if j == char_limit:
                     break
                 context_char_idx[i, j] = _get_char(char)

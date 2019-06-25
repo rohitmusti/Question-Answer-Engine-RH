@@ -30,7 +30,7 @@ def toy_transformer(in_file="data/train/train-v2.0.json", out_file="data/toy/toy
         new_data["data"] = []
         topic_counter = topic_num
         for topic in tqdm(source["data"]):
-            logger.info(f"Processing: {topic["title"]}")
+            logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []

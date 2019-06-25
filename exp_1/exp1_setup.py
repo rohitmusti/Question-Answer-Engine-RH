@@ -260,7 +260,7 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         ques_idxs.append(ques_idx)
 
         for i, token in enumerate(example["context_chars"]):
-            for j, char in enumerate(token):
+            for j, char in enumerate(token)
                 if j == char_limit:
                     break
                 context_char_idx[i, j] = _get_char(char)
@@ -334,15 +334,15 @@ def pre_process(c, flags, logger):
     save(word2idx_file, word2idx_dict)
     save(char2idx_file, char2idx_dict)
 
+    build_features(c=c, examples=examples, datatype=flags[1], out_file=record_file,
+                   word2idx_dict=word2idx_dict, char2idx_dict=char2idx_dict, is_test=False)
+
     # Process dev and test sets
     dev_examples, dev_eval = process_file(c.dev_data_exp1, "dev", word_counter, char_counter, logger)
-    build_features(c, examples, flags[1], record_file, word2idx_dict, char2idx_dict)
     dev_meta = build_features(c, dev_examples, "dev", c.dev_record_file_exp1, word2idx_dict, char2idx_dict)
 
     save(c.dev_eval_file, dev_eval)
     save(c.dev_meta_file, dev_meta)
-
-
 
 if __name__ == '__main__':
     # Get command-line args

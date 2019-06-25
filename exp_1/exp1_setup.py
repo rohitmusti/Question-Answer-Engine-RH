@@ -334,7 +334,7 @@ def pre_process(c, flags, logger):
     save(word2idx_file, word2idx_dict)
     save(char2idx_file, char2idx_dict)
 
-    build_features(c=c, examples=examples, datatype=flags[1], out_file=record_file,
+    build_features(c=c, examples=examples, data_type=flags[1], out_file=record_file,
                    word2idx_dict=word2idx_dict, char2idx_dict=char2idx_dict, is_test=False)
 
     # Process dev and test sets

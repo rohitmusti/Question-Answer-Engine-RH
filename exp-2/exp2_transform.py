@@ -15,15 +15,16 @@ def exp2_transformer(in_file, out_file, logger):
         new_data["version"] = source["version"]
         new_data["data"] = []
         logger.info("Creating all context list")
-        all_contexts = [para["context"] for topic in source["data"] for para in topic["paragraphs"]]
         for topic in tqdm(source["data"]):
             logger.info(f"Processing: {topic['title']}")
+            context_buffer = 0
             topic_dict = {}
             topic_dict["title"] = topic["title"]
-            topic_dict["paragraphs"] = []
+            topic_dict["qas"] = []
+            topic_contexts = [para["context"] for para in topic["paragraphs"]]
+            topic_dict["context"] = " ".join(topic_contexts)
             for para in topic["paragraphs"]:
                 paragraph = {}
-                paragraph["context"], context_buffer = get_new_context(orig_context=para["context"], all_contexts=all_contexts)
                 paragraph["qas"] = []
                 for qas in para['qas']:
                     counter += 1
@@ -39,8 +40,8 @@ def exp2_transformer(in_file, out_file, logger):
                             answer_dict["text"] = answer["text"]
 
                             qas_dict["answers"].append(answer_dict)
-                    paragraph["qas"].append(qas_dict)
-                topic_dict["paragraphs"].append(paragraph)
+                    topic_dict["qas"].append(qas_dict)
+                context_buffer += len(para['context']) + 1
             new_data["data"].append(topic_dict)
 
     logger.info(f"Processed {counter} question, answer pairs")

@@ -17,7 +17,7 @@ def save(filename, obj):
 def quick_clean(raw_str):
     """
     args:
-        - context: a string to be quickly cleaned
+        - raw_str: a string to be quickly cleaned
 
     return
         - the original string w/ all quotes replaced as double quotes

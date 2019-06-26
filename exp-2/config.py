@@ -12,6 +12,7 @@ class config():
         self.train_data_orig = self.train_folder + "train-v2.0.json"
         self.train_data_exp2 = self.train_folder + "train-exp2.json"
         self.train_eval_file = self.train_folder + "train-eval.json"
+        self.train_topic_contexts_file = self.train_folder + "train-topic-contexts.json"
         self.train_record_file_exp2 = self.train_folder + "train-exp2.npz"
 
         # development data
@@ -20,6 +21,7 @@ class config():
         self.dev_data_orig = self.dev_folder + "dev-v2.0.json"
         self.dev_data_exp2 = self.dev_folder + "dev-exp2.json"
         self.dev_eval_file = self.dev_folder + "dev-eval.json"
+        self.dev_topic_contexts_file = self.dev_folder + "dev-topic-contexts.json"
         self.dev_record_file_exp2 = self.dev_folder + "dev-exp2.npz"
         self.dev_meta_file = self.dev_folder + "dev-meta.json"
 
@@ -29,6 +31,7 @@ class config():
         self.toy_data_orig = self.toy_folder + "toy-v2.0.json"
         self.toy_data_exp2 = self.toy_folder + "toy-exp2.json"
         self.toy_eval_file = self.toy_folder + "toy-eval.json"
+        self.toy_topic_contexts_file = self.toy_folder + "toy-topic-contexts.json"
         self.toy_record_file_exp2 = self.toy_folder + "toy-exp2.npz"
         self.toy_word2idx_file = self.toy_folder + "toy_word2idx.json"
         self.toy_char2idx_file = self.toy_folder + "toy_char2idx.json"

@@ -49,18 +49,29 @@ class SQuAD(data.Dataset):
         self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
         self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
+        self.topic_ids = torch.from_numpy(dataset['topic_ids'])
         self.y1s = torch.from_numpy(dataset['y1s']).long()
         self.y2s = torch.from_numpy(dataset['y2s']).long()
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)
+            print(f"shape of context_idxs: {self.context_idxs.shape}")
+            print(f"shape of context_char_idxs: {self.context_char_idxs.shape}")
+            print(f"shape of question_idxs: {self.question_idxs.shape}")
+            print(f"shape of question_char_idxs: {self.question_char_idxs.shape}")
             batch_size, c_len, w_len = self.context_char_idxs.size()
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
-            self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
 
             ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
             self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
+
+            batch_size, c_len, w_len = self.question_char_idxs.size()
+
+            ones = torch.ones((batch_size, 1), dtype=torch.int64)
+            self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
+
+            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
             self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
 
             self.y1s += 1
@@ -73,8 +84,9 @@ class SQuAD(data.Dataset):
 
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]
-        example = (self.context_idxs[idx],
-                   self.context_char_idxs[idx],
+        # I need to write a function to get the correct context_idx or context_char_idx
+        example = (self.context_idxs[self.topic_ids[idx]],
+                   self.context_char_idxs[self.topic_ids[idx]],
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],

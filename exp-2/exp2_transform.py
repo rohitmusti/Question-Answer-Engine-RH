@@ -15,7 +15,7 @@ def exp2_transformer(in_file, out_file, logger):
         new_data["version"] = source["version"]
         new_data["data"] = []
         logger.info("Creating all context list")
-        for topic in tqdm(source["data"]):
+        for topic_id, topic in tqdm(enumerate(source["data"])):
             logger.info(f"Processing: {topic['title']}")
             context_buffer = 0
             topic_dict = {}
@@ -29,6 +29,7 @@ def exp2_transformer(in_file, out_file, logger):
                 for qas in para['qas']:
                     counter += 1
                     qas_dict = {}
+                    qas_dict["topic_id"] = topic_id
                     qas_dict["id"] = qas["id"]
                     qas_dict["is_impossible"] = qas["is_impossible"]
                     qas_dict["question"] = quick_clean(raw_str=qas["question"])

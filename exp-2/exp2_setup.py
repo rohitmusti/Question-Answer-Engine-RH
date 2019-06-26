@@ -188,6 +188,7 @@ def build_features(c, examples, topic_contexts, data_type, out_file, word2idx_di
     context_char_idxs = []
     ques_idxs = []
     ques_char_idxs = []
+    topic_ids = []
     y1s = []
     y2s = []
     ids = []
@@ -242,6 +243,7 @@ def build_features(c, examples, topic_contexts, data_type, out_file, word2idx_di
         y1s.append(start)
         y2s.append(end)
         ids.append(example["id"])
+        topic_ids.append(example["topic_context_id"])
 
 
     np.savez(out_file,
@@ -251,7 +253,8 @@ def build_features(c, examples, topic_contexts, data_type, out_file, word2idx_di
              ques_char_idxs=np.array(ques_char_idxs),
              y1s=np.array(y1s),
              y2s=np.array(y2s),
-             ids=np.array(ids))
+             ids=np.array(ids),
+             topic_ids=np.array(topic_ids))
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     return meta

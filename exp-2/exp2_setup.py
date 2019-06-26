@@ -260,16 +260,21 @@ def build_features(c, examples, topic_contexts, data_type, out_file, word2idx_di
 def pre_process(c, flags, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
+    if flags[1] == "train" or flags[1] == "dev":
+        word_emb_file = c.word_emb_file
+        char_emb_file = c.char_emb_file
+        word2idx_file = c.word2idx_file
+        char2idx_file = c.char2idx_file
     if flags[1] == "train":
         exp2_data = c.train_data_exp2
         eval_file = c.train_eval_file
         topic_contexts_file = c.train_topic_contexts_file
         record_file = c.train_record_file_exp2
-        word_emb_file = c.word_emb_file
-        char_emb_file = c.char_emb_file
-        word2idx_file = c.word2idx_file
-        char2idx_file = c.char2idx_file
-
+    elif flags[1] == "dev":
+        exp2_data = c.dev_data_exp2
+        eval_file = c.dev_eval_file
+        topic_contexts_file = c.dev_topic_contexts_file
+        record_file = c.dev_record_file_exp2
     elif flags[1] == "toy":
         exp2_data = c.toy_data_exp2
         eval_file = c.toy_eval_file
@@ -287,6 +292,7 @@ def pre_process(c, flags, logger):
     examples, eval_obj, topic_contexts_examples = process_file(exp2_data, flags[1], word_counter, char_counter, logger)
 
     save(eval_file, eval_obj)
+    del eval_obj
     save(topic_contexts_file, topic_contexts_examples)
 
     word_emb_mat, word2idx_dict = get_embedding(
@@ -296,12 +302,17 @@ def pre_process(c, flags, logger):
 
     save(word_emb_file, word_emb_mat)
     save(char_emb_file, char_emb_mat)
+    del word_emb_mat
+    del char_emb_mat
+
     save(word2idx_file, word2idx_dict)
     save(char2idx_file, char2idx_dict)
 
     build_features(c=c, examples=examples,topic_contexts=topic_contexts_examples,
                    data_type=flags[1], out_file=record_file, word2idx_dict=word2idx_dict, 
                    char2idx_dict=char2idx_dict, is_test=False)
+    del topic_contexts_examples
+    del examples
 
     # Process dev and test sets
     dev_examples, dev_eval, dev_topic_contexts = process_file(c.dev_data_exp2, "dev", word_counter, char_counter, logger)
@@ -309,7 +320,7 @@ def pre_process(c, flags, logger):
 
     save(c.dev_eval_file, dev_eval)
     save(c.dev_meta_file, dev_meta)
-    save(c.dev_topic_contexts_file, topic_contexts_examples)
+    save(c.dev_topic_contexts_file, dev_topic_contexts)
 
 if __name__ == '__main__':
     # Get command-line args

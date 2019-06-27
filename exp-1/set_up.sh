@@ -11,7 +11,7 @@ pip3 install urllib3 --user
 pip3 install spacy --user
 pip3 install tqdm --user
 pip3 install nltk --user
-pip3 install spacy --user
+pip3 install tensorboard --user
 python3 -m spacy download en --user
 
 # creates directories

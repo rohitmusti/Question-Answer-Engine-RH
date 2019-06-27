@@ -55,10 +55,10 @@ class SQuAD(data.Dataset):
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)
-            print(f"shape of context_idxs: {self.context_idxs.shape}")
-            print(f"shape of context_char_idxs: {self.context_char_idxs.shape}")
-            print(f"shape of question_idxs: {self.question_idxs.shape}")
-            print(f"shape of question_char_idxs: {self.question_char_idxs.shape}")
+#            print(f"shape of context_idxs: {self.context_idxs.shape}")
+#            print(f"shape of context_char_idxs: {self.context_char_idxs.shape}")
+#            print(f"shape of question_idxs: {self.question_idxs.shape}")
+#            print(f"shape of question_char_idxs: {self.question_char_idxs.shape}")
             batch_size, c_len, w_len = self.context_char_idxs.size()
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)

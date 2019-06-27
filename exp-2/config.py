@@ -5,6 +5,11 @@ class config():
     """
     def __init__(self, folder="./data/"):
         self.folder = folder
+        self.logging_dir = "./logs/"
+        self.save_dir = "./save/"
+        self.load_path = None
+        self.name = None
+        self.split=None
 
         # training data
         # - usually used when you want to "officially" train your model
@@ -85,6 +90,3 @@ class config():
         self.drop_prob = 0.2
 
         # save file to save logs
-        self.logging_dir = "./logs/"
-        self.save_dir = "./save/"
-        self.load_path = None

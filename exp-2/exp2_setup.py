@@ -106,7 +106,7 @@ def process_file(filename, data_type, word_counter, char_counter, logger):
                            "id": total}
                 examples.append(example)
                 eval_examples[str(total)] = {"question": ques,
-                                             "topic_context_id": topic_id,
+                                             "context": topic_context_examples[topic_id]["context"],
                                              "spans": spans,
                                              "answers": answer_texts,
                                              "uuid": qa["id"]}
@@ -268,6 +268,13 @@ def pre_process(c, flags, logger):
         char_emb_file = c.char_emb_file
         word2idx_file = c.word2idx_file
         char2idx_file = c.char2idx_file
+    if flags[1] == "train" or flags[1] == "toy":
+        dev_data_exp2 = c.dev_data_exp2
+        dev_record_file_exp2 = c.dev_record_file_exp2
+        dev_eval_file = c.dev_eval_file
+        dev_meta_file = c.dev_meta_file
+        dev_topic_contexts_file = c.dev_topic_contexts_file
+
     if flags[1] == "train":
         exp2_data = c.train_data_exp2
         eval_file = c.train_eval_file
@@ -278,6 +285,13 @@ def pre_process(c, flags, logger):
         eval_file = c.dev_eval_file
         topic_contexts_file = c.dev_topic_contexts_file
         record_file = c.dev_record_file_exp2
+
+        dev_data_exp2 = c.toy_data_exp2
+        dev_record_file_exp2 = c.toy_record_file_exp2
+        dev_eval_file = c.toy_eval_file
+        dev_meta_file = c.toy_meta_file
+        dev_topic_contexts_file = c.toy_topic_contexts_file
+
     elif flags[1] == "toy":
         exp2_data = c.toy_data_exp2
         eval_file = c.toy_eval_file
@@ -287,7 +301,7 @@ def pre_process(c, flags, logger):
         char_emb_file = c.toy_char_emb_file
         word2idx_file = c.toy_word2idx_file
         char2idx_file = c.toy_char2idx_file
-    else:
+
         logger.info("Error: no valid flags were passed in")
         logger.info("Valid flags: train, toy")
 
@@ -318,12 +332,12 @@ def pre_process(c, flags, logger):
     del examples
 
     # Process dev and test sets
-    dev_examples, dev_eval, dev_topic_contexts = process_file(c.dev_data_exp2, "dev", word_counter, char_counter, logger)
-    dev_meta = build_features(c, dev_examples, dev_topic_contexts, "dev", c.dev_record_file_exp2, word2idx_dict, char2idx_dict)
+    dev_examples, dev_eval, dev_topic_contexts = process_file(dev_data_exp2, "dev", word_counter, char_counter, logger)
+    dev_meta = build_features(c, dev_examples, dev_topic_contexts, "dev", dev_record_file_exp2, word2idx_dict, char2idx_dict)
 
-    save(c.dev_eval_file, dev_eval)
-    save(c.dev_meta_file, dev_meta)
-    save(c.dev_topic_contexts_file, dev_topic_contexts)
+    save(dev_eval_file, dev_eval)
+    save(dev_meta_file, dev_meta)
+    save(dev_topic_contexts_file, dev_topic_contexts)
 
 if __name__ == '__main__':
     # Get command-line args

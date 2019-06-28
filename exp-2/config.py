@@ -8,6 +8,7 @@ class config():
         self.logging_dir = "./logs/"
         self.save_dir = "./save/"
         self.load_path = None
+        self.checkpoints = "./checkpoints/"
         self.name = None
         self.split=None
 
@@ -37,6 +38,7 @@ class config():
         self.toy_data_exp2 = self.toy_folder + "toy-exp2.json"
         self.toy_eval_file = self.toy_folder + "toy-eval.json"
         self.toy_topic_contexts_file = self.toy_folder + "toy-topic-contexts.json"
+        self.toy_meta_file = self.toy_folder + "toy-meta.json"
         self.toy_record_file_exp2 = self.toy_folder + "toy-exp2.npz"
         self.toy_word2idx_file = self.toy_folder + "toy_word2idx.json"
         self.toy_char2idx_file = self.toy_folder + "toy_char2idx.json"

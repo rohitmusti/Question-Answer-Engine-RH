@@ -304,6 +304,8 @@ def pre_process(c, flags, logger):
 
         logger.info("Error: no valid flags were passed in")
         logger.info("Valid flags: train, toy")
+    else:
+        raise ValueError("Unregonized or missing flag")
 
     word_counter, char_counter = Counter(), Counter()
     examples, eval_obj, topic_contexts_examples = process_file(exp2_data, flags[1], word_counter, char_counter, logger)

@@ -274,7 +274,6 @@ def pre_process(c, flags, logger):
         dev_eval_file = c.dev_eval_file
         dev_meta_file = c.dev_meta_file
         dev_topic_contexts_file = c.dev_topic_contexts_file
-
     if flags[1] == "train":
         exp2_data = c.train_data_exp2
         eval_file = c.train_eval_file

@@ -29,12 +29,15 @@ from util import collate_fn, SQuAD
 
 def main(c, flags):
 
+    if flags[1] == "train" or flags[1] == "dev":
+        word_emb_file = c.word_emb_file
     if flags[1] == "toy":
         word_emb_file = c.toy_word_emb_file
         train_record_file = c.toy_record_file_exp2
     elif flags[1] == "train":
-        word_emb_file = c.word_emb_file
         train_record_file = c.train_record_file_exp2
+    elif flags[1] == "dev":
+        train_record_file = c.dev_record_file_exp2
     else:
         raise ValueError("Unregonized or missing flag")
 
@@ -104,7 +107,8 @@ def main(c, flags):
     log.info('Training...')
     steps_till_eval = c.eval_steps
     epoch = step // len(train_dataset)
-    while epoch != c.num_epochs:
+    # revert to: while epoch != c.num_epochs:
+    while epoch != 3:
         epoch += 1
         log.info(f"Starting epoch {epoch}...")
         with torch.enable_grad(), \
@@ -140,7 +144,8 @@ def main(c, flags):
                                step)
 
                 steps_till_eval -= batch_size
-                if steps_till_eval <= 0:
+                # revert to: if steps_till_eval <= 0:
+                if True:
                     steps_till_eval = c.eval_steps
 
                     # Evaluate and save checkpoint

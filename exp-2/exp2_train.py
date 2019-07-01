@@ -108,7 +108,7 @@ def main(c, flags):
     steps_till_eval = c.eval_steps
     epoch = step // len(train_dataset)
     # revert to: while epoch != c.num_epochs:
-    while epoch != 3:
+    while epoch != 2:
         epoch += 1
         log.info(f"Starting epoch {epoch}...")
         with torch.enable_grad(), \

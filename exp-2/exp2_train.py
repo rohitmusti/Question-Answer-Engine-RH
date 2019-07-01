@@ -31,9 +31,11 @@ def main(c, flags):
 
     if flags[1] == "train" or flags[1] == "dev":
         word_emb_file = c.word_emb_file
+        eval_file = c.toy_eval_file
     if flags[1] == "toy":
         word_emb_file = c.toy_word_emb_file
         train_record_file = c.toy_record_file_exp2
+        eval_file = c.dev_eval_file
     elif flags[1] == "train":
         train_record_file = c.train_record_file_exp2
     elif flags[1] == "dev":
@@ -152,7 +154,7 @@ def main(c, flags):
                     log.info(f"Evaluating at step {step}...")
                     ema.assign(model)
                     results, pred_dict = evaluate(model, dev_loader, device,
-                                                  c.dev_eval_file,
+                                                  eval_file,
                                                   c.max_ans_len,
                                                   use_squad_v2=True)
                     saver.save(step, model, results[c.metric_name], device)
@@ -168,7 +170,7 @@ def main(c, flags):
                         tbx.add_scalar(f"dev/{k}", v, step)
                     util.visualize(tbx,
                                    pred_dict=pred_dict,
-                                   eval_path=c.dev_eval_file,
+                                   eval_path=eval_file,
                                    step=step,
                                    split='dev',
                                    num_visuals=c.num_visuals)

@@ -53,23 +53,13 @@ if __name__ == "__main__":
     flags = sys.argv
     c = config()
     logger = get_logger(log_dir=c.logging_dir, name="exp2 data transformer")
-    valid_args = ["test", "train", "dev", "toy", "all"]
 
-    if flags[1] not in valid_args:
-        logger.info("Not a valid args")
-        logger.info(f"Valid args are: {valid_args}")
+    if flags[1]=="train" or flags[1]=="all":
+        exp2_transformer(c.train_data_orig, c.train_data_exp2, logger)
+    if flags[1]=="dev" or flags[1]=="all":
+        exp2_transformer(c.dev_data_orig, c.dev_data_exp2, logger)
+    if flags[1]=="toy" or flags[1]=="all":
+        exp2_transformer(c.toy_data_orig, c.toy_data_exp2, logger)
+        exp2_transformer(c.toy_dev_data_orig, c.toy_dev_data_exp2, logger)
     else:
-
-        if flags[1]=="test":
-            c, b = get_new_context("test", ["test1", "test2", "test3", "test4", "test5",
-                            "test6", "test7", "test8", "test9"])
-            logger.info(f"New context: {c}")
-            logger.info(f"Index of start of 'test': {b}")
-            test = "test" == c[b:b+4]
-            logger.info(f"Checking if the indexes line up: {test}")
-        if flags[1]=="train" or flags[1]=="all":
-            exp2_transformer(c.train_data_orig, c.train_data_exp2, logger)
-        if flags[1]=="dev" or flags[1]=="all":
-            exp2_transformer(c.dev_data_orig, c.dev_data_exp2, logger)
-        if flags[1]=="toy" or flags[1]=="all":
-            exp2_transformer(c.toy_data_orig, c.toy_data_exp2, logger)
+        raise ValueError("Unrecognized or missing flags")

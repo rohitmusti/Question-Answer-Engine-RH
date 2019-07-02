@@ -23,7 +23,7 @@ from json import dumps
 from models import BiDAF
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
-from ujson import load as json_load
+import ujson 
 from util import collate_fn, SQuAD
 
 
@@ -31,15 +31,16 @@ def main(c, flags):
 
     if flags[1] == "train" or flags[1] == "dev":
         word_emb_file = c.word_emb_file
-        eval_file = c.toy_eval_file
     if flags[1] == "toy":
         word_emb_file = c.toy_word_emb_file
         train_record_file = c.toy_record_file_exp2
-        eval_file = c.dev_eval_file
+        eval_file = c.toy_dev_eval_file
     elif flags[1] == "train":
         train_record_file = c.train_record_file_exp2
+        eval_file = c.dev_eval_file
     elif flags[1] == "dev":
         train_record_file = c.dev_record_file_exp2
+        eval_file = c.toy_eval_file
     else:
         raise ValueError("Unregonized or missing flag")
 
@@ -110,6 +111,7 @@ def main(c, flags):
     steps_till_eval = c.eval_steps
     epoch = step // len(train_dataset)
     # revert to: while epoch != c.num_epochs:
+    torch.set_num_threads(7)
     while epoch != 2:
         epoch += 1
         log.info(f"Starting epoch {epoch}...")
@@ -183,7 +185,7 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     model.eval()
     pred_dict = {}
     with open(eval_file, 'r') as fh:
-        gold_dict = json_load(fh)
+        gold_dict = ujson.load(fh)
     with torch.no_grad(), \
             tqdm(total=len(data_loader.dataset)) as progress_bar:
         for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:

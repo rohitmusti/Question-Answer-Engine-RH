@@ -268,17 +268,17 @@ def pre_process(c, flags, logger):
         char_emb_file = c.char_emb_file
         word2idx_file = c.word2idx_file
         char2idx_file = c.char2idx_file
-    if flags[1] == "train" or flags[1] == "toy":
-        dev_data_exp2 = c.dev_data_exp2
-        dev_record_file_exp2 = c.dev_record_file_exp2
-        dev_eval_file = c.dev_eval_file
-        dev_meta_file = c.dev_meta_file
-        dev_topic_contexts_file = c.dev_topic_contexts_file
     if flags[1] == "train":
         exp2_data = c.train_data_exp2
         eval_file = c.train_eval_file
         topic_contexts_file = c.train_topic_contexts_file
         record_file = c.train_record_file_exp2
+
+        dev_data_exp2 = c.dev_data_exp2
+        dev_record_file_exp2 = c.dev_record_file_exp2
+        dev_eval_file = c.dev_eval_file
+        dev_meta_file = c.dev_meta_file
+        dev_topic_contexts_file = c.dev_topic_contexts_file
     elif flags[1] == "dev":
         exp2_data = c.dev_data_exp2
         eval_file = c.dev_eval_file
@@ -300,6 +300,12 @@ def pre_process(c, flags, logger):
         char_emb_file = c.toy_char_emb_file
         word2idx_file = c.toy_word2idx_file
         char2idx_file = c.toy_char2idx_file
+
+        dev_data_exp2 = c.toy_dev_data_exp2
+        dev_record_file_exp2 = c.toy_dev_record_file_exp2
+        dev_eval_file = c.toy_dev_eval_file
+        dev_meta_file = c.toy_dev_meta_file
+        dev_topic_contexts_file = c.toy_dev_topic_contexts_file
 
         logger.info("Error: no valid flags were passed in")
         logger.info("Valid flags: train, toy")

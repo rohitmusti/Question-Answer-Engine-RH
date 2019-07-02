@@ -34,13 +34,16 @@ def main(c, flags):
     if flags[1] == "toy":
         word_emb_file = c.toy_word_emb_file
         train_record_file = c.toy_record_file_exp2
+        dev_record_file = c.toy_dev_record_file_exp2
         eval_file = c.toy_dev_eval_file
     elif flags[1] == "train":
         train_record_file = c.train_record_file_exp2
+        dev_record_file = c.dev_record_file_exp2
         eval_file = c.dev_eval_file
     elif flags[1] == "dev":
         train_record_file = c.dev_record_file_exp2
-        eval_file = c.toy_eval_file
+        dev_record_file = c.toy_dev_record_file_exp2
+        eval_file = c.toy_dev_eval_file
     else:
         raise ValueError("Unregonized or missing flag")
 
@@ -99,7 +102,7 @@ def main(c, flags):
                                    shuffle=True,
                                    num_workers=c.num_workers,
                                    collate_fn=collate_fn)
-    dev_dataset = SQuAD(c.dev_record_file_exp2, use_v2=True)
+    dev_dataset = SQuAD(dev_record_file, use_v2=True)
     dev_loader = data.DataLoader(dev_dataset,
                                  batch_size=c.batch_size,
                                  shuffle=False,

@@ -42,8 +42,8 @@ def main(c, flags):
         eval_file = c.dev_eval_file
     elif flags[1] == "dev":
         train_record_file = c.dev_record_file_exp2
-        dev_record_file = c.toy_dev_record_file_exp2
-        eval_file = c.toy_dev_eval_file
+        dev_record_file = c.toy_record_file_exp2
+        eval_file = c.toy_eval_file
     else:
         raise ValueError("Unregonized or missing flag")
 

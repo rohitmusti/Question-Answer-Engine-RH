@@ -23,6 +23,13 @@ class config():
         self.dev_record_file_exp1 = self.dev_folder + "dev-exp1.npz"
         self.dev_meta_file = self.dev_folder + "dev-meta.json"
 
+        self.test_folder = self.folder + "test/"
+        self.test_data_orig = self.test_folder + "test-v2.0.json"
+        self.test_data_exp1 = self.test_folder + "test-exp1.json"
+        self.test_eval_file = self.test_folder + "test-eval.json"
+        self.test_record_file_exp1 = self.test_folder + "test-exp1.npz"
+        self.test_meta_file = self.test_folder + "test-meta.json"
+
         # toy data
         # -  just to see if things are working
         self.toy_folder = self.folder + "toy/"

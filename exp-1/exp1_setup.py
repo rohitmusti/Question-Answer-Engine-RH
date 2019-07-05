@@ -316,6 +316,7 @@ def pre_process(c, flags, logger):
         word2idx_file = c.toy_word2idx_file
         char2idx_file = c.toy_char2idx_file
     else:
+        exp1_data = c.toy_data_exp1
         logger.info("Error: no valid flags were passed in")
         logger.info("Valid flags: train, toy")
 
@@ -343,6 +344,11 @@ def pre_process(c, flags, logger):
 
     save(c.dev_eval_file, dev_eval)
     save(c.dev_meta_file, dev_meta)
+
+    test_examples, test_eval = process_file(c.test_data_exp1, "test", word_counter, char_counter, logger)
+    save(c.test_eval_file, test_eval, message="test eval")
+    test_meta = build_features(c, test_examples, "test",c.test_record_file_exp1, word2idx_dict, char2idx_dict, is_test=True)
+    save(c.test_meta_file, test_meta, message="test meta")
 
 if __name__ == '__main__':
     # Get command-line args

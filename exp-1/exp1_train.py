@@ -167,7 +167,6 @@ def main(c, flags):
                                    step=step,
                                    split='dev',
                                    num_visuals=c.num_visuals)
-                log.info("finished one epoch")
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):

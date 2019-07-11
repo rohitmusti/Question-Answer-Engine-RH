@@ -81,9 +81,11 @@ def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logg
 
 if __name__ == "__main__":
     c = config.config()
+    flags = sys.argv
+    topic_num = int(flags[1])
     log = get_logger(log_dir=c.logging_dir, name="data-gen")
     toy_transformer(in_file="data/train/orig-train-v2.0.json", 
                     out_file_1="data/train/train-v2.0.json", 
                     out_file_2="data/dev/dev-v2.0.json", 
                     out_file_3="data/test/test-v2.0.json", 
-                    topic_num=50,logger=log)
+                    topic_num=topic_num,logger=log)

@@ -9,7 +9,7 @@ from toolkit import save, quick_clean, get_logger
 from random import randrange
 from args import get_data_gen_args
 
-def toy_transformer(raw_data_file, new_train_data_file, new_dev_data_file, new_test_data_file, train_topic_num, dev_topic_num, test_topic_num, logger):
+def toy_transformer(raw_data_file, train_data_file, dev_data_file, test_data_file, train_topic_num, dev_topic_num, test_topic_num, logger):
     """
     distill original data into at most 15 topics, with each having at most 5 paragraphs,
     each of which has 5 questions and 5 answers
@@ -82,20 +82,20 @@ def toy_transformer(raw_data_file, new_train_data_file, new_dev_data_file, new_t
             else:
                 break
 
-    logger.info(f"Saving new data to {new_train_data_file}")
-    save(filename=new_train_data_file, obj=new_train_data)
-    logger.info(f"Saving new dev data to {new_dev_data_file}")
-    save(filename=new_dev_data_file, obj=new_dev_data)
-    logger.info(f"Saving new test data to {new_test_data_file}")
-    save(filename=new_test_data_file, obj=new_test_data)
+    logger.info(f"Saving new data to {train_data_file}")
+    save(filename=train_data_file, obj=new_train_data)
+    logger.info(f"Saving new dev data to {dev_data_file}")
+    save(filename=dev_data_file, obj=new_dev_data)
+    logger.info(f"Saving new test data to {test_data_file}")
+    save(filename=test_data_file, obj=new_test_data)
 
 if __name__ == "__main__":
     args = get_data_gen_args()
     log = get_logger(log_dir=args.logging_dir, name="data-gen")
-    toy_transformer(raw_data_file=args.raw_data_file,
-                    new_train_data_file=args.new_train_data_file,
-                    new_dev_data_file=args.new_dev_data_file,
-                    new_test_data_file=args.new_test_data_file,
+    toy_transformer(raw_data_file=args.raw_data,
+                    train_data_file=args.train_data_orig,
+                    dev_data_file=args.dev_data_orig,
+                    test_data_file=args.test_data_orig,
                     train_topic_num=args.train_topic_num, 
                     dev_topic_num=args.dev_topic_num,
                     test_topic_num=args.test_topic_num, 

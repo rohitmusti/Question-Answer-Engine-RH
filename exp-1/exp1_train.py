@@ -29,17 +29,19 @@ from util import collate_fn, SQuAD
 
 def main(c, flags):
 
-    if flags[1] == "toy":
+    data_split = flags[1]
+
+    if data_split == "toy":
         word_emb_file = c.toy_word_emb_file
         train_record_file = c.toy_record_file_exp1
-    elif flags[1] == "train":
+    elif data_split == "train":
         word_emb_file = c.word_emb_file
         train_record_file = c.train_record_file_exp1
     else:
         raise ValueError("Unregonized or missing flag")
 
     # Set up logging and devices
-    name = "train exp1"
+    name = f"{data_split} exp1"
     c.save_dir = util.get_save_dir(c.logging_dir, name, training=True)
     log = get_logger(c.save_dir, name)
     tbx = SummaryWriter(c.save_dir)
@@ -134,13 +136,14 @@ def main(c, flags):
                 progress_bar.update(batch_size)
                 progress_bar.set_postfix(epoch=epoch,
                                          NLL=loss_val)
-                tbx.add_scalar('train/NLL', loss_val, step)
-                tbx.add_scalar('train/LR',
+                tbx.add_scalar(f'{data_split}/NLL', loss_val, step)
+                tbx.add_scalar(f'{data_split}/LR',
                                optimizer.param_groups[0]['lr'],
                                step)
 
                 steps_till_eval -= batch_size
-                if steps_till_eval <= 0:
+#                if steps_till_eval <= 0:
+                if True:
                     steps_till_eval = c.eval_steps
 
                     # Evaluate and save checkpoint

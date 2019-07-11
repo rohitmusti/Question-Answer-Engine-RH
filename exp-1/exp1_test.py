@@ -29,14 +29,16 @@ from ujson import load as json_load
 from util import collate_fn, SQuAD
 from toolkit import get_logger
 
+import sys
+
 
 def main(c, flags):
-    # Set up logging
     data_split = flags[1]
+    c.load_path = flags[2]
     if data_split == "train":
-        eval_file = c.train_eval_file
-        record_file = c.train_record_file_exp1
-    if data_split == "toy":
+        eval_file = c.dev_eval_file
+        record_file = c.dev_record_file_exp1
+    elif data_split == "toy":
         eval_file = c.toy_eval_file
         record_file = c.toy_record_file_exp1
     else:
@@ -59,8 +61,9 @@ def main(c, flags):
     model = BiDAF(word_vectors=word_vectors,
                   hidden_size=c.hidden_size)
     model = nn.DataParallel(model, gpu_ids)
+
     log.info(f'Loading checkpoint from {c.load_path}...')
-    model = util.load_model(model, c.save_dir, gpu_ids, return_step=False)
+    model = util.load_model(model, c.load_path, gpu_ids, return_step=False)
     model = model.to(device)
     model.eval()
 
@@ -119,8 +122,7 @@ def main(c, flags):
     results_list = [('NLL', nll_meter.avg),
                     ('F1', results['F1']),
                     ('EM', results['EM'])]
-    if args.use_squad_v2:
-        results_list.append(('AvNA', results['AvNA']))
+    results_list.append(('AvNA', results['AvNA']))
     results = OrderedDict(results_list)
     # Log to console
     results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
@@ -131,7 +133,7 @@ def main(c, flags):
                    pred_dict=pred_dict,
                    eval_path=eval_file,
                    step=0,
-                   split="Dev",
+                   split=data_split,
                    num_visuals=c.num_visuals)
  # Write submission file
     # I'm not focused on the submission file

@@ -6,40 +6,41 @@ author: @rohitmusti
 import ujson as json
 from tqdm import tqdm
 from toolkit import save, quick_clean, get_logger
-import sys
 from random import randrange
-import config
+from args import get_data_gen_args
 
-def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logger):
+def toy_transformer(raw_data_file, new_train_data_file, new_dev_data_file, new_test_data_file, train_topic_num, dev_topic_num, test_topic_num, logger):
     """
     distill original data into at most 15 topics, with each having at most 5 paragraphs,
     each of which has 5 questions and 5 answers
     args:
-        - in_file: the file name of the data to be transformed to experiment 2
+        - raw_data_file: the file name of the data to be transformed to experiment 2
         - out_file: the file name of where the ought to be written
 
     return:
         none, the data is written to an output
     """
-    logger.info(f"This toy data set will be compromised of {topic_num} topics")
-    new_data = {}
-    new_data['experiment'] = "toy"
+    logger.info(f"This toy data set will be compromised of {train_topic_num + test_topic_num + dev_topic_num} topics")
+    new_train_data = {}
+    new_train_data['experiment'] = "toy"
     new_dev_data = {}
     new_dev_data['experiment'] = "toy_dev"
     new_test_data = {}
     new_test_data['experiment'] = "toy_train"
-    with open(in_file, "r") as fh:
-        logger.info(f"Importing: {in_file}")
+    with open(raw_data_file, "r") as fh:
+        logger.info(f"Importing: {raw_data_file}")
         source = json.load(fh)
         logger.info("Converting into toy format")
-        new_data["version"] = source["version"]
-        new_data["data"] = []
+        new_train_data["version"] = source["version"]
+        new_train_data["data"] = []
         new_dev_data["version"] = source["version"]
         new_dev_data["data"] = []
         new_test_data["version"] = source["version"]
         new_test_data["data"] = []
-        topic_counter = topic_num
-        for topic in tqdm(source["data"]):
+        train_topic_counter = train_topic_num
+        dev_topic_counter = dev_topic_num
+        test_topic_counter = test_topic_num
+        for topic in (source["data"]):
             logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
@@ -62,30 +63,40 @@ def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logg
                             qas_dict["answers"].append(answer_dict)
                     paragraph["qas"].append(qas_dict)
                 topic_dict["paragraphs"].append(paragraph)
-            if topic_counter >= 0:
-                new_data["data"].append(topic_dict)
-            elif topic_counter >= -20:
-                new_dev_data["data"].append(topic_dict)
-            else:
-                new_test_data["data"].append(topic_dict)
-            if topic_counter == -30:
-                break
-            topic_counter -= 1
 
-    logger.info(f"Saving new data to {out_file_1}")
-    save(filename=out_file_1, obj=new_data)
-    logger.info(f"Saving new dev data to {out_file_2}")
-    save(filename=out_file_2, obj=new_dev_data)
-    logger.info(f"Saving new test data to {out_file_3}")
-    save(filename=out_file_3, obj=new_test_data)
+            if train_topic_counter > 0:
+                new_train_data["data"].append(topic_dict)
+            elif dev_topic_counter > 0:
+                new_dev_data["data"].append(topic_dict)
+            elif test_topic_counter > 0:
+                new_test_data["data"].append(topic_dict)
+            else:
+                break
+
+            if train_topic_counter >= 0:
+                train_topic_counter -= 1
+            elif dev_topic_counter >= 0:
+                dev_topic_counter -= 1
+            elif test_topic_counter >= 0:
+                test_topic_counter -= 1
+            else:
+                break
+
+    logger.info(f"Saving new data to {new_train_data_file}")
+    save(filename=new_train_data_file, obj=new_train_data)
+    logger.info(f"Saving new dev data to {new_dev_data_file}")
+    save(filename=new_dev_data_file, obj=new_dev_data)
+    logger.info(f"Saving new test data to {new_test_data_file}")
+    save(filename=new_test_data_file, obj=new_test_data)
 
 if __name__ == "__main__":
-    c = config.config()
-    flags = sys.argv
-    topic_num = int(flags[1])
-    log = get_logger(log_dir=c.logging_dir, name="data-gen")
-    toy_transformer(in_file="data/train/orig-train-v2.0.json", 
-                    out_file_1="data/train/train-v2.0.json", 
-                    out_file_2="data/dev/dev-v2.0.json", 
-                    out_file_3="data/test/test-v2.0.json", 
-                    topic_num=topic_num,logger=log)
+    args = get_data_gen_args()
+    log = get_logger(log_dir=args.logging_dir, name="data-gen")
+    toy_transformer(raw_data_file=args.raw_data_file,
+                    new_train_data_file=args.new_train_data_file,
+                    new_dev_data_file=args.new_dev_data_file,
+                    new_test_data_file=args.new_test_data_file,
+                    train_topic_num=args.train_topic_num, 
+                    dev_topic_num=args.dev_topic_num,
+                    test_topic_num=args.test_topic_num, 
+                    logger=log)

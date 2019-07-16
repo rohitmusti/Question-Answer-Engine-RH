@@ -25,27 +25,34 @@ def get_data_gen_args():
 def get_exp2_data_transform_args():
     parser = argparse.ArgumentParser("Arguments for transforming raw_data into exp 2 format")
     add_common_args(parser)
-    parser.add_argument("--datasplit",
-                        type=str,
-                        default="all",
-                        choices=("all", "train", "dev", "test"),
-                        help="The number of topics in the original data put in the dev dataset")
-    parser.add_argument("--train_data_exp2",
-                        type=str,
-                        default="data/train/train-exp2.json", 
-                        help="The subset of the raw data reserved for training")
-    parser.add_argument("--dev_data_exp2",
-                        type=str,
-                        default="data/dev/dev-exp2.json", 
-                        help="The subset of the raw data reserved for development (evaluating and hypertuning)")
-    parser.add_argument("--test_data_exp2",
-                        type=str,
-                        default="data/test/test-exp2.json", 
-                        help="The subset of the raw data reserved for development (evaluating and hypertuning)")
-
     args = parser.parse_args()
     return args
 
+def get_exp2_setup_args():
+    parser = argparse.ArgumentParser("Arguments for transforming raw_data into exp 2 format")
+    add_common_args(parser)
+    parser.add_argument("--glove_word_file",
+                        type=str,
+                        default="data/embeddings/glove.840B.300d.txt", 
+                        help="Glove word file")
+    parser.add_argument("--glove_word_dim",
+                        type=int,
+                        default=300,
+                        help="Glove word dimensions")
+    parser.add_argument("--glove_word_num_vecs",
+                        type=int,
+                        default=2196017,
+                        help="Glove word dimensions")
+    parser.add_argument("--glove_char_file",
+                        type=str,
+                        default="data/embeddings/glove.840B.300d-char.txt", 
+                        help="Glove char file")
+    parser.add_argument("--glove_char_dim",
+                        type=int,
+                        default=64,
+                        help="Glove char dimension")
+    args = parser.parse_args()
+    return args
 
 
 def add_common_args(parser):
@@ -65,4 +72,56 @@ def add_common_args(parser):
                         type=str,
                         default="data/test/test-v2.0.json", 
                         help="The subset of the raw data reserved for development (evaluating and hypertuning)")
-
+    parser.add_argument("--datasplit",
+                        type=str,
+                        default="all",
+                        choices=("all", "train", "dev", "test"),
+                        help="The number of topics in the original data put in the dev dataset")
+    parser.add_argument("--train_data_exp2",
+                        type=str,
+                        default="data/train/train-exp2.json", 
+                        help="The subset of the raw data reserved for training")
+    parser.add_argument("--dev_data_exp2",
+                        type=str,
+                        default="data/dev/dev-exp2.json", 
+                        help="The subset of the raw data reserved for development (evaluating and hypertuning)")
+    parser.add_argument("--test_data_exp2",
+                        type=str,
+                        default="data/test/test-exp2.json", 
+                        help="The subset of the raw data reserved for development (evaluating and hypertuning)")
+    parser.add_argument("--word2idx_file",
+                        type=str,
+                        default="data/embeddings/word2idx.json", 
+                        help="File reserved for storing word2idx pairings")
+    parser.add_argument("--char2idx_file",
+                        type=str,
+                        default="data/embeddings/char2idx.json", 
+                        help="File reserved for storing char2idx pairings")
+    parser.add_argument("--word_emb_file",
+                        type=str,
+                        default="data/embeddings/word-emb.json", 
+                        help="File reserved for storing word embeddings")
+    parser.add_argument("--char_emb_file",
+                        type=str,
+                        default="data/embeddings/char-emb.json", 
+                        help="File reserved for storing character embeddings")
+    parser.add_argument("--train_eval_file",
+                        type=str,
+                        default="data/train/train-eval.json", 
+                        help="File reserved for storing train evaluation data")
+    parser.add_argument("--dev_eval_file",
+                        type=str,
+                        default="data/dev/dev-eval.json", 
+                        help="File reserved for storing dev evaluation data")
+    parser.add_argument("--train_record_file_exp2",
+                        type=str,
+                        default="data/train/train-exp2.npz", 
+                        help="File reserved storing the processed and prepped training data")
+    parser.add_argument("--dev_record_file_exp2",
+                        type=str,
+                        default="data/dev/dev-exp2.npz", 
+                        help="File reserved storing the processed and prepped dev data")
+    parser.add_argument("--dev_meta_file",
+                        type=str,
+                        default="data/dev/dev-meta.json", 
+                        help="Dev meta file information")

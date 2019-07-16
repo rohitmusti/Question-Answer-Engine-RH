@@ -264,12 +264,13 @@ def pre_process(args, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
     word_counter, char_counter = Counter(), Counter()
-    examples, eval_obj, topic_contexts_examples = process_file(args.train_exp2_data, 
-                                                               args.datasplit, 
-                                                               word_counter, 
-                                                               char_counter, logger)
+    examples, eval_obj, topic_contexts_examples = process_file(filename=args.train_exp2_data, 
+                                                               data_type="train", 
+                                                               word_counter=word_counter, 
+                                                               char_counter=char_counter, 
+                                                               logger=logger)
 
-    save(eval_file, eval_obj)
+    save(args.train_eval_file, eval_obj)
     del eval_obj
 
     word_emb_mat, word2idx_dict = get_embedding(word_counter, 'word', 
@@ -289,17 +290,23 @@ def pre_process(args, logger):
     save(args.char2idx_file, char2idx_dict)
 
     build_features(c=args, examples=examples,topic_contexts=topic_contexts_examples,
-                   data_type=args.datasplit, out_file=args.train_record_file_exp2, 
+                   data_type="train", out_file=args.train_record_file_exp2, 
                    word2idx_dict=word2idx_dict, char2idx_dict=char2idx_dict, is_test=False)
     del topic_contexts_examples
     del examples
 
     # Process dev and test sets
-    dev_examples, dev_eval, dev_topic_contexts = process_file(args.dev_data_exp2, "dev", 
-                                                              word_counter, char_counter, 
-                                                              logger)
-    dev_meta = build_features(c, dev_examples, dev_topic_contexts, "dev", 
-                              args.dev_record_file_exp2, word2idx_dict, char2idx_dict)
+    dev_examples, dev_eval, dev_topic_contexts = process_file(filename=args.dev_data_exp2, 
+                                                              data_type="dev", 
+                                                              word_counter=word_counter, 
+                                                              char_counter=char_counter, 
+                                                              logger=logger)
+    dev_meta = build_features(c=args, examples=dev_examples, 
+                              topic_contexts=dev_topic_contexts, 
+                              data_type="dev", 
+                              out_file=args.dev_record_file_exp2, 
+                              word2idx_dict=word2idx_dict, 
+                              char2idx_dict=char2idx_dict)
     del dev_topic_contexts
     del dev_examples
 

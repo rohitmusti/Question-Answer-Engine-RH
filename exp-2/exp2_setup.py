@@ -263,21 +263,11 @@ def build_features(c, examples, topic_contexts, data_type, out_file, word2idx_di
 def pre_process(args, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
-    word_emb_file = args.word_emb_file
-    char_emb_file = args.char_emb_file
-    word2idx_file = args.word2idx_file
-    char2idx_file = args.char2idx_file
-    exp2_data = args.train_data_exp2
-    eval_file = args.train_eval_file
-    record_file = args.train_record_file_exp2
-
-    dev_data_exp2 = args.dev_data_exp2
-    dev_record_file_exp2 = args.dev_record_file_exp2
-    dev_eval_file = args.dev_eval_file
-    dev_meta_file = args.dev_meta_file
-
     word_counter, char_counter = Counter(), Counter()
-    examples, eval_obj, topic_contexts_examples = process_file(exp2_data, args.datasplit, word_counter, char_counter, logger)
+    examples, eval_obj, topic_contexts_examples = process_file(args.train_exp2_data, 
+                                                               args.datasplit, 
+                                                               word_counter, 
+                                                               char_counter, logger)
 
     save(eval_file, eval_obj)
     del eval_obj
@@ -290,28 +280,31 @@ def pre_process(args, logger):
                                                 emb_file=None, 
                                                 vec_size=args.glove_char_dim)
 
-    save(word_emb_file, word_emb_mat)
-    save(char_emb_file, char_emb_mat)
+    save(args.word_emb_file, word_emb_mat)
+    save(args.char_emb_file, char_emb_mat)
     del word_emb_mat
     del char_emb_mat
 
-    save(word2idx_file, word2idx_dict)
-    save(char2idx_file, char2idx_dict)
+    save(args.word2idx_file, word2idx_dict)
+    save(args.char2idx_file, char2idx_dict)
 
     build_features(c=args, examples=examples,topic_contexts=topic_contexts_examples,
-                   data_type=args.datasplit, out_file=record_file, word2idx_dict=word2idx_dict, 
-                   char2idx_dict=char2idx_dict, is_test=False)
+                   data_type=args.datasplit, out_file=args.train_record_file_exp2, 
+                   word2idx_dict=word2idx_dict, char2idx_dict=char2idx_dict, is_test=False)
     del topic_contexts_examples
     del examples
 
     # Process dev and test sets
-    dev_examples, dev_eval, dev_topic_contexts = process_file(dev_data_exp2, "dev", word_counter, char_counter, logger)
-    dev_meta = build_features(c, dev_examples, dev_topic_contexts, "dev", dev_record_file_exp2, word2idx_dict, char2idx_dict)
+    dev_examples, dev_eval, dev_topic_contexts = process_file(args.dev_data_exp2, "dev", 
+                                                              word_counter, char_counter, 
+                                                              logger)
+    dev_meta = build_features(c, dev_examples, dev_topic_contexts, "dev", 
+                              args.dev_record_file_exp2, word2idx_dict, char2idx_dict)
     del dev_topic_contexts
     del dev_examples
 
-    save(dev_eval_file, dev_eval)
-    save(dev_meta_file, dev_meta)
+    save(args.dev_eval_file, dev_eval)
+    save(args.dev_meta_file, dev_meta)
 
 if __name__ == '__main__':
     # Get command-line args

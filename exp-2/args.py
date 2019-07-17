@@ -65,6 +65,18 @@ def get_exp2_training_args():
                         type=float,
                         default=0.5,
                         help='Learning rate.')
+    parser.add_argument('--eval_steps',
+                        type=int,
+                        default=50000,
+                        help='Number of steps between evaluations.')
+    parser.add_argument('--num_epochs',
+                        type=int,
+                        default=30,
+                        help='Number of epochs for which to train. Negative means forever.')
+    parser.add_argument('--max_grad_norm',
+                        type=float,
+                        default=5.0,
+                        help='Maximum gradient norm for gradient clipping.')
     parser.add_argument('--learning_rate_decay',
                         type=float,
                         default=0,
@@ -191,3 +203,12 @@ def _add_common_exp2_args(parser):
                         type=str,
                         default="data/dev/dev-meta.json", 
                         help="Dev meta file information")
+    parser.add_argument('--max_ans_len',
+                        type=int,
+                        default=15,
+                        help='Maximum length of a predicted answer.')
+    parser.add_argument('--num_visuals',
+                        type=int,
+                        default=10,
+                        help='Number of examples to visualize in TensorBoard.')
+

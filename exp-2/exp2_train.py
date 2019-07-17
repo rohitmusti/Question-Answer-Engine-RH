@@ -28,9 +28,9 @@ from util import collate_fn, SQuAD
 
 
 def main(args):
-    train_record_file = args.toy_record_file_exp2
-    dev_record_file = c.toy_dev_record_file_exp2
-    eval_file = c.toy_dev_eval_file
+    train_record_file = args.train_record_file_exp2
+    dev_record_file = args.dev_record_file_exp2
+    eval_file = args.eval_file
 
     # Set up logging and devices
     name = "train_exp2"
@@ -96,10 +96,10 @@ def main(args):
 
     # Train
     log.info('Training...')
-    steps_till_eval = c.eval_steps
+    steps_till_eval = args.eval_steps
     epoch = step // len(train_dataset)
     # torch.set_num_threads(7)
-    while epoch != c.num_epochs:
+    while epoch != args.num_epochs:
         epoch += 1
         log.info(f"Starting epoch {epoch}...")
         with torch.enable_grad(), \
@@ -119,7 +119,7 @@ def main(args):
 
                 # Backward
                 loss.backward()
-                nn.utils.clip_grad_norm_(model.parameters(), c.max_grad_norm)
+                nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
                 optimizer.step()
                 scheduler.step(step // batch_size)
                 ema(model, step // batch_size)
@@ -135,18 +135,17 @@ def main(args):
                                step)
 
                 steps_till_eval -= batch_size
-                # revert to: if steps_till_eval <= 0:
-                if True:
-                    steps_till_eval = c.eval_steps
+                if steps_till_eval <= 0:
+                    steps_till_eval = args.eval_steps
 
                     # Evaluate and save checkpoint
                     log.info(f"Evaluating at step {step}...")
                     ema.assign(model)
                     results, pred_dict = evaluate(model, dev_loader, device,
                                                   eval_file,
-                                                  c.max_ans_len,
+                                                  args.max_ans_len,
                                                   use_squad_v2=True)
-                    saver.save(step, model, results[c.metric_name], device)
+                    saver.save(step, model, results[args.metric_name], device)
                     ema.resume(model)
 
                     # Log to console
@@ -162,7 +161,7 @@ def main(args):
                                    eval_path=eval_file,
                                    step=step,
                                    split='dev',
-                                   num_visuals=c.num_visuals)
+                                   num_visuals=args.num_visuals)
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):

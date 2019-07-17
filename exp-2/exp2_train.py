@@ -15,9 +15,9 @@ import torch.utils.data as data
 import util
 
 from toolkit import get_logger
-import config
 import sys
 
+from args import get_exp2_training_args
 from collections import OrderedDict
 from json import dumps
 from models import BiDAF
@@ -27,86 +27,71 @@ import ujson
 from util import collate_fn, SQuAD
 
 
-def main(c, flags):
-
-    if flags[1] == "train" or flags[1] == "dev":
-        word_emb_file = c.word_emb_file
-    if flags[1] == "toy":
-        word_emb_file = c.toy_word_emb_file
-        train_record_file = c.toy_record_file_exp2
-        dev_record_file = c.toy_dev_record_file_exp2
-        eval_file = c.toy_dev_eval_file
-    elif flags[1] == "train":
-        train_record_file = c.train_record_file_exp2
-        dev_record_file = c.dev_record_file_exp2
-        eval_file = c.dev_eval_file
-    elif flags[1] == "dev":
-        train_record_file = c.dev_record_file_exp2
-        dev_record_file = c.toy_record_file_exp2
-        eval_file = c.toy_eval_file
-    else:
-        raise ValueError("Unregonized or missing flag")
+def main(args):
+    train_record_file = args.toy_record_file_exp2
+    dev_record_file = c.toy_dev_record_file_exp2
+    eval_file = c.toy_dev_eval_file
 
     # Set up logging and devices
-    name = "train exp2"
-    c.save_dir = util.get_save_dir(c.logging_dir, name, training=True)
-    log = get_logger(c.save_dir, name)
-    tbx = SummaryWriter(c.save_dir)
-    device, c.gpu_ids = util.get_available_devices()
-    log.info(f"Args: {dumps(vars(c), indent=4, sort_keys=True)}")
-    c.batch_size *= max(1, len(c.gpu_ids))
+    name = "train_exp2"
+    args.save_dir = util.get_save_dir(args.logging_dir, name, training=True)
+    log = get_logger(args.save_dir, name)
+    tbx = SummaryWriter(args.save_dir)
+    device, gpu_ids = util.get_available_devices()
+    log.info(f"Args: {dumps(vars(args), indent=4, sort_keys=True)}")
+    args.batch_size *= max(1, len(gpu_ids))
 
     # Set random seed
-    log.info(f"Using random seed {c.random_seed}...")
-    random.seed(c.random_seed)
-    np.random.seed(c.random_seed)
-    torch.manual_seed(c.random_seed)
-    torch.cuda.manual_seed_all(c.random_seed)
+    log.info(f"Using random seed {args.random_seed}...")
+    random.seed(args.random_seed)
+    np.random.seed(args.random_seed)
+    torch.manual_seed(args.random_seed)
+    torch.cuda.manual_seed_all(args.random_seed)
 
     # Get embeddings
-    log.info("Loading embeddings...")
-    word_vectors = util.torch_from_json(word_emb_file)
+    log.info(f"Loading embeddings from {args.word_emb_file}...")
+    word_vectors = util.torch_from_json(args.word_emb_file)
 
     # Get model
     log.info("Building model...")
     model = BiDAF(word_vectors=word_vectors,
-                  hidden_size=c.hidden_size,
-                  drop_prob=c.drop_prob)
-    model = nn.DataParallel(model, c.gpu_ids)
-    if c.load_path:
-        log.info(f"Loading checkpoint from {c.load_path}...")
-        model, step = util.load_model(model, c.load_path, c.gpu_ids)
+                  hidden_size=args.hidden_size,
+                  drop_prob=args.drop_prob)
+    model = nn.DataParallel(model, gpu_ids)
+    if args.load_path:
+        log.info(f"Loading checkpoint from {args.load_path}...")
+        model, step = util.load_model(model, args.load_path, gpu_ids)
     else:
         step = 0
     model = model.to(device)
     model.train()
-    ema = util.EMA(model, c.ema_decay)
+    ema = util.EMA(model, args.ema_decay)
 
     # Get saver
-    saver = util.CheckpointSaver(c.save_dir,
-                                 max_checkpoints=c.max_checkpoints,
-                                 metric_name=c.metric_name,
-                                 maximize_metric=c.maximize_metric,
+    saver = util.CheckpointSaver(args.save_dir,
+                                 max_checkpoints=args.max_checkpoints,
+                                 metric_name=args.metric_name,
+                                 maximize_metric=args.maximize_metric,
                                  log=log)
 
     # Get optimizer and scheduler
-    optimizer = optim.Adadelta(model.parameters(), c.learning_rate,
-                               weight_decay=c.learning_weight_decay)
+    optimizer = optim.Adadelta(model.parameters(), args.learning_rate,
+                               weight_decay=args.learning_weight_decay)
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
     # Get data loader
     log.info('Building dataset...')
-    train_dataset = SQuAD(train_record_file, use_v2=True)
+    train_dataset = SQuAD(args.train_record_file_exp2, use_v2=True)
     train_loader = data.DataLoader(train_dataset,
-                                   batch_size=c.batch_size,
+                                   batch_size=args.batch_size,
                                    shuffle=True,
-                                   num_workers=c.num_workers,
+                                   num_workers=args.num_workers,
                                    collate_fn=collate_fn)
-    dev_dataset = SQuAD(dev_record_file, use_v2=True)
+    dev_dataset = SQuAD(args.dev_record_file_exp2, use_v2=True)
     dev_loader = data.DataLoader(dev_dataset,
-                                 batch_size=c.batch_size,
+                                 batch_size=args.batch_size,
                                  shuffle=False,
-                                 num_workers=c.num_workers,
+                                 num_workers=args.num_workers,
                                  collate_fn=collate_fn)
 
     # Train
@@ -230,6 +215,5 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
 
 
 if __name__ == '__main__':
-    c = config.config()
-    flags = sys.argv
-    main(c, flags)
+    args = get_exp2_training_args()
+    main(args)

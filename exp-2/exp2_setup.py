@@ -264,7 +264,7 @@ def pre_process(args, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
     word_counter, char_counter = Counter(), Counter()
-    examples, eval_obj, topic_contexts_examples = process_file(filename=args.train_exp2_data, 
+    examples, eval_obj, topic_contexts_examples = process_file(filename=args.train_data_exp2, 
                                                                data_type="train", 
                                                                word_counter=word_counter, 
                                                                char_counter=char_counter, 

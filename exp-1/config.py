@@ -12,7 +12,12 @@ class config():
         self.train_data_orig = self.train_folder + "train-v2.0.json"
         self.train_data_exp1 = self.train_folder + "train-exp1.json"
         self.train_eval_file = self.train_folder + "train-eval.json"
-        self.train_record_file_exp1 = self.train_folder + "train-exp1.npz"
+        self.train_record_file_exp1 = [self.train_folder + "train-exp1-context_idxs.npz",
+                                       self.train_folder + "train-exp1-context_char_idxs.npz",
+                                       self.train_folder + "train-exp1-ques_idxs.npz",
+                                       self.train_folder + "train-exp1-ques_char_idxs.npz",
+                                       self.train_folder + "train-exp1-y1s.npz",
+                                       self.train_folder + "train-exp1-y2s.npz"]
 
         # development data
         #  - usually reserved for hypertuning or for training locally to ensure models work
@@ -20,15 +25,25 @@ class config():
         self.dev_data_orig = self.dev_folder + "dev-v2.0.json"
         self.dev_data_exp1 = self.dev_folder + "dev-exp1.json"
         self.dev_eval_file = self.dev_folder + "dev-eval.json"
-        self.dev_record_file_exp1 = self.dev_folder + "dev-exp1.npz"
         self.dev_meta_file = self.dev_folder + "dev-meta.json"
+        self.dev_record_file_exp1 = [self.dev_folder + "dev-exp1-context_idxs.npz",
+                                     self.dev_folder + "dev-exp1-context_char_idxs.npz",
+                                     self.dev_folder + "dev-exp1-ques_idxs.npz",
+                                     self.dev_folder + "dev-exp1-ques_char_idxs.npz",
+                                     self.dev_folder + "dev-exp1-y1s.npz",
+                                     self.dev_folder + "dev-exp1-y2s.npz"]
 
         self.test_folder = self.folder + "test/"
         self.test_data_orig = self.test_folder + "test-v2.0.json"
         self.test_data_exp1 = self.test_folder + "test-exp1.json"
         self.test_eval_file = self.test_folder + "test-eval.json"
-        self.test_record_file_exp1 = self.test_folder + "test-exp1.npz"
         self.test_meta_file = self.test_folder + "test-meta.json"
+        self.test_record_file_exp1 = [self.test_folder + "test-exp1-context_idxs.npz",
+                                      self.test_folder + "test-exp1-context_char_idxs.npz",
+                                      self.test_folder + "test-exp1-ques_idxs.npz",
+                                      self.test_folder + "test-exp1-ques_char_idxs.npz",
+                                      self.test_folder + "test-exp1-y1s.npz",
+                                      self.test_folder + "test-exp1-y2s.npz"]
 
         # toy data
         # -  just to see if things are working

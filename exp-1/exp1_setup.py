@@ -226,7 +226,6 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
     ques_char_idxs = []
     y1s = []
     y2s = []
-    ids = []
     for n, example in tqdm(enumerate(examples)):
         total_ += 1
 
@@ -280,18 +279,21 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
 
         y1s.append(start)
         y2s.append(end)
-        ids.append(example["id"])
 
 
     logger.info("test: made it here about to save")
-    np.savez(out_file,
-             context_idxs=np.array(context_idxs),
-             context_char_idxs=np.array(context_char_idxs),
-             ques_idxs=np.array(ques_idxs),
-             ques_char_idxs=np.array(ques_char_idxs),
-             y1s=np.array(y1s),
-             y2s=np.array(y2s),
-             ids=np.array(ids))
+    np.savez(outfile[0], context_idxs=np.asarray(context_idxs)) 
+    np.savez(outfile[1], context_char_idxs=np.asarray(context_char_idxs))
+    np.savez(outfile[2], ques_idxs=np.asarray(ques_idxs))
+    np.savez(outfile[3], ques_char_idxs=np.asarray(ques_char_idxs))
+    np.savez(outfile[4], y1s=np.asarray(y1s))
+    np.savez(outfile[5], y2s=np.asarray(y2s))
+             
+             
+             
+             
+             
+             
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     return meta

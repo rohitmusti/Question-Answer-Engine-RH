@@ -44,13 +44,19 @@ class SQuAD(data.Dataset):
     def __init__(self, data_path, use_v2=True):
         super(SQuAD, self).__init__()
 
-        dataset = np.load(data_path)
-        self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
-        self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()
-        self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
-        self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
-        self.y1s = torch.from_numpy(dataset['y1s']).long()
-        self.y2s = torch.from_numpy(dataset['y2s']).long()
+        exp1_context_idxs = np.load(data_path[0])
+        exp1_context_char_idxs = np.load(data_path[1])
+        exp1_ques_idxs = np.load(data_path[2])
+        exp1_ques_char_idxs= np.load(data_path[3])
+        exp1__y1s= np.load(data_path[4])
+        exp1_y2s= np.load(data_path[5])
+        exp1_ids= np.load(data_path[6])
+        self.context_idxs = torch.from_numpy(exp1_context_idxs).long()
+        self.context_char_idxs = torch.from_numpy(exp1_context_char_idxs)long()
+        self.question_idxs = torch.from_numpy(exp1_ques_idxs).long()
+        self.question_char_idxs = torch.from_numpy(exp1_ques_char_idxs).long()
+        self.y1s = torch.from_numpy(exp1_y1s).long()
+        self.y2s = torch.from_numpy(exp1_y2s).long()
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)

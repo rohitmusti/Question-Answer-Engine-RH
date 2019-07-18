@@ -81,6 +81,7 @@ class SQuAD(data.Dataset):
         self.ids = torch.from_numpy(dataset['ids']).long()
         self.valid_idxs = [idx for idx in range(len(self.ids))
                            if use_v2 or self.y1s[idx].item() >= 0]
+        print("finished loading")
 
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]

@@ -46,9 +46,9 @@ class SQuAD(data.Dataset):
 
         dataset = np.load(data_path)
         self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
-#        self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()
+        self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
-#        self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
+        self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids'])
         self.y1s = torch.from_numpy(dataset['y1s']).long()
         self.y2s = torch.from_numpy(dataset['y2s']).long()
@@ -63,16 +63,16 @@ class SQuAD(data.Dataset):
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
 
-            #ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            #self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
+            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
 
             batch_size, c_len, w_len = self.question_char_idxs.size()
 
             ones = torch.ones((batch_size, 1), dtype=torch.int64)
             self.question_idxs = torch.cat((ones, self.question_idxs), dim=1)
 
-            #ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            #self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
+            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+            self.question_char_idxs = torch.cat((ones, self.question_char_idxs), dim=1)
 
             self.y1s += 1
             self.y2s += 1
@@ -86,9 +86,9 @@ class SQuAD(data.Dataset):
         idx = self.valid_idxs[idx]
         # I need to write a function to get the correct context_idx or context_char_idx
         example = (self.context_idxs[self.topic_ids[idx]],
-#                   self.context_char_idxs[self.topic_ids[idx]],
+                   self.context_char_idxs[self.topic_ids[idx]],
                    self.question_idxs[idx],
-#                   self.question_char_idxs[idx],
+                   self.question_char_idxs[idx],
                    self.y1s[idx],
                    self.y2s[idx],
                    self.ids[idx])

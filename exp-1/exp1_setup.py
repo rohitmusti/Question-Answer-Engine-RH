@@ -283,7 +283,7 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         ids.append(example["id"])
 
 
-    log.info("test: made it here about to save")
+    logger.info("test: made it here about to save")
     np.savez(out_file,
              context_idxs=np.array(context_idxs),
              context_char_idxs=np.array(context_char_idxs),

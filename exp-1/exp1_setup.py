@@ -281,13 +281,18 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         y2s.append(end)
 
 
-    logger.info("test: made it here about to save")
-    np.savez(outfile[0], context_idxs=np.asarray(context_idxs)) 
-    np.savez(outfile[1], context_char_idxs=np.asarray(context_char_idxs))
-    np.savez(outfile[2], ques_idxs=np.asarray(ques_idxs))
-    np.savez(outfile[3], ques_char_idxs=np.asarray(ques_char_idxs))
-    np.savez(outfile[4], y1s=np.asarray(y1s))
-    np.savez(outfile[5], y2s=np.asarray(y2s))
+    logger.info("Saving context_idxs")
+    np.savez(out_file[0], context_idxs=np.asarray(context_idxs)) 
+    logger.info("Saving context_char_idxs")
+    np.savez(out_file[1], context_char_idxs=np.asarray(context_char_idxs))
+    logger.info("Saving ques_idxs")
+    np.savez(out_file[2], ques_idxs=np.asarray(ques_idxs))
+    logger.info("Saving ques_char_idxs")
+    np.savez(out_file[3], ques_char_idxs=np.asarray(ques_char_idxs))
+    logger.info("Saving y1s")
+    np.savez(out_file[4], y1s=np.asarray(y1s))
+    logger.info("Saving y2s")
+    np.savez(out_file[5], y2s=np.asarray(y2s))
              
              
              

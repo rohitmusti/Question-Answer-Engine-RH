@@ -28,8 +28,6 @@ from util import collate_fn, SQuAD
 
 
 def main(args):
-    train_record_file = args.train_record_file_exp2
-    dev_record_file = args.dev_record_file_exp2
     eval_file = args.eval_file
 
     # Set up logging and devices
@@ -142,7 +140,7 @@ def main(args):
                     log.info(f"Evaluating at step {step}...")
                     ema.assign(model)
                     results, pred_dict = evaluate(model, dev_loader, device,
-                                                  eval_file,
+                                                  args.eval_file,
                                                   args.max_ans_len,
                                                   use_squad_v2=True)
                     saver.save(step, model, results[args.metric_name], device)
@@ -158,7 +156,7 @@ def main(args):
                         tbx.add_scalar(f"dev/{k}", v, step)
                     util.visualize(tbx,
                                    pred_dict=pred_dict,
-                                   eval_path=eval_file,
+                                   eval_path=args.eval_file,
                                    step=step,
                                    split='dev',
                                    num_visuals=args.num_visuals)

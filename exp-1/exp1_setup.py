@@ -283,20 +283,27 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
 
     logger.info("Saving context_idxs")
     np.savez(out_file[0], context_idxs=np.asarray(context_idxs)) 
+    del context_idxs
+
     logger.info("Saving context_char_idxs")
     np.savez(out_file[1], context_char_idxs=np.asarray(context_char_idxs))
+    del context_char_idxs
+
     logger.info("Saving ques_idxs")
     np.savez(out_file[2], ques_idxs=np.asarray(ques_idxs))
+    del ques_idxs
+
     logger.info("Saving ques_char_idxs")
     np.savez(out_file[3], ques_char_idxs=np.asarray(ques_char_idxs))
+    del ques_char_idxs
+
     logger.info("Saving y1s")
     np.savez(out_file[4], y1s=np.asarray(y1s))
+    del y1s
+
     logger.info("Saving y2s")
     np.savez(out_file[5], y2s=np.asarray(y2s))
-             
-             
-             
-             
+    del y2s
              
              
     logger.info(f"Built {total} / {total_} instances of features in total")

@@ -50,12 +50,12 @@ class SQuAD(data.Dataset):
         exp1_ques_char_idxs= np.load(data_path[3])
         exp1__y1s= np.load(data_path[4])
         exp1_y2s= np.load(data_path[5])
-        self.context_idxs = torch.from_numpy(exp1_context_idxs).long()
-        self.context_char_idxs = torch.from_numpy(exp1_context_char_idxs).long()
-        self.question_idxs = torch.from_numpy(exp1_ques_idxs).long()
-        self.question_char_idxs = torch.from_numpy(exp1_ques_char_idxs).long()
-        self.y1s = torch.from_numpy(exp1_y1s).long()
-        self.y2s = torch.from_numpy(exp1_y2s).long()
+        self.context_idxs = torch.from_numpy(exp1_context_idxs['context_idxs']).long()
+        self.context_char_idxs = torch.from_numpy(exp1_context_char_idxs['context_char_idxs']).long()
+        self.question_idxs = torch.from_numpy(exp1_ques_idxs['ques_idxs']).long()
+        self.question_char_idxs = torch.from_numpy(exp1_ques_char_idxs['ques_char_idxs']).long()
+        self.y1s = torch.from_numpy(exp1_y1s['y1s']).long()
+        self.y2s = torch.from_numpy(exp1_y2s['y2s']).long()
 
         if use_v2:
             # SQuAD 2.0: Use index 0 for no-answer token (token 1 = OOV)

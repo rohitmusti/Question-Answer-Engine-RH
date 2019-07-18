@@ -28,7 +28,6 @@ from util import collate_fn, SQuAD
 
 
 def main(args):
-    eval_file = args.eval_file
 
     # Set up logging and devices
     name = "train_exp2"

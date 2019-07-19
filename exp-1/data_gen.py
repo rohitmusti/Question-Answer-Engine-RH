@@ -6,7 +6,6 @@ author: @rohitmusti
 import ujson as json
 from tqdm import tqdm
 from toolkit import save, quick_clean, get_logger
-import sys
 from random import randrange
 from args import get_data_gen_args
 

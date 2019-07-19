@@ -1,6 +1,5 @@
 import ujson as json
 from toolkit import get_logger, quick_clean, save
-import sys
 from random import randrange
 from tqdm import tqdm
 from args import get_exp1_transform_args

@@ -29,9 +29,6 @@ from ujson import load as json_load
 from util import collate_fn, SQuAD
 from toolkit import get_logger
 
-import sys
-
-
 def main(args):
     args.save_dir = util.get_save_dir(args.save_dir, "exp1_training", training=False)
     log = get_logger(args.logging_dir, "exp1_training")

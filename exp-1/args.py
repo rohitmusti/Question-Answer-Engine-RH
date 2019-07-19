@@ -15,8 +15,64 @@ def get_exp1_train_test_args():
                         type=int,
                         default=10,
                         help='Number of examples to visualize in TensorBoard.')
+    parser.add_argument('--random_seed',
+                        type=int,
+                        default=3716,
+                        help='The default random seed.')
+    parser.add_argument('--hidden_size',
+                        type=int,
+                        default=100,
+                        help='The standard hidden size for nn layers.')
+    parser.add_argument('--drop_prob',
+                        type=float,
+                        default=0.2,
+                        help='The drop probability for the dropout layers.')
+    parser.add_argument('--ema_decay',
+                        type=float,
+                        default=0.999,
+                        help='Decay rate for exponential moving average of parameters.')
+    parser.add_argument('--max_checkpoints',
+                        type=int,
+                        default=10,
+                        help='Max number of checkpoints to store.')
+    parser.add_argument('--metric_name',
+                        type=str,
+                        default='F1',
+                        choices=('NLL', 'EM', 'F1'),
+                        help='Name of dev metric to determine best checkpoint.')
+    parser.add_argument('--learning_rate',
+                        type=float,
+                        default=0.5,
+                        help='Learning rate.')
+    parser.add_argument('--learning_rate_decay',
+                        type=float,
+                        default=0,
+                        help='learning_rate_decay.')
+    parser.add_argument('--eval_steps',
+                        type=int,
+                        default=50000,
+                        help='Number of steps between evaluations.')
+    parser.add_argument('--num_epochs',
+                        type=int,
+                        default=30,
+                        help='Number of epochs for which to train. Negative means forever.')
+    parser.add_argument('--max_grad_norm',
+                        type=float,
+                        default=5.0,
+                        help='Maximum gradient norm for gradient clipping.')
 
     args = parser.parse_args()
+
+    if args.metric_name == 'NLL':
+        # Best checkpoint is the one that minimizes negative log-likelihood
+        args.maximize_metric = False
+    elif args.metric_name in ('EM', 'F1'):
+        # Best checkpoint is the one that maximizes EM or F1
+        args.maximize_metric = True
+    else:
+        raise ValueError(f'Unrecognized metric name: "{args.metric_name}"')
+
+
     return args
 
 def get_exp1_setup_args():

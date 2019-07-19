@@ -163,3 +163,19 @@ def _add_common_exp1_args(parser):
                         default="all",
                         choices=("all", "train", "dev", "test"),
                         help="The number of topics in the original data put in the dev dataset")
+    parser.add_argument('--ques_limit',
+                        type=int,
+                        default=50,
+                        help='question number of words limit.')
+    parser.add_argument('--para_limit',
+                        type=int,
+                        default=3800,
+                        help='paragraph character limit.')
+    parser.add_argument('--ans_limit',
+                        type=int,
+                        default=3800,
+                        help='answer word limit.')
+    parser.add_argument('--char_limit',
+                        type=int,
+                        default=3800,
+                        help='max number of chars to keep from a word limit.')

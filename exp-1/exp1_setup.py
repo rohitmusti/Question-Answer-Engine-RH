@@ -112,8 +112,8 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
         with open(emb_file, "r", encoding="utf-8") as fh:
             for line in tqdm(fh, total=num_vectors):
                 array = line.split()
-                word = "".join(array[0:-vec_size])
-                vector = list(map(float, array[-vec_size:]))
+                word = "".join(array[0:(-vec_size)])
+                vector = list(map(float, array[(-vec_size):]))
                 if word in counter and counter[word] > limit:
                     embedding_dict[word] = vector
         logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {data_type} embedding vector")
@@ -277,7 +277,7 @@ def pre_process(args, logger):
                                           char_counter=char_counter, 
                                           logger=logger)
     dev_meta = build_features(c=args, examples=dev_examples, data_type="dev", 
-                              out_file=c.dev_record_file_exp1, word2idx_dict=word2idx_dict, 
+                              out_file=args.dev_record_file_exp1, word2idx_dict=word2idx_dict, 
                               char2idx_dict=char2idx_dict, is_test=False)
 
     save(args.dev_eval_file, dev_eval)
@@ -293,7 +293,7 @@ def pre_process(args, logger):
     save(args.test_eval_file, test_eval)
     del test_eval
     test_meta = build_features(c=args, examples=test_examples, data_type="test",
-                               out_file=c.test_record_file_exp1, word2idx_dict=word2idx_dict, 
+                               out_file=args.test_record_file_exp1, word2idx_dict=word2idx_dict, 
                                char2idx_dict=char2idx_dict, is_test=True)
     save(args.test_meta_file, test_meta)
 

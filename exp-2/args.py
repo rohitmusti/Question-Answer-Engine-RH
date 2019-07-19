@@ -162,16 +162,16 @@ def _add_common_exp2_args(parser):
                         help="The number of topics in the original data put in the dev dataset")
     parser.add_argument('--batch_size',
                         type=int,
-                        default=3716,
-                        help='Base random number generator seed to guarantee replicability.')
+                        default=32,
+                        help='the size of each batch')
     parser.add_argument('--random_seed',
                         type=int,
                         default=100,
                         help='Number of features in hidden layers.')
     parser.add_argument('--hidden_size',
                         type=int,
-                        default=64,
-                        help='Batch size per GPU.')
+                        default=100,
+                        help='The standard hidden size for nn layers.')
     parser.add_argument("--train_data_exp2",
                         type=str,
                         default="data/train/train-exp2.json", 

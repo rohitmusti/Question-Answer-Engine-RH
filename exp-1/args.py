@@ -170,7 +170,7 @@ def _add_common_exp1_args(parser):
                         type=str,
                         default="data/dev/dev-eval.json", 
                         help="File reserved for storing dev evaluation data")
-    parser.add_argument("--train_eval_file",
+    parser.add_argument("--test_eval_file",
                         type=str,
                         default="data/test/test-eval.json", 
                         help="File reserved for storing test evaluation data")

@@ -8,7 +8,7 @@ from tqdm import tqdm
 from toolkit import save, quick_clean, get_logger
 import sys
 from random import randrange
-import config
+from args import get_data_gen_args
 
 def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, dev_topic_num, test_topic_num, logger):
     """
@@ -65,11 +65,11 @@ def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, d
 
             if topic_counter >= 0:
                 new_data["data"].append(topic_dict)
-            elif topic_counter >= -dev_topic_num:
+            elif topic_counter >= -1*dev_topic_num:
                 new_dev_data["data"].append(topic_dict)
-            elif topic_counter >= -(dev_topic_num+test_topic_num):
+            elif topic_counter >= -1*(dev_topic_num+test_topic_num):
                 new_test_data["data"].append(topic_dict)
-            else
+            else:
                 break
 
             topic_counter -= 1
@@ -82,10 +82,8 @@ def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, d
     save(filename=test_file, obj=new_test_data)
 
 if __name__ == "__main__":
-    c = config.config()
-    flags = sys.argv
-    topic_num = int(flags[1])
-    log = get_logger(log_dir=c.logging_dir, name="data-gen")
+    args = get_data_gen_args()
+    log = get_logger(log_dir=args.logging_dir, name="data-gen")
     toy_transformer(in_file=args.raw_train_data, 
                     train_file=args.train_data_src, 
                     dev_file=args.dev_data_src,

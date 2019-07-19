@@ -18,7 +18,7 @@ import spacy
 import ujson as json
 import urllib.request
 
-from config import config
+from args import get_exp1_setup_args
 from codecs import open
 from collections import Counter
 from subprocess import run
@@ -281,102 +281,89 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         y2s.append(end)
 
 
-    logger.info("Saving context_idxs")
-    np.savez_compressed(out_file[0], context_idxs=np.asarray(context_idxs)) 
-    del context_idxs
+    logger.info("Saving file")
+    np.savez_compressed(out_file, 
+                        context_idxs=np.asarray(context_idxs),
+                        ques_idxs=np.asarray(ques_idxs),
+                        y1s=np.asarray(y1s),
+                        y2s=np.asarray(y2s),
+                        ques_char_idxs=np.asarray(ques_char_idxs),
+                        context_char_idxs=np.asarray(context_char_idxs)) 
 
-    logger.info("Saving ques_idxs")
-    np.savez_compressed(out_file[2], ques_idxs=np.asarray(ques_idxs))
-    del ques_idxs
-
-    logger.info("Saving y1s")
-    np.savez_compressed(out_file[4], y1s=np.asarray(y1s))
-    del y1s
-
-    logger.info("Saving y2s")
-    np.savez_compressed(out_file[5], y2s=np.asarray(y2s))
-    del y2s
-
-    logger.info("Saving ques_char_idxs")
-    np.savez_compressed(out_file[3], ques_char_idxs=np.asarray(ques_char_idxs))
-    del ques_char_idxs
-
-    logger.info("Saving context_char_idxs")
-    np.savez_compressed(out_file[1], context_char_idxs=np.asarray(context_char_idxs))
-    del context_char_idxs
-             
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     return meta
 
 
-def pre_process(c, flags, logger):
+def pre_process(args, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
-    if flags[1] == "train":
-        exp1_data = c.train_data_exp1
-        eval_file = c.train_eval_file
-        record_file = c.train_record_file_exp1
-        word_emb_file = c.word_emb_file
-        char_emb_file = c.char_emb_file
-        word2idx_file = c.word2idx_file
-        char2idx_file = c.char2idx_file
-
-    elif flags[1] == "toy":
-        exp1_data = c.toy_data_exp1
-        eval_file = c.toy_eval_file
-        record_file = c.toy_record_file_exp1
-        word_emb_file = c.toy_word_emb_file
-        char_emb_file = c.toy_char_emb_file
-        word2idx_file = c.toy_word2idx_file
-        char2idx_file = c.toy_char2idx_file
-    else:
-        exp1_data = c.toy_data_exp1
-        logger.info("Error: no valid flags were passed in")
-        logger.info("Valid flags: train, toy")
-
     word_counter, char_counter = Counter(), Counter()
-    examples, eval_obj = process_file(exp1_data, flags[1], word_counter, char_counter, logger)
+    examples, eval_obj = process_file(filename=args.train_data_exp1, 
+                                      data_type="train", 
+                                      word_counter=word_counter, 
+                                      char_counter=char_counter, 
+                                      logger=logger)
 
-    save(eval_file, eval_obj)
+    save(args.train_eval_file, eval_obj)
+    del eval_obj
 
-    word_emb_mat, word2idx_dict = get_embedding(
-        word_counter, 'word', emb_file=c.glove_word_file, vec_size=c.glove_word_dim, num_vectors=c.glove_word_num_vecs)
-    char_emb_mat, char2idx_dict = get_embedding(
-        char_counter, 'char', emb_file=None, vec_size=c.char_dim)
+    word_emb_mat, word2idx_dict = get_embedding(counter=word_counter, 
+                                                data_type='word', 
+                                                emb_file=args.glove_word_file, 
+                                                vec_size=args.glove_word_dim, 
+                                                num_vectors=args.glove_word_num_vecs)
+    char_emb_mat, char2idx_dict = get_embedding(counter=char_counter, 
+                                                data_type='char', 
+                                                emb_file=None, 
+                                                vec_size=args.glove_char_dim)
 
-    save(word_emb_file, word_emb_mat)
-    save(char_emb_file, char_emb_mat)
-    save(word2idx_file, word2idx_dict)
-    save(char2idx_file, char2idx_dict)
+    save(args.word_emb_file, word_emb_mat)
+    del word_emb_mat
+    save(args.char_emb_file, char_emb_mat)
+    del char_emb_mat
+    save(args.word2idx_file, word2idx_dict)
+    save(args.char2idx_file, char2idx_dict)
 
-    build_features(c=c, examples=examples, data_type=flags[1], out_file=record_file,
-                   word2idx_dict=word2idx_dict, char2idx_dict=char2idx_dict, is_test=False)
+    build_features(c=args, examples=examples, data_type="train", 
+                   out_file=args.train_record_file_exp1, word2idx_dict=word2idx_dict, 
+                   char2idx_dict=char2idx_dict, is_test=False)
 
     # Process dev and test sets
-    dev_examples, dev_eval = process_file(c.dev_data_exp1, "dev", word_counter, char_counter, logger)
-    dev_meta = build_features(c, dev_examples, "dev", c.dev_record_file_exp1, word2idx_dict, char2idx_dict)
+    dev_examples, dev_eval = process_file(filename=args.dev_data_exp1, 
+                                          data_type="dev", 
+                                          word_counter=word_counter, 
+                                          char_counter=char_counter, 
+                                          logger=logger)
+    dev_meta = build_features(c=args, examples=dev_examples, data_type="dev", 
+                              out_file=c.dev_record_file_exp1, word2idx_dict=word2idx_dict, 
+                              char2idx_dict=char2idx_dict, is_test=False)
 
-    save(c.dev_eval_file, dev_eval)
-    save(c.dev_meta_file, dev_meta)
+    save(args.dev_eval_file, dev_eval)
+    del dev_eval
+    save(args.dev_meta_file, dev_meta)
+    del dev_meta
 
-    test_examples, test_eval = process_file(c.test_data_exp1, "test", word_counter, char_counter, logger)
-    save(c.test_eval_file, test_eval, message="test eval")
-    test_meta = build_features(c, test_examples, "test",c.test_record_file_exp1, word2idx_dict, char2idx_dict, is_test=True)
-    save(c.test_meta_file, test_meta, message="test meta")
+    test_examples, test_eval = process_file(filename=args.test_data_exp1, 
+                                            data_type="test", 
+                                            word_counter=word_counter, 
+                                            char_counter=char_counter, 
+                                            logger=logger)
+    save(args.test_eval_file, test_eval)
+    del test_eval
+    test_meta = build_features(c=args, examples=test_examples, data_type="test",
+                               out_file=c.test_record_file_exp1, word2idx_dict=word2idx_dict, 
+                               char2idx_dict=char2idx_dict, is_test=True)
+    save(args.test_meta_file, test_meta)
 
 if __name__ == '__main__':
-    # Get command-line args
-    c = config()
-
     # Import spacy language model
     nlp = spacy.blank("en")
 
-    # get flags
-    flags = sys.argv
+    args = get_exp1_setup_args()
 
     # set up logger
-    logger = get_logger(log_dir=c.logging_dir, name="exp1 setup")
+    logger = get_logger(log_dir=args.logging_dir, name="exp1_setup")
 
     # Preprocess dataset
-    pre_process(c=c, flags=flags, logger=logger)
+    pre_process(args=args, logger=logger)

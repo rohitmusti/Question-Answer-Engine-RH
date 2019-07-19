@@ -20,7 +20,6 @@ def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, d
     return:
         none, the data is written to an output
     """
-    logger.info(f"This toy data set will be compromised of {topic_num} topics")
     new_data = {}
     new_data['experiment'] = "toy"
     new_dev_data = {}
@@ -81,7 +80,7 @@ def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, d
     save(filename=test_file, obj=new_test_data)
 
 if __name__ == "__main__":
-    args = get_data_gen_args()
+    args = get_exp1_data_gen_args()
     log = get_logger(log_dir=args.logging_dir, name="data-gen")
     toy_transformer(in_file=args.raw_train_data, 
                     train_file=args.train_data_src, 

@@ -166,8 +166,8 @@ def _add_common_exp2_args(parser):
                         help='the size of each batch')
     parser.add_argument('--random_seed',
                         type=int,
-                        default=100,
-                        help='Number of features in hidden layers.')
+                        default=3716,
+                        help='The default random seed.')
     parser.add_argument('--hidden_size',
                         type=int,
                         default=100,

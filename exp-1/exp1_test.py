@@ -18,7 +18,7 @@ import torch.nn.functional as F
 import torch.utils.data as data
 import util
 
-import config
+from args import get_exp1_train_test_args
 from collections import OrderedDict
 from json import dumps
 from models import BiDAF
@@ -32,56 +32,43 @@ from toolkit import get_logger
 import sys
 
 
-def main(c, flags):
-    data_split = flags[1]
-    c.load_path = flags[2]
-    if data_split == "train":
-        eval_file = c.dev_eval_file
-        record_file = c.dev_record_file_exp1
-    elif data_split == "toy":
-        eval_file = c.toy_eval_file
-        record_file = c.toy_record_file_exp1
-    else:
-        eval_file = None
-        record_file = None
-        raise ValueError("Unregonized or missing flag")
-
-    c.save_dir = util.get_save_dir(c.save_dir, "results", training=False)
-    log = get_logger(c.save_dir, "results")
-    log.info(f'Args: {dumps(vars(c), indent=4, sort_keys=True)}')
+def main(args):
+    args.save_dir = util.get_save_dir(args.save_dir, "exp1_training", training=False)
+    log = get_logger(args.logging_dir, "exp1_training")
+    log.info(f'Args: {dumps(vars(args), indent=4, sort_keys=True)}')
     device, gpu_ids = util.get_available_devices()
-    c.batch_size *= max(1, len(gpu_ids))
+    args.batch_size *= max(1, len(gpu_ids))
 
     # Get embeddings
     log.info('Loading embeddings...')
-    word_vectors = util.torch_from_json(c.word_emb_file)
+    word_vectors = util.torch_from_json(args.word_emb_file)
 
     # Get model
     log.info('Building model...')
     model = BiDAF(word_vectors=word_vectors,
-                  hidden_size=c.hidden_size)
+                  hidden_size=args.hidden_size)
     model = nn.DataParallel(model, gpu_ids)
 
-    log.info(f'Loading checkpoint from {c.load_path}...')
+    log.info(f'Loading checkpoint from {args.load_path}...')
     model = util.load_model(model, c.load_path, gpu_ids, return_step=False)
     model = model.to(device)
     model.eval()
 
     # Get data loader
     log.info('Building dataset...')
-    dataset = SQuAD(record_file, True)
+    dataset = SQuAD(args.test_record_file, True)
     data_loader = data.DataLoader(dataset,
-                                  batch_size=c.batch_size,
+                                  batch_size=args.batch_size,
                                   shuffle=False,
-                                  num_workers=c.num_workers,
+                                  num_workers=args.num_workers,
                                   collate_fn=collate_fn)
 
     # Evaluate
-    log.info(f'Evaluating on {data_split} split...')
+    log.info(f'Evaluating on {args.datasplit} split...')
     nll_meter = util.AverageMeter()
     pred_dict = {}  # Predictions for TensorBoard
     sub_dict = {}   # Predictions for submission
-    with open(eval_file, 'r') as fh:
+    with open(args.test_eval_file, 'r') as fh:
         gold_dict = json_load(fh)
     with torch.no_grad(), \
             tqdm(total=len(dataset)) as progress_bar:
@@ -126,15 +113,15 @@ def main(c, flags):
     results = OrderedDict(results_list)
     # Log to console
     results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
-    log.info(f'{data_split} {results_str}')
+    log.info(f'{args.datasplit} {results_str}')
     # Log to TensorBoard
     tbx = SummaryWriter(c.save_dir)
     util.visualize(tbx,
                    pred_dict=pred_dict,
-                   eval_path=eval_file,
+                   eval_path=args.test_eval_file,
                    step=0,
-                   split=data_split,
-                   num_visuals=c.num_visuals)
+                   split=args.datasplit,
+                   num_visuals=args.num_visuals)
  # Write submission file
     # I'm not focused on the submission file
 #    sub_path = join(args.save_dir, args.split + '_' + args.sub_file)
@@ -147,6 +134,5 @@ def main(c, flags):
 
 
 if __name__ == '__main__':
-    c = config.config()
-    flags = sys.argv
-    main(c, flags)
+    args = get_exp1_train_test_args()
+    main(args)

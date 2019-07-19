@@ -29,7 +29,7 @@ from util import collate_fn, SQuAD
 def main(args):
 
     # Set up logging and devices
-    name = f"{args.data_split}_exp1"
+    name = f"{args.datasplit}_exp1"
     args.save_dir = util.get_save_dir(args.logging_dir, name, training=True)
     log = get_logger(args.logging_dir, name)
     tbx = SummaryWriter(args.save_dir)

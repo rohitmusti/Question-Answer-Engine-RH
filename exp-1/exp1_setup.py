@@ -17,6 +17,7 @@ import sys
 import spacy
 import ujson as json
 import urllib.request
+import sys
 
 from args import get_exp1_setup_args
 from codecs import open
@@ -222,17 +223,21 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         y2s.append(end)
 
 
-    print(f'context_char_idxs type pre_transform: {type(context_char_idxs)}')
-    context_char_idxs = np.asarray(context_char_idxs)
-    print(f'context_char_idxs type post-transform: {type(context_char_idxs)}')
+    print(f"size of context_idxs: {sys.getsizeof(context_idxs)}")
+    print(f"size of ques_idxs: {sys.getsizeof(ques_idxs)}")
+    print(f"size of ques_char_idxs: {sys.getsizeof(ques_char_idxs)}")
+    print(f"size of y1s: {sys.getsizeof(y1s)}")
+    print(f"size of y2s: {sys.getsizeof(y2s)}")
+    print(f"size of context_char_idxs: {sys.getsizeof(context_char_idxs)}")
+
     logger.info("Saving file")
     np.savez(out_file, 
-             context_idxs=np.array(context_idxs),
-             context_char_idxs=context_char_idxs,
-             ques_idxs=np.array(ques_idxs),
-             ques_char_idxs=np.array(ques_char_idxs),
-             y1s=np.array(y1s),
-             y2s=np.array(y2s))
+             context_idxs=np.asarray(context_idxs),
+             ques_idxs=np.asarray(ques_idxs),
+             ques_char_idxs=np.asarray(ques_char_idxs),
+             y1s=np.asarray(y1s),
+             y2s=np.asarray(y2s),
+             context_char_idxs=np.asarray(context_char_idxs))
 
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total

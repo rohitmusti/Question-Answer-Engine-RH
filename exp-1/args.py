@@ -1,5 +1,11 @@
 import argparse
 
+def get_exp1_transform_args():
+    parser = argparse.ArgumentParser("Arguments for transforming the raw data into exp1 format")
+    _add_common_exp1_args(parser)
+    args = parser.parse_args()
+    return args
+
 def get_data_gen_args():
     parser = argparse.ArgumentParser("Arguments for sub-sampling the raw data into smaller amounts to work w/ toy datasets")
     _add_common_exp1_args(parser)
@@ -19,18 +25,6 @@ def get_data_gen_args():
     return args
 
 def _add_common_exp1_args(parser):
-    parser.add_argument("--logging_dir",
-                        type=str,
-                        default="./logs/",
-                        help="The folder where all logs are stored")
-    parser.add_argument("--save_dir",
-                        type=str,
-                        default="./save/",
-                        help="The folder for storing general info")
-    parser.add_argument("--load_path",
-                        type=str,
-                        default=None,
-                        help="Load path where old good models are stored")
     parser.add_argument("--raw_train_data",
                         type=str,
                         default="data/train/orig-train-v2.0.json", 
@@ -55,6 +49,30 @@ def _add_common_exp1_args(parser):
                         type=str,
                         default="data/test/test-v2.0.json", 
                         help="The subset of the raw data used as the  testing source")
+    parser.add_argument("--train_data_exp1",
+                        type=str,
+                        default="data/train/train-exp1.json", 
+                        help="The training data in exp1 format")
+    parser.add_argument("--dev_data_exp1",
+                        type=str,
+                        default="data/dev/dev-exp1.json", 
+                        help="The dev data in exp1 format")
+    parser.add_argument("--test_data_exp1",
+                        type=str,
+                        default="data/test/test-exp1.json", 
+                        help="The test data in exp1 format")
+    parser.add_argument("--logging_dir",
+                        type=str,
+                        default="./logs/",
+                        help="The folder where all logs are stored")
+    parser.add_argument("--save_dir",
+                        type=str,
+                        default="./save/",
+                        help="The folder for storing general info")
+    parser.add_argument("--load_path",
+                        type=str,
+                        default=None,
+                        help="Load path where old good models are stored")
     parser.add_argument("--datasplit",
                         type=str,
                         default="all",

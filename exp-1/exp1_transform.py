@@ -1,9 +1,9 @@
 import ujson as json
 from toolkit import get_logger, quick_clean, save
-from config import config
 import sys
 from random import randrange
 from tqdm import tqdm
+from args import get_exp1_transform_args
 
 def get_new_context(orig_context, all_contexts):
     """
@@ -73,26 +73,19 @@ def exp_1_transformer(in_file, out_file, logger):
     save(filename=out_file, obj=new_data)
 
 if __name__ == "__main__":
-    flags = sys.argv
-    c = config()
-    logger = get_logger(log_dir=c.logging_dir, name="exp_1 data transformer")
-    valid_args = ["test", "train", "dev", "toy", "all"]
+    args = get_exp1_transform_args()
+    logger = get_logger(log_dir=args.logging_dir, name="exp_1 data transformer")
 
-    if flags[1] not in valid_args:
-        logger.info("Not a valid args")
-        logger.info(f"Valid args are: {valid_args}")
-    else:
-
-        if flags[1]=="test":
-            c, b = get_new_context("test", ["test1", "test2", "test3", "test4", "test5",
-                            "test6", "test7", "test8", "test9"])
-            logger.info(f"New context: {c}")
-            logger.info(f"Index of start of 'test': {b}")
-            test = "test" == c[b:b+4]
-            logger.info(f"Checking if the indexes line up: {test}")
-        if flags[1]=="train" or flags[1]=="all":
-            exp_1_transformer(c.train_data_orig, c.train_data_exp1, logger)
-        if flags[1]=="dev" or flags[1]=="all":
-            exp_1_transformer(c.dev_data_orig, c.dev_data_exp1, logger)
-        if flags[1]=="toy" or flags[1]=="all":
-            exp_1_transformer(c.toy_data_orig, c.toy_data_exp1, logger)
+    # standard sanity check to run every time
+    c, b = get_new_context("test", ["test1", "test2", "test3", "test4", "test5",
+                           "test6", "test7", "test8", "test9"])
+    test_val = "test" == c[b:b+4]
+    if test_val != True:
+        raise ValueError('The get_new_context function is not working')
+    
+    if args.datasplit=="train" or args.datasplit=="all":
+        exp_1_transformer(args.train_data_src, args.train_data_exp1, logger)
+    if args.datasplit=="dev" or args.datasplit=="all":
+        exp_1_transformer(args.dev_data_src, args.dev_data_exp1, logger)
+    if args.datasplit=="test" or args.datasplit=="all":
+        exp_1_transformer(args.test_data_src, args.toy_data_exp1, logger)

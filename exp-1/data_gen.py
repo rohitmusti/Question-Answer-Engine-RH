@@ -90,7 +90,7 @@ if __name__ == "__main__":
                     train_file=args.train_data_src, 
                     dev_file=args.dev_data_src,
                     test_file=args.test_data_src,
-                    train_topic_num=topic_num,
-                    dev_topic_num=,
-                    test_topic_num=,
+                    train_topic_num=args.train_topic_num,
+                    dev_topic_num=args.dev_topic_num,
+                    test_topic_num=args.test_topic_num,
                     logger=log)

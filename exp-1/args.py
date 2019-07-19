@@ -3,6 +3,18 @@ import argparse
 def get_data_gen_args():
     parser = argparse.ArgumentParser("Arguments for sub-sampling the raw data into smaller amounts to work w/ toy datasets")
     _add_common_exp1_args(parser)
+    parser.add_argument("--train_topic_num",
+                        type=int,
+                        default=50,
+                        help="The number of topics to put into the training_data_src")
+    parser.add_argument("--dev_topic_num",
+                        type=int,
+                        default=20,
+                        help="The number of topics to put into the dev_data_src")
+    parser.add_argument("--test_topic_num",
+                        type=int,
+                        default=10,
+                        help="The number of topics to put into the test_data_src")
     args = parser.parse_args()
     return args
 

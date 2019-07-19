@@ -87,4 +87,4 @@ if __name__ == "__main__":
     if args.datasplit=="dev" or args.datasplit=="all":
         exp_1_transformer(args.dev_data_src, args.dev_data_exp1, logger)
     if args.datasplit=="test" or args.datasplit=="all":
-        exp_1_transformer(args.test_data_src, args.toy_data_exp1, logger)
+        exp_1_transformer(args.test_data_src, args.train_data_exp1, logger)

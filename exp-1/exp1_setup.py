@@ -112,8 +112,8 @@ def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, nu
         with open(emb_file, "r", encoding="utf-8") as fh:
             for line in tqdm(fh, total=num_vectors):
                 array = line.split()
-                word = "".join(array[0:(-vec_size)])
-                vector = list(map(float, array[(-vec_size):]))
+                word = "".join(array[0:(-1*vec_size)])
+                vector = list(map(float, array[(-1*vec_size):]))
                 if word in counter and counter[word] > limit:
                     embedding_dict[word] = vector
         logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {data_type} embedding vector")
@@ -222,10 +222,13 @@ def build_features(c, examples, data_type, out_file, word2idx_dict, char2idx_dic
         y2s.append(end)
 
 
+    print(f'context_char_idxs type pre_transform: {type(context_char_idxs)}')
+    context_char_idxs = np.asarray(context_char_idxs)
+    print(f'context_char_idxs type post-transform: {type(context_char_idxs)}')
     logger.info("Saving file")
     np.savez(out_file, 
              context_idxs=np.array(context_idxs),
-             context_char_idxs=np.array(context_char_idxs),
+             context_char_idxs=context_char_idxs,
              ques_idxs=np.array(ques_idxs),
              ques_char_idxs=np.array(ques_char_idxs),
              y1s=np.array(y1s),

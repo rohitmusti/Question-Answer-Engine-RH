@@ -10,7 +10,7 @@ import sys
 from random import randrange
 import config
 
-def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logger):
+def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, dev_topic_num, test_topic_num, logger):
     """
     distill original data into at most 15 topics, with each having at most 5 paragraphs,
     each of which has 5 questions and 5 answers
@@ -38,7 +38,7 @@ def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logg
         new_dev_data["data"] = []
         new_test_data["version"] = source["version"]
         new_test_data["data"] = []
-        topic_counter = topic_num
+        topic_counter = train_topic_num
         for topic in tqdm(source["data"]):
             logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
@@ -62,30 +62,35 @@ def toy_transformer(in_file, out_file_1, out_file_2, out_file_3, topic_num, logg
                             qas_dict["answers"].append(answer_dict)
                     paragraph["qas"].append(qas_dict)
                 topic_dict["paragraphs"].append(paragraph)
+
             if topic_counter >= 0:
                 new_data["data"].append(topic_dict)
-            elif topic_counter >= -20:
+            elif topic_counter >= -dev_topic_num:
                 new_dev_data["data"].append(topic_dict)
-            else:
+            elif topic_counter >= -(dev_topic_num+test_topic_num):
                 new_test_data["data"].append(topic_dict)
-            if topic_counter == -30:
+            else
                 break
+
             topic_counter -= 1
 
-    logger.info(f"Saving new data to {out_file_1}")
-    save(filename=out_file_1, obj=new_data)
-    logger.info(f"Saving new dev data to {out_file_2}")
-    save(filename=out_file_2, obj=new_dev_data)
-    logger.info(f"Saving new test data to {out_file_3}")
-    save(filename=out_file_3, obj=new_test_data)
+    logger.info(f"Saving new data to {train_file}")
+    save(filename=train_file, obj=new_data)
+    logger.info(f"Saving new dev data to {dev_file}")
+    save(filename=dev_file, obj=new_dev_data)
+    logger.info(f"Saving new test data to {test_file}")
+    save(filename=test_file, obj=new_test_data)
 
 if __name__ == "__main__":
     c = config.config()
     flags = sys.argv
     topic_num = int(flags[1])
     log = get_logger(log_dir=c.logging_dir, name="data-gen")
-    toy_transformer(in_file="data/train/orig-train-v2.0.json", 
-                    out_file_1="data/train/train-v2.0.json", 
-                    out_file_2="data/dev/dev-v2.0.json", 
-                    out_file_3="data/test/test-v2.0.json", 
-                    topic_num=topic_num,logger=log)
+    toy_transformer(in_file=args.raw_train_data, 
+                    train_file=args.train_data_src, 
+                    dev_file=args.dev_data_src,
+                    test_file=args.test_data_src,
+                    train_topic_num=topic_num,
+                    dev_topic_num=,
+                    test_topic_num=,
+                    logger=log)

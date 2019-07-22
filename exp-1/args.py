@@ -60,6 +60,10 @@ def get_exp1_train_test_args():
                         type=float,
                         default=5.0,
                         help='Maximum gradient norm for gradient clipping.')
+    parser.add_argument('--max_ans_len',
+                        type=int,
+                        default=15,
+                        help='Maximum length of a predicted answer.')
 
     args = parser.parse_args()
 

@@ -184,15 +184,15 @@ def _add_common_exp1_args(parser):
                         help="File reserved storing the dev meta data")
     parser.add_argument("--train_record_file_exp1",
                         type=str,
-                        default="data/train/train-exp1.npz", 
+                        default="data/train/train-exp1", 
                         help="File reserved storing the processed and prepped training data")
     parser.add_argument("--dev_record_file_exp1",
                         type=str,
-                        default="data/dev/dev-exp1.npz", 
+                        default="data/dev/dev-exp1", 
                         help="File reserved storing the processed and prepped dev data")
     parser.add_argument("--test_record_file_exp1",
                         type=str,
-                        default="data/test/test-exp1.npz", 
+                        default="data/test/test-exp1", 
                         help="File reserved storing the processed and prepped test data")
     parser.add_argument("--word2idx_file",
                         type=str,
@@ -243,3 +243,15 @@ def _add_common_exp1_args(parser):
                         type=int,
                         default=30,
                         help='max number of chars to keep from a word limit.')
+    parser.add_argument('--chunk_size',
+                         type=int,
+                         default=4,
+                         help='the number of chunks you want to split the train data into')
+    parser.add_argument('--num_train_chunks',
+                         type=int,
+                         default=None,
+                         help='the number of chunks you have to iterate through while training')
+    parser.add_argument('--num_dev_chunks',
+                         type=int,
+                         default=None,
+                         help='the number of chunks you have to iterate through while evaluating during training')

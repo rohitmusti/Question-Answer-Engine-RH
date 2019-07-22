@@ -126,14 +126,18 @@ def multi_process_file(args, filename, data_type, word_counter, char_counter):
 
     return examples, eval_examples 
 
-def process_file(filename, data_type, word_counter, char_counter):
+def process_file(filename, data_type, word_counter, char_counter, chunk_size=1):
     print(f"Pre-processing {data_type} examples...")
+    ret_examples = []
+    ret_eval_examples = []
     examples = []
     eval_examples = {}
     total = 0
     with open(filename, "r") as fh:
         source = json.load(fh)
-        for article in tqdm(source["data"]):
+        chunk_number = len(source['data'])/chunk_size
+        for n, article in tqdm(enumerate(source["data"])):
+            chunk_number -= 1
             for para in article["paragraphs"]:
                 context = para["context"].replace(
                     "''", '" ').replace("``", '" ')
@@ -181,8 +185,14 @@ def process_file(filename, data_type, word_counter, char_counter):
                                                  "spans": spans,
                                                  "answers": answer_texts,
                                                  "uuid": qa["id"]}
-        print(f"{len(examples)} questions in total")
-    return examples, eval_examples
+                if chunk_number == 0 or n == (len(source['data'])-1):
+                    ret_examples.append(examples)
+                    ret_eval_examples.append(eval_examples)
+                    examples=[]
+                    eval_examples={}
+                        
+        print(f"{len(ret_examples)} questions in total")
+    return ret_examples, ret_eval_examples
 
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
@@ -221,7 +231,7 @@ def is_answerable(example):
     return len(example['y2s']) > 0 and len(example['y1s']) > 0
 
 
-def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_dict, is_test=False):
+def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_dict, is_test=False, chunk_size=1):
     para_limit = args.para_limit
     ques_limit = args.ques_limit
     ans_limit = args.ans_limit
@@ -246,74 +256,79 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     ques_idxs, ques_char_idxs = [], []
     y1s, y2s, ids = [], [], []
     
-    for example in tqdm(examples):
-        total_ += 1
+    for n, chunk in enumerate(examples):
+        context_idxs, context_char_idxs = [], []
+        ques_idxs, ques_char_idxs = [], []
+        y1s, y2s, ids = [], [], []
+        for example in tqdm(chunk):
+            total_ += 1
 
-        if drop_example(example, is_test):
-            continue
+            if drop_example(example, is_test):
+                continue
 
-        total += 1
+            total += 1
 
-        def _get_word(word):
-            for each in (word, word.lower(), word.capitalize(), word.upper()):
-                if each in word2idx_dict:
-                    return word2idx_dict[each]
-            return 1
+            def _get_word(word):
+                for each in (word, word.lower(), word.capitalize(), word.upper()):
+                    if each in word2idx_dict:
+                        return word2idx_dict[each]
+                return 1
 
-        def _get_char(char):
-            if char in char2idx_dict:
-                return char2idx_dict[char]
-            return 1
+            def _get_char(char):
+                if char in char2idx_dict:
+                    return char2idx_dict[char]
+                return 1
 
-        context_idx = np.zeros([para_limit], dtype=np.int32)
-        context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
-        ques_idx = np.zeros([ques_limit], dtype=np.int32)
-        ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
+            context_idx = np.zeros([para_limit], dtype=np.int32)
+            context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
+            ques_idx = np.zeros([ques_limit], dtype=np.int32)
+            ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
 
-        for i, token in enumerate(example["context_tokens"]):
-            context_idx[i] = _get_word(token)
-        context_idxs.append(context_idx)
+            for i, token in enumerate(example["context_tokens"]):
+                context_idx[i] = _get_word(token)
+            context_idxs.append(context_idx)
 
-        for i, token in enumerate(example["ques_tokens"]):
-            ques_idx[i] = _get_word(token)
-        ques_idxs.append(ques_idx)
+            for i, token in enumerate(example["ques_tokens"]):
+                ques_idx[i] = _get_word(token)
+            ques_idxs.append(ques_idx)
 
-        for i, token in enumerate(example["context_chars"]):
-            for j, char in enumerate(token):
-                if j == char_limit:
-                    break
-                context_char_idx[i, j] = _get_char(char)
-        context_char_idxs.append(context_char_idx)
+            for i, token in enumerate(example["context_chars"]):
+                for j, char in enumerate(token):
+                    if j == char_limit:
+                        break
+                    context_char_idx[i, j] = _get_char(char)
+            context_char_idxs.append(context_char_idx)
 
-        for i, token in enumerate(example["ques_chars"]):
-            for j, char in enumerate(token):
-                if j == char_limit:
-                    break
-                ques_char_idx[i, j] = _get_char(char)
-        ques_char_idxs.append(ques_char_idx)
+            for i, token in enumerate(example["ques_chars"]):
+                for j, char in enumerate(token):
+                    if j == char_limit:
+                        break
+                    ques_char_idx[i, j] = _get_char(char)
+            ques_char_idxs.append(ques_char_idx)
 
-        if is_answerable(example):
-            start, end = example["y1s"][-1], example["y2s"][-1]
-        else:
-            start, end = -1, -1
+            if is_answerable(example):
+                start, end = example["y1s"][-1], example["y2s"][-1]
+            else:
+                start, end = -1, -1
 
-        y1s.append(start)
-        y2s.append(end)
-        ids.append(example["id"])
+            y1s.append(start)
+            y2s.append(end)
+            ids.append(example["id"])
 
 
-    logger.info("Saving file")
-    np.savez(out_file, 
-             context_idxs=np.array(context_idxs),
-             context_char_idxs=np.array(context_char_idxs),
-             ques_idxs=np.array(ques_idxs),
-             ques_char_idxs=np.array(ques_char_idxs),
-             y1s=np.array(y1s),
-             y2s=np.array(y2s),
-             ids=np.array(ids))
+        logger.info("Saving file")
+        np.savez(f"{out_file}_{n}.npz", 
+                 context_idxs=np.array(context_idxs),
+                 context_char_idxs=np.array(context_char_idxs),
+                 ques_idxs=np.array(ques_idxs),
+                 ques_char_idxs=np.array(ques_char_idxs),
+                 y1s=np.array(y1s),
+                 y2s=np.array(y2s),
+                 ids=np.array(ids))
 
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
+    logger.info(f"created {len(examples)} chunks for {data_type}")
     return meta
 
 
@@ -324,7 +339,8 @@ def pre_process(args, logger):
     examples, eval_obj = process_file(filename=args.train_data_exp1, 
                                       data_type="train", 
                                       word_counter=word_counter, 
-                                      char_counter=char_counter)
+                                      char_counter=char_counter,
+                                      chunk_size=args.chunk_size)
     save(args.train_eval_file, eval_obj)
     del eval_obj
 
@@ -350,7 +366,7 @@ def pre_process(args, logger):
 
     build_features(args=args, examples=examples, data_type="train", 
                    out_file=args.train_record_file_exp1, word2idx_dict=word2idx_dict, 
-                   char2idx_dict=char2idx_dict, is_test=False)
+                   char2idx_dict=char2idx_dict, is_test=False, chunk_size=args.chunk_size)
     
     del examples 
 

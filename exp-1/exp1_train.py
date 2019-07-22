@@ -206,9 +206,9 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
         
             temp_results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
             temp_results_list = [('NLL', nll_meter.avg),
-                            ('F1', results['F1']),
-                            ('AvNA', results['AvNA']),
-                            ('EM', results['EM'])]
+                            ('F1', temp_results['F1']),
+                            ('AvNA', temp_results['AvNA']),
+                            ('EM', temp_results['EM'])]
             temp_results = OrderedDict(temp_results_list)
             results.update(temp_results)
 

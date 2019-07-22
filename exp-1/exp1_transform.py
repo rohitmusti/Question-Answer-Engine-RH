@@ -41,7 +41,6 @@ def exp_1_transformer(in_file, out_file, logger):
         logger.info("Creating all context list")
         all_contexts = [para["context"] for topic in source["data"] for para in topic["paragraphs"]]
         for topic in tqdm(source["data"]):
-            logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []
@@ -68,6 +67,7 @@ def exp_1_transformer(in_file, out_file, logger):
             new_data["data"].append(topic_dict)
 
     logger.info(f"Processed {counter} question, answer pairs")
+    print(f"number of questions {len(['hey' for i in new_data['data'] for para in i['paragraphs'] for _ in para['qas']]) }")
     logger.info(f"Saving to {out_file}")
     save(filename=out_file, obj=new_data)
 
@@ -87,4 +87,4 @@ if __name__ == "__main__":
     if args.datasplit=="dev" or args.datasplit=="all":
         exp_1_transformer(args.dev_data_src, args.dev_data_exp1, logger)
     if args.datasplit=="test" or args.datasplit=="all":
-        exp_1_transformer(args.test_data_src, args.train_data_exp1, logger)
+        exp_1_transformer(args.test_data_src, args.test_data_exp1, logger)

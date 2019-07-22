@@ -166,48 +166,51 @@ def main(args):
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     nll_meter = util.AverageMeter()
+    results = OrderedDict()
 
     model.eval()
     pred_dict = {}
     with open(eval_file, 'r') as fh:
-        gold_dict = json_load(fh)
-    with torch.no_grad(), \
-            tqdm(total=len(data_loader.dataset)) as progress_bar:
-        for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
-            # Setup for forward
-            cw_idxs = cw_idxs.to(device)
-            qw_idxs = qw_idxs.to(device)
-            batch_size = cw_idxs.size(0)
-
-            # Forward
-            log_p1, log_p2 = model(cw_idxs, qw_idxs)
-            y1, y2 = y1.to(device), y2.to(device)
-            loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
-            nll_meter.update(loss.item(), batch_size)
-
-            # Get F1 and EM scores
-            p1, p2 = log_p1.exp(), log_p2.exp()
-            starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
-
-            # Log info
-            progress_bar.update(batch_size)
-            progress_bar.set_postfix(NLL=nll_meter.avg)
-
-            preds, _ = util.convert_tokens(gold_dict,
-                                           ids.tolist(),
-                                           starts.tolist(),
-                                           ends.tolist(),
-                                           use_squad_v2)
-            pred_dict.update(preds)
-
-    model.train()
-
-    results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
-    results_list = [('NLL', nll_meter.avg),
-                    ('F1', results['F1']),
-                    ('AvNA', results['AvNA']),
-                    ('EM', results['EM'])]
-    results = OrderedDict(results_list)
+        gold_dicts = json_load(fh)
+        for gold_dict in gold_dicts:
+            with torch.no_grad(), \
+                    tqdm(total=len(data_loader.dataset)) as progress_bar:
+                for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
+                    # Setup for forward
+                    cw_idxs = cw_idxs.to(device)
+                    qw_idxs = qw_idxs.to(device)
+                    batch_size = cw_idxs.size(0)
+        
+                    # Forward
+                    log_p1, log_p2 = model(cw_idxs, qw_idxs)
+                    y1, y2 = y1.to(device), y2.to(device)
+                    loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
+                    nll_meter.update(loss.item(), batch_size)
+        
+                    # Get F1 and EM scores
+                    p1, p2 = log_p1.exp(), log_p2.exp()
+                    starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
+        
+                    # Log info
+                    progress_bar.update(batch_size)
+                    progress_bar.set_postfix(NLL=nll_meter.avg)
+        
+                    preds, _ = util.convert_tokens(gold_dict,
+                                                   ids.tolist(),
+                                                   starts.tolist(),
+                                                   ends.tolist(),
+                                                   use_squad_v2)
+                    pred_dict.update(preds)
+        
+            model.train()
+        
+            temp_results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
+            temp_results_list = [('NLL', nll_meter.avg),
+                            ('F1', results['F1']),
+                            ('AvNA', results['AvNA']),
+                            ('EM', results['EM'])]
+            temp_results = OrderedDict(temp_results_list)
+            results.update(temp_results)
 
     return results, pred_dict
 

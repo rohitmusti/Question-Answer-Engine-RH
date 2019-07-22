@@ -178,6 +178,10 @@ def _add_common_exp1_args(parser):
                         type=str,
                         default="data/test/test-eval.json", 
                         help="File reserved for storing test evaluation data")
+    parser.add_argument("--dev_meta_file",
+                        type=str,
+                        default="data/dev/dev-meta.json", 
+                        help="File reserved storing the dev meta data")
     parser.add_argument("--train_record_file_exp1",
                         type=str,
                         default="data/train/train-exp1.npz", 
@@ -229,13 +233,13 @@ def _add_common_exp1_args(parser):
                         help='question number of words limit.')
     parser.add_argument('--para_limit',
                         type=int,
-                        default=3800,
+                        default=1500,
                         help='paragraph character limit.')
     parser.add_argument('--ans_limit',
                         type=int,
-                        default=3800,
+                        default=50,
                         help='answer word limit.')
     parser.add_argument('--char_limit',
                         type=int,
-                        default=3800,
+                        default=30,
                         help='max number of chars to keep from a word limit.')

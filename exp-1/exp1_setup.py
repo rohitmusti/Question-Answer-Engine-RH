@@ -62,10 +62,11 @@ def _multi_process_file_helper(article, word_counter, char_counter, total, lock)
         context_tokens = word_tokenize(context)
         context_chars = [list(token) for token in context_tokens]
         spans = convert_idx(context, context_tokens)
-        for token in context_tokens:
-            word_counter[token] += len(para["qas"])
-            for char in token:
-                char_counter[char] += len(para["qas"])
+        with lock:
+            for token in context_tokens:
+                word_counter[token] += len(para["qas"])
+                for char in token:
+                    char_counter[char] += len(para["qas"])
         for qa in para["qas"]:
             with lock:
                 total += 1
@@ -73,10 +74,11 @@ def _multi_process_file_helper(article, word_counter, char_counter, total, lock)
                 "''", '" ').replace("``", '" ')
             ques_tokens = word_tokenize(ques)
             ques_chars = [list(token) for token in ques_tokens]
-            for token in ques_tokens:
-                word_counter[token] += 1
-                for char in token:
-                    char_counter[char] += 1
+            with lock:
+                for token in ques_tokens:
+                    word_counter[token] += 1
+                    for char in token:
+                        char_counter[char] += 1
             y1s, y2s = [], []
             answer_texts = []
             for answer in qa["answers"]:
@@ -123,6 +125,64 @@ def multi_process_file(args, filename, data_type, word_counter, char_counter):
                 eval_examples.update(result[1])
 
     return examples, eval_examples 
+
+def process_file(filename, data_type, word_counter, char_counter):
+    print(f"Pre-processing {data_type} examples...")
+    examples = []
+    eval_examples = {}
+    total = 0
+    with open(filename, "r") as fh:
+        source = json.load(fh)
+        for article in tqdm(source["data"]):
+            for para in article["paragraphs"]:
+                context = para["context"].replace(
+                    "''", '" ').replace("``", '" ')
+                context_tokens = word_tokenize(context)
+                context_chars = [list(token) for token in context_tokens]
+                spans = convert_idx(context, context_tokens)
+                for token in context_tokens:
+                    word_counter[token] += len(para["qas"])
+                    for char in token:
+                        char_counter[char] += len(para["qas"])
+                for qa in para["qas"]:
+                    total += 1
+                    ques = qa["question"].replace(
+                        "''", '" ').replace("``", '" ')
+                    ques_tokens = word_tokenize(ques)
+                    ques_chars = [list(token) for token in ques_tokens]
+                    for token in ques_tokens:
+                        word_counter[token] += 1
+                        for char in token:
+                            char_counter[char] += 1
+                    y1s, y2s = [], []
+                    answer_texts = []
+                    for answer in qa["answers"]:
+                        answer_text = answer["text"]
+                        answer_start = answer['answer_start']
+                        answer_end = answer_start + len(answer_text)
+                        answer_texts.append(answer_text)
+                        answer_span = []
+                        for idx, span in enumerate(spans):
+                            if not (answer_end <= span[0] or answer_start >= span[1]):
+                                answer_span.append(idx)
+                        y1, y2 = answer_span[0], answer_span[-1]
+                        y1s.append(y1)
+                        y2s.append(y2)
+                    example = {"context_tokens": context_tokens,
+                               "context_chars": context_chars,
+                               "ques_tokens": ques_tokens,
+                               "ques_chars": ques_chars,
+                               "y1s": y1s,
+                               "y2s": y2s,
+                               "id": total}
+                    examples.append(example)
+                    eval_examples[str(total)] = {"context": context,
+                                                 "question": ques,
+                                                 "spans": spans,
+                                                 "answers": answer_texts,
+                                                 "uuid": qa["id"]}
+        print(f"{len(examples)} questions in total")
+    return examples, eval_examples
 
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
@@ -182,12 +242,10 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
     total = 0
     total_ = 0
     meta = {}
-    context_idxs = []
-    context_char_idxs = []
-    ques_idxs = []
-    ques_char_idxs = []
-    y1s = []
-    y2s = []
+    context_idxs, context_char_idxs = [], []
+    ques_idxs, ques_char_idxs = [], []
+    y1s, y2s, ids = [], [], []
+    
     for example in tqdm(examples):
         total_ += 1
 
@@ -241,15 +299,8 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
 
         y1s.append(start)
         y2s.append(end)
+        ids.append(example["id"])
 
-
-    print("made it here")
-    print(f"size of context_idxs: {sys.getsizeof(context_idxs)}")
-    print(f"size of ques_idxs: {sys.getsizeof(ques_idxs)}")
-    print(f"size of ques_char_idxs: {sys.getsizeof(ques_char_idxs)}")
-    print(f"size of y1s: {sys.getsizeof(y1s)}")
-    print(f"size of y2s: {sys.getsizeof(y2s)}")
-    print(f"size of context_char_idxs: {sys.getsizeof(context_char_idxs)}")
 
     logger.info("Saving file")
     np.savez(out_file, 
@@ -258,16 +309,11 @@ def build_features(args, examples, data_type, out_file, word2idx_dict, char2idx_
              ques_idxs=np.array(ques_idxs),
              ques_char_idxs=np.array(ques_char_idxs),
              y1s=np.array(y1s),
-             y2s=np.array(y2s))
+             y2s=np.array(y2s),
+             ids=np.array(ids))
 
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
-    del context_idxs
-    del context_char_idxs
-    del ques_idxs
-    del ques_char_idxs
-    del y1s
-    del y2s
     return meta
 
 
@@ -275,7 +321,7 @@ def pre_process(args, logger):
     # Process training set and use it to decide on the word/character vocabularies
 
     word_counter, char_counter = Counter(), Counter()
-    examples, eval_obj = multi_process_file(args=args, filename=args.train_data_exp1, 
+    examples, eval_obj = process_file(filename=args.train_data_exp1, 
                                       data_type="train", 
                                       word_counter=word_counter, 
                                       char_counter=char_counter)
@@ -297,43 +343,41 @@ def pre_process(args, logger):
     del word_emb_mat
     del char_emb_mat
 
-    dev_examples, dev_eval = multi_process_file(args=args,filename=args.dev_data_exp1, 
+    dev_examples, dev_eval = process_file(filename=args.dev_data_exp1, 
                                           data_type="dev", 
                                           word_counter=word_counter, 
                                           char_counter=char_counter)
 
-    build_features(c=args, examples=examples, data_type="train", 
+    build_features(args=args, examples=examples, data_type="train", 
                    out_file=args.train_record_file_exp1, word2idx_dict=word2idx_dict, 
                    char2idx_dict=char2idx_dict, is_test=False)
     
-    del examples, eval_obj
+    del examples 
 
     # Process dev and test sets
-    dev_meta = build_features(c=args, examples=dev_examples, data_type="dev", 
+    dev_meta = build_features(args=args, examples=dev_examples, data_type="dev", 
                               out_file=args.dev_record_file_exp1, word2idx_dict=word2idx_dict, 
                               char2idx_dict=char2idx_dict, is_test=False)
     save(args.dev_meta_file, dev_meta)
     save(args.dev_eval_file, dev_eval)
     del dev_meta
-    del dev_eval_file
+    del dev_eval
 
 
-    test_examples, test_eval = process_file(filename=args.test_data_exp1, 
-                                            data_type="test", 
-                                            word_counter=word_counter, 
-                                            char_counter=char_counter, 
-                                            logger=logger)
-    test_meta = build_features(c=args, examples=test_examples, data_type="test",
-                               out_file=args.test_record_file_exp1, word2idx_dict=word2idx_dict, 
-                               char2idx_dict=char2idx_dict, is_test=True)
+#    test_examples, test_eval = process_file(filename=args.test_data_exp1, 
+#                                            data_type="test", 
+#                                            word_counter=word_counter, 
+#                                            char_counter=char_counter, 
+#                                            logger=logger)
+#    test_meta = build_features(args=args, examples=test_examples, data_type="test",
+#                               out_file=args.test_record_file_exp1, word2idx_dict=word2idx_dict, 
+#                               char2idx_dict=char2idx_dict, is_test=True)
+#    save(args.test_meta_file, test_meta)
+#    save(args.test_eval_file, test_eval)
 
     save(args.word2idx_file, word2idx_dict)
     save(args.char2idx_file, char2idx_dict)
-    del word2idx_dict
-    del char2idx_dict
 
-    save(args.test_meta_file, test_meta)
-    save(args.test_eval_file, test_eval)
 
 if __name__ == '__main__':
     nlp = spacy.blank("en")

@@ -576,13 +576,10 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     #    total_ += 1
     #    if str(qid) in eval_dict.keys():
     #        total += 1
-        print("hey 1")
+        print(f"sanity check: {'1' in eval_dict.keys()}")
         context = eval_dict[str(qid)]["context"]
-        print("hey 2")
         spans = eval_dict[str(qid)]["spans"]
-        print("hey 3")
         uuid = eval_dict[str(qid)]["uuid"]
-        print("hey 4")
         if no_answer and (y_start == 0 or y_end == 0):
             pred_dict[str(qid)] = ''
             sub_dict[uuid] = ''
@@ -593,7 +590,7 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
             end_idx = spans[y_end][1]
             pred_dict[str(qid)] = context[start_idx: end_idx]
             sub_dict[uuid] = context[start_idx: end_idx]
-    print(f"evaluated {total}/{total_} examples")
+#    print(f"evaluated {total}/{total_} examples")
     return pred_dict, sub_dict
 
 

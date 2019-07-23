@@ -570,12 +570,8 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     """
     pred_dict = {}
     sub_dict = {}
-    total = 0
-    total_ = 0
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
-        total_ += 1
         if str(qid) in eval_dict.keys():
-            total += 1
    #     if not ('1' in eval_dict.keys()):
    #         print(f"eval_dict keys{eval_dict.keys()}")
 
@@ -592,7 +588,6 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
                 end_idx = spans[y_end][1]
                 pred_dict[str(qid)] = context[start_idx: end_idx]
                 sub_dict[uuid] = context[start_idx: end_idx]
-#    print(f"evaluated {total}/{total_} examples")
     return pred_dict, sub_dict
 
 
@@ -618,13 +613,15 @@ def eval_dicts(gold_dict, pred_dict, no_answer):
             if no_answer:
                 avna += compute_avna(prediction, ground_truths)
 
-    eval_dict = {'EM': 100. * em / total,
-                 'F1': 100. * f1 / total}
-
-    if no_answer:
-        eval_dict['AvNA'] = 100. * avna / total
-
-    return eval_dict
+        eval_dict = {'EM': 100. * em / total,
+                     'F1': 100. * f1 / total}
+    
+        if no_answer:
+            eval_dict['AvNA'] = 100. * avna / total
+    
+        return eval_dict
+    
+    return {'F1': "none"}
 
 
 def compute_avna(prediction, ground_truths):

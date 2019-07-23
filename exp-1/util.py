@@ -70,7 +70,6 @@ class SQuAD(data.Dataset):
         self.ids = torch.from_numpy(dataset['ids']).long()
         self.valid_idxs = [idx for idx in range(len(self.ids))
                            if use_v2 or self.y1s[idx].item() >= 0]
-        print("finished loading")
 
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]
@@ -571,23 +570,26 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     """
     pred_dict = {}
     sub_dict = {}
+    total = 0
+    total_ = 0
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
-        print(f"type of qid: {type(qid)}")
-        print(f"qid: {qid}")
-        print(f"eval dict at qid: {eval_dict[str(qid)]}")
-        context = eval_dict[str(qid)]["context"]
-        spans = eval_dict[str(qid)]["spans"]
-        uuid = eval_dict[str(qid)]["uuid"]
-        if no_answer and (y_start == 0 or y_end == 0):
-            pred_dict[str(qid)] = ''
-            sub_dict[uuid] = ''
-        else:
-            if no_answer:
-                y_start, y_end = y_start - 1, y_end - 1
-            start_idx = spans[y_start][0]
-            end_idx = spans[y_end][1]
-            pred_dict[str(qid)] = context[start_idx: end_idx]
-            sub_dict[uuid] = context[start_idx: end_idx]
+        total_ += 1
+        if str(qid) in eval_dict.keys():
+            total += 1
+            context = eval_dict[str(qid)]["context"]
+            spans = eval_dict[str(qid)]["spans"]
+            uuid = eval_dict[str(qid)]["uuid"]
+            if no_answer and (y_start == 0 or y_end == 0):
+                pred_dict[str(qid)] = ''
+                sub_dict[uuid] = ''
+            else:
+                if no_answer:
+                    y_start, y_end = y_start - 1, y_end - 1
+                start_idx = spans[y_start][0]
+                end_idx = spans[y_end][1]
+                pred_dict[str(qid)] = context[start_idx: end_idx]
+                sub_dict[uuid] = context[start_idx: end_idx]
+    print(f"evaluated {total}/{total_} examples")
     return pred_dict, sub_dict
 
 

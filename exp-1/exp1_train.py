@@ -155,7 +155,7 @@ def main(args):
                             for k, v in results.items():
                                 tbx.add_scalar(f"dev/{k}", v, step)
                             util.visualize(tbx,
-                                           pred_dict=pred_dict,
+                                           pred_dicts=pred_dicts,
                                            eval_path=args.dev_eval_file,
                                            step=step,
                                            split='dev',

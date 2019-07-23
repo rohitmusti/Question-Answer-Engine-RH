@@ -576,7 +576,8 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     #    total_ += 1
     #    if str(qid) in eval_dict.keys():
     #        total += 1
-        print(f"sanity check: {'1' in eval_dict.keys()}")
+        if not ('1' in eval_dict.keys()):
+            print(f"eval_dict keys{eval_dict.keys()}")
         context = eval_dict[str(qid)]["context"]
         spans = eval_dict[str(qid)]["spans"]
         uuid = eval_dict[str(qid)]["uuid"]

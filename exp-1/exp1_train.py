@@ -170,8 +170,8 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     pred_dict = {}
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
-        for gold_dict in gold_dicts:
-            with torch.no_grad(), tqdm(total=len(data_loader.dataset)) as progress_bar:
+        for gold_dict in tqdm(gold_dicts):
+            with torch.no_grad():
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
                     # Setup for forward
                     cw_idxs = cw_idxs.to(device)
@@ -189,8 +189,6 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
                     starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
         
                     # Log info
-                    progress_bar.update(batch_size)
-                    progress_bar.set_postfix(NLL=nll_meter.avg)
         
                     preds, _ = util.convert_tokens(gold_dict,
                                                    ids.tolist(),

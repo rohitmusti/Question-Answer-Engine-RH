@@ -125,9 +125,7 @@ def main(args):
                                    step)
 
                     steps_till_eval -= batch_size
-    #                if steps_till_eval <= 0:
-                    if True:
-
+                    if steps_till_eval <= 0:
                         steps_till_eval = args.eval_steps
 
                         # Evaluate and save checkpoint
@@ -173,7 +171,7 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
         print(f"len of gold dicts{len(gold_dicts)}")
-        print(f"type of single gold dict{type(gold_dicts)}")
+        print(f"type of single gold dict{type(gold_dicts[0])}")
         for gold_dict in gold_dicts:
             with torch.no_grad(), tqdm(total=len(data_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:

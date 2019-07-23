@@ -613,12 +613,13 @@ def eval_dicts(gold_dict, pred_dict, no_answer):
             if no_answer:
                 avna += compute_avna(prediction, ground_truths)
 
+    if total > 0:
         eval_dict = {'EM': 100. * em / total,
                      'F1': 100. * f1 / total}
-    
+
         if no_answer:
             eval_dict['AvNA'] = 100. * avna / total
-    
+
         return eval_dict
     
     return {'F1': "none"}

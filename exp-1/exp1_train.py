@@ -203,9 +203,8 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
                         ('EM', temp_results['EM'])]
         temp_results = OrderedDict(temp_results_list)
         results.update(temp_results)
-        ret_preds.append(pred_dict)
 
-     return results, ret_preds
+    return results, pred_dict
 
 
 if __name__ == '__main__':

@@ -195,8 +195,6 @@ def process_file(filename, data_type, word_counter, char_counter, chunk_size=1):
 
 def process_file_dev(filename, data_type, word_counter, char_counter, chunk_size=1):
     print(f"Pre-processing {data_type} examples...")
-    ret_examples = []
-    ret_eval_examples = []
     examples = []
     eval_examples = {}
     total = 0
@@ -252,13 +250,8 @@ def process_file_dev(filename, data_type, word_counter, char_counter, chunk_size
                                                  "spans": spans,
                                                  "answers": answer_texts,
                                                  "uuid": qa["id"]}
-                if chunk_number == 0 or n == (len(source['data'])-1):
-                    ret_examples.append(examples)
-                    ret_eval_examples.append(eval_examples)
-                    examples=[]
-                    eval_examples={}
                         
-    return ret_examples, ret_eval_examples
+    return examples, eval_examples
 
 def build_features_dev(args, examples, data_type, out_file, word2idx_dict, char2idx_dict, is_test=False):
     para_limit = args.para_limit

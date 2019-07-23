@@ -191,7 +191,6 @@ def process_file(filename, data_type, word_counter, char_counter, chunk_size=1):
                     examples=[]
                     eval_examples={}
                         
-        print(f"{len(ret_examples)} questions in total")
     return ret_examples, ret_eval_examples
 
 

@@ -139,7 +139,7 @@ def main(args):
                                                          shuffle=False,
                                                          num_workers=args.num_workers,
                                                          collate_fn=collate_fn)
-                            results, pred_dict = evaluate(model, dev_loader, device,
+                            results, pred_dicts = evaluate(model, dev_loader, device,
                                                           args.dev_eval_file,
                                                           args.max_ans_len,
                                                           use_squad_v2=True)
@@ -166,11 +166,13 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     nll_meter = util.AverageMeter()
     results = OrderedDict()
 
+    ret_preds = []
+
     model.eval()
-    pred_dict = {}
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
         for gold_dict in tqdm(gold_dicts):
+            pred_dict = {}
             with torch.no_grad():
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
                     # Setup for forward
@@ -207,8 +209,9 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
                                 ('EM', temp_results['EM'])]
                 temp_results = OrderedDict(temp_results_list)
                 results.update(temp_results)
+            ret_preds.append(pred_dict)
 
-    return results, pred_dict
+    return results, ret_preds
 
 
 if __name__ == '__main__':

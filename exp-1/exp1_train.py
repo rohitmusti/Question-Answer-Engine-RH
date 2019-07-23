@@ -173,7 +173,7 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
         print(f"len of gold dicts{len(gold_dicts)}")
-        print(f"gold dict: {gold_dicts[0]}")
+        print(f"type of single gold dict{type(gold_dicts)}")
         for gold_dict in gold_dicts:
             with torch.no_grad(), tqdm(total=len(data_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:

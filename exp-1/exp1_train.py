@@ -129,7 +129,7 @@ def main(args):
                         steps_till_eval = args.eval_steps
 
                         # Evaluate and save checkpoint
-                        for j in range(args.num_dev_chunks):
+                        for j in tqdm(range(args.num_dev_chunks)):
                             log.info(f"Evaluating at step {step}...")
                             ema.assign(model)
 

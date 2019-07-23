@@ -192,7 +192,7 @@ def _add_common_exp1_args(parser):
                         help="File reserved storing the processed and prepped training data")
     parser.add_argument("--dev_record_file_exp1",
                         type=str,
-                        default="data/dev/dev-exp1", 
+                        default="data/dev/dev-exp1.npz", 
                         help="File reserved storing the processed and prepped dev data")
     parser.add_argument("--test_record_file_exp1",
                         type=str,

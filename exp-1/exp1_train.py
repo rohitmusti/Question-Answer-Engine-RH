@@ -129,37 +129,34 @@ def main(args):
                         steps_till_eval = args.eval_steps
 
                         # Evaluate and save checkpoint
-                        for j in tqdm(range(args.num_dev_chunks)):
-                            log.info(f"Evaluating at step {step}...")
-                            ema.assign(model)
+                        log.info(f"Evaluating at step {step}...")
+                        ema.assign(model)
 
-                            dev_dataset = SQuAD(f"{args.dev_record_file_exp1}_{j}.npz", use_v2=True)
-                            dev_loader = data.DataLoader(dev_dataset,
-                                                         batch_size=args.batch_size,
-                                                         shuffle=False,
-                                                         num_workers=args.num_workers,
-                                                         collate_fn=collate_fn)
-                            results, pred_dicts = evaluate(model, dev_loader, device,
-                                                          args.dev_eval_file,
-                                                          args.max_ans_len,
-                                                          use_squad_v2=True)
-                            saver.save(step, model, results[args.metric_name], device)
-                            ema.resume(model)
+                        dev_dataset = SQuAD(args.dev_record_file_exp1, use_v2=True)
+                        dev_loader = data.DataLoader(dev_dataset,
+                                                     batch_size=args.batch_size,
+                                                     shuffle=False,
+                                                     num_workers=args.num_workers,
+                                                     collate_fn=collate_fn)
+                        results, pred_dict = evaluate(model, dev_loader, device,
+                                                      args.dev_eval_file,
+                                                      args.max_ans_len,
+                                                      use_squad_v2=True)
+                        saver.save(step, model, results[args.metric_name], device)
+                        ema.resume(model)
 
-                            # Log to console
-                            results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
-                            log.info(f"Dev {results_str}")
+                        # Log to console
+                        results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
+                        log.info(f"Dev {results_str}")
 
-                            # Log to TensorBoard
-                            log.info('Visualizing in TensorBoard...')
-                            for k, v in results.items():
-                                tbx.add_scalar(f"dev/{k}", v, step)
-                            util.visualize(tbx,
-                                           pred_dicts=pred_dicts,
-                                           eval_path=args.dev_eval_file,
-                                           step=step,
-                                           split='dev',
-                                           num_visuals=args.num_visuals)
+                        # Log to TensorBoard
+                        log.info('Visualizing in TensorBoard...')
+                        util.visualize(tbx,
+                                       pred_dict=pred_dict,
+                                       eval_path=args.dev_eval_file,
+                                       step=step,
+                                       split='dev',
+                                       num_visuals=args.num_visuals)
 
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
@@ -171,47 +168,44 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     model.eval()
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
-        for gold_dict in tqdm(gold_dicts):
-            pred_dict = {}
-            with torch.no_grad():
-                for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
-                    # Setup for forward
-                    cw_idxs = cw_idxs.to(device)
-                    qw_idxs = qw_idxs.to(device)
-                    batch_size = cw_idxs.size(0)
-        
-                    # Forward
-                    log_p1, log_p2 = model(cw_idxs, qw_idxs)
-                    y1, y2 = y1.to(device), y2.to(device)
-                    loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
-                    nll_meter.update(loss.item(), batch_size)
-        
-                    # Get F1 and EM scores
-                    p1, p2 = log_p1.exp(), log_p2.exp()
-                    starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
-        
-                    # Log info
-        
-                    preds, _ = util.convert_tokens(gold_dict,
-                                                   ids.tolist(),
-                                                   starts.tolist(),
-                                                   ends.tolist(),
-                                                   use_squad_v2)
-                    pred_dict.update(preds)
-        
-            model.train()
-        
-            temp_results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
-            if temp_results['F1'] != "none":
-                temp_results_list = [('NLL', nll_meter.avg),
-                                ('F1', temp_results['F1']),
-                                ('AvNA', temp_results['AvNA']),
-                                ('EM', temp_results['EM'])]
-                temp_results = OrderedDict(temp_results_list)
-                results.update(temp_results)
-            ret_preds.append(pred_dict)
+        with torch.no_grad():
+            for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
+                # Setup for forward
+                cw_idxs = cw_idxs.to(device)
+                qw_idxs = qw_idxs.to(device)
+                batch_size = cw_idxs.size(0)
+    
+                # Forward
+                log_p1, log_p2 = model(cw_idxs, qw_idxs)
+                y1, y2 = y1.to(device), y2.to(device)
+                loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
+                nll_meter.update(loss.item(), batch_size)
+    
+                # Get F1 and EM scores
+                p1, p2 = log_p1.exp(), log_p2.exp()
+                starts, ends = util.discretize(p1, p2, max_len, use_squad_v2)
+    
+                # Log info
+    
+                preds, _ = util.convert_tokens(gold_dict,
+                                               ids.tolist(),
+                                               starts.tolist(),
+                                               ends.tolist(),
+                                               use_squad_v2)
+                pred_dict.update(preds)
+    
+        model.train()
+    
+        temp_results = util.eval_dicts(gold_dict, pred_dict, use_squad_v2)
+        temp_results_list = [('NLL', nll_meter.avg),
+                        ('F1', temp_results['F1']),
+                        ('AvNA', temp_results['AvNA']),
+                        ('EM', temp_results['EM'])]
+        temp_results = OrderedDict(temp_results_list)
+        results.update(temp_results)
+        ret_preds.append(pred_dict)
 
-    return results, ret_preds
+     return results, ret_preds
 
 
 if __name__ == '__main__':

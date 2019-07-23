@@ -386,7 +386,7 @@ def masked_softmax(logits, mask, dim=-1, log_softmax=False):
     return probs
 
 
-def visualize(tbx, pred_dicts, eval_path, step, split, num_visuals):
+def visualize(tbx, pred_dict, eval_path, step, split, num_visuals):
     """Visualize text examples to TensorBoard.
 
     Args:
@@ -400,30 +400,29 @@ def visualize(tbx, pred_dicts, eval_path, step, split, num_visuals):
     if num_visuals <= 0:
         return
 
+    if num_visuals > len(pred_dict):
+        num_visuals = len(pred_dict)
+
+    visual_ids = np.random.choice(list(pred_dict), size=num_visuals, replace=False)
+
     with open(eval_path, 'r') as eval_file:
-        eval_dicts = json.load(eval_file)
+        eval_dict = json.load(eval_file)
     
-    for pred_dict, eval_dict in zip(pred_dicts, eval_dicts):
+    for i, id_ in enumerate(visual_ids):
+        pred = pred_dict[id_] or 'N/A'
+        example = eval_dict[str(id_)]
+        question = example['question']
+        context = example['context']
+        answers = example['answers']
 
-        if num_visuals > len(pred_dict):
-            num_visuals = len(pred_dict)
-
-        visual_ids = np.random.choice(list(pred_dict), size=num_visuals, replace=False)
-        for i, id_ in enumerate(visual_ids):
-            pred = pred_dict[id_] or 'N/A'
-            example = eval_dict[str(id_)]
-            question = example['question']
-            context = example['context']
-            answers = example['answers']
-
-            gold = answers[0] if answers else 'N/A'
-            tbl_fmt = (f'- **Question:** {question}\n'
-                       + f'- **Context:** {context}\n'
-                       + f'- **Answer:** {gold}\n'
-                       + f'- **Prediction:** {pred}')
-            tbx.add_text(tag=f'{split}/{i+1}_of_{num_visuals}',
-                         text_string=tbl_fmt,
-                         global_step=step)
+        gold = answers[0] if answers else 'N/A'
+        tbl_fmt = (f'- **Question:** {question}\n'
+                   + f'- **Context:** {context}\n'
+                   + f'- **Answer:** {gold}\n'
+                   + f'- **Prediction:** {pred}')
+        tbx.add_text(tag=f'{split}/{i+1}_of_{num_visuals}',
+                     text_string=tbl_fmt,
+                     global_step=step)
 
 
 def save_preds(preds, save_dir, file_name='predictions.csv'):
@@ -574,23 +573,24 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     pred_dict = {}
     sub_dict = {}
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
-        if str(qid) in eval_dict.keys():
+#        if str(qid) in eval_dict.keys():
    #     if not ('1' in eval_dict.keys()):
    #         print(f"eval_dict keys{eval_dict.keys()}")
 
-            context = eval_dict[str(qid)]["context"]
-            spans = eval_dict[str(qid)]["spans"]
-            uuid = eval_dict[str(qid)]["uuid"]
-            if no_answer and (y_start == 0 or y_end == 0):
-                pred_dict[str(qid)] = ''
-                sub_dict[uuid] = ''
-            else:
-                if no_answer:
-                    y_start, y_end = y_start - 1, y_end - 1
-                start_idx = spans[y_start][0]
-                end_idx = spans[y_end][1]
-                pred_dict[str(qid)] = context[start_idx: end_idx]
-                sub_dict[uuid] = context[start_idx: end_idx]
+        context = eval_dict[str(qid)]["context"]
+        spans = eval_dict[str(qid)]["spans"]
+        uuid = eval_dict[str(qid)]["uuid"]
+        if no_answer and (y_start == 0 or y_end == 0):
+            pred_dict[str(qid)] = ''
+            sub_dict[uuid] = ''
+        else:
+            if no_answer:
+                y_start, y_end = y_start - 1, y_end - 1
+            start_idx = spans[y_start][0]
+            end_idx = spans[y_end][1]
+            pred_dict[str(qid)] = context[start_idx: end_idx]
+            sub_dict[uuid] = context[start_idx: end_idx]
+
     return pred_dict, sub_dict
 
 

@@ -570,27 +570,28 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     """
     pred_dict = {}
     sub_dict = {}
-    total = 0
-    total_ = 0
+   # total = 0
+   # total_ = 0
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
-    #    total_ += 1
-    #    if str(qid) in eval_dict.keys():
-    #        total += 1
-        if not ('1' in eval_dict.keys()):
-            print(f"eval_dict keys{eval_dict.keys()}")
-        context = eval_dict[str(qid)]["context"]
-        spans = eval_dict[str(qid)]["spans"]
-        uuid = eval_dict[str(qid)]["uuid"]
-        if no_answer and (y_start == 0 or y_end == 0):
-            pred_dict[str(qid)] = ''
-            sub_dict[uuid] = ''
-        else:
-            if no_answer:
-                y_start, y_end = y_start - 1, y_end - 1
-            start_idx = spans[y_start][0]
-            end_idx = spans[y_end][1]
-            pred_dict[str(qid)] = context[start_idx: end_idx]
-            sub_dict[uuid] = context[start_idx: end_idx]
+        total_ += 1
+        if str(qid) in eval_dict.keys():
+            total += 1
+   #     if not ('1' in eval_dict.keys()):
+   #         print(f"eval_dict keys{eval_dict.keys()}")
+
+            context = eval_dict[str(qid)]["context"]
+            spans = eval_dict[str(qid)]["spans"]
+            uuid = eval_dict[str(qid)]["uuid"]
+            if no_answer and (y_start == 0 or y_end == 0):
+                pred_dict[str(qid)] = ''
+                sub_dict[uuid] = ''
+            else:
+                if no_answer:
+                    y_start, y_end = y_start - 1, y_end - 1
+                start_idx = spans[y_start][0]
+                end_idx = spans[y_end][1]
+                pred_dict[str(qid)] = context[start_idx: end_idx]
+                sub_dict[uuid] = context[start_idx: end_idx]
 #    print(f"evaluated {total}/{total_} examples")
     return pred_dict, sub_dict
 
@@ -608,13 +609,14 @@ def metric_max_over_ground_truths(metric_fn, prediction, ground_truths):
 def eval_dicts(gold_dict, pred_dict, no_answer):
     avna = f1 = em = total = 0
     for key, value in pred_dict.items():
-        total += 1
-        ground_truths = gold_dict[key]['answers']
-        prediction = value
-        em += metric_max_over_ground_truths(compute_em, prediction, ground_truths)
-        f1 += metric_max_over_ground_truths(compute_f1, prediction, ground_truths)
-        if no_answer:
-            avna += compute_avna(prediction, ground_truths)
+        if key in gold_dict:
+            total += 1
+            ground_truths = gold_dict[key]['answers']
+            prediction = value
+            em += metric_max_over_ground_truths(compute_em, prediction, ground_truths)
+            f1 += metric_max_over_ground_truths(compute_f1, prediction, ground_truths)
+            if no_answer:
+                avna += compute_avna(prediction, ground_truths)
 
     eval_dict = {'EM': 100. * em / total,
                  'F1': 100. * f1 / total}

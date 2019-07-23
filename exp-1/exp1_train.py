@@ -171,7 +171,6 @@ def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     with open(eval_file, 'r') as fh:
         gold_dicts = json_load(fh)
         for gold_dict in tqdm(gold_dicts):
-            print(f"len gold dict {len(gold_dict.keys())}")
             with torch.no_grad():
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in data_loader:
                     # Setup for forward

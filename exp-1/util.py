@@ -570,8 +570,8 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     """
     pred_dict = {}
     sub_dict = {}
-   # total = 0
-   # total_ = 0
+    total = 0
+    total_ = 0
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
         total_ += 1
         if str(qid) in eval_dict.keys():

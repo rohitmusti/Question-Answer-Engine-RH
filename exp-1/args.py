@@ -255,7 +255,3 @@ def _add_common_exp1_args(parser):
                          type=int,
                          default=None,
                          help='the number of chunks you have to iterate through while training')
-    parser.add_argument('--num_dev_chunks',
-                         type=int,
-                         default=None,
-                         help='the number of chunks you have to iterate through while evaluating during training')

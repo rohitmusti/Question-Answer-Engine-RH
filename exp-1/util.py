@@ -574,7 +574,7 @@ def convert_tokens(eval_dict, qa_id, y_start_list, y_end_list, no_answer):
     for qid, y_start, y_end in zip(qa_id, y_start_list, y_end_list):
         print(f"type of qid: {type(qid)}")
         print(f"qid: {qid}")
-        print(f"eval dict at qid: {eval_dict[qid]}")
+        print(f"eval dict at qid: {eval_dict[str(qid)]}")
         context = eval_dict[str(qid)]["context"]
         spans = eval_dict[str(qid)]["spans"]
         uuid = eval_dict[str(qid)]["uuid"]

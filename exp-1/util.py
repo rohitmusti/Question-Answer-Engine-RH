@@ -399,22 +399,23 @@ def visualize(tbx, pred_dicts, eval_path, step, split, num_visuals):
     """
     if num_visuals <= 0:
         return
-    if num_visuals > len(pred_dict):
-        num_visuals = len(pred_dict)
-
-    visual_ids = np.random.choice(list(pred_dict), size=num_visuals, replace=False)
 
     with open(eval_path, 'r') as eval_file:
         eval_dicts = json.load(eval_file)
     
     for pred_dict, eval_dict in zip(pred_dicts, eval_dicts):
+
+        if num_visuals > len(pred_dict):
+            num_visuals = len(pred_dict)
+
+        visual_ids = np.random.choice(list(pred_dict), size=num_visuals, replace=False)
         for i, id_ in enumerate(visual_ids):
             pred = pred_dict[id_] or 'N/A'
             example = eval_dict[str(id_)]
             question = example['question']
             context = example['context']
             answers = example['answers']
-    
+
             gold = answers[0] if answers else 'N/A'
             tbl_fmt = (f'- **Question:** {question}\n'
                        + f'- **Context:** {context}\n'

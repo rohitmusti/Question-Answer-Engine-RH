@@ -237,15 +237,15 @@ def _add_common_exp1_args(parser):
                         help='question number of words limit.')
     parser.add_argument('--para_limit',
                         type=int,
-                        default=1500,
+                        default=4000,
                         help='paragraph character limit.')
     parser.add_argument('--ans_limit',
                         type=int,
-                        default=50,
+                        default=30,
                         help='answer word limit.')
     parser.add_argument('--char_limit',
                         type=int,
-                        default=30,
+                        default=16,
                         help='max number of chars to keep from a word limit.')
     parser.add_argument('--chunk_size',
                          type=int,

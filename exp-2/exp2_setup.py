@@ -114,7 +114,7 @@ def process_file(filename, data_type, word_counter, char_counter, logger, chunk_
                                              "spans": spans,
                                              "answers": answer_texts,
                                              "uuid": qa["id"]}
-            if chunk_tracker == 0 or n == (len(source['data'])-1):
+            if chunk_tracker == 0 or topic_id == (len(source['data'])-1):
 #                print(f"creating chunk b/c {chunk_tracker == 0} or {n == (len(source['data'])-1)}")
 #                print(f"number of examples is {chunk_size - chunk_tracker}")
                 ret_examples.append(examples)
@@ -123,7 +123,6 @@ def process_file(filename, data_type, word_counter, char_counter, logger, chunk_
                 eval_examples={}
                 chunk_tracker = chunk_size
 
-        logger.info(f"{len(examples)} questions in total")
     return ret_examples, ret_eval_examples, topic_context_examples
 
 def process_file_dev(filename, data_type, word_counter, char_counter, logger):
@@ -293,8 +292,8 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
         context_char_idxs.append(context_char_idx)
 
     np.savez(args.exp2_topic_contexts,
-             context_idxs=np.array(ques_idxs),
-             context_char_idxs=np.array(ques_char_idxs))
+             context_idxs=np.array(context_idxs),
+             context_char_idxs=np.array(context_char_idxs))
 
     # question + answer feature building
     logger.info(f"Creating the {data_type} question and answer features")
@@ -345,6 +344,7 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
                  topic_ids=np.array(topic_ids))
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
+    logger.info(f"created {len(examples)} chunks for {data_type}")
     return meta
 
 

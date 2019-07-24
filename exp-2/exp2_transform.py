@@ -16,7 +16,6 @@ def exp2_transformer(in_file, out_file, logger):
         new_data["data"] = []
         logger.info("Creating all context list")
         for topic_id, topic in tqdm(enumerate(source["data"])):
-            logger.info(f"Processing: {topic['title']}")
             context_buffer = 0
             topic_dict = {}
             topic_dict["title"] = topic["title"]
@@ -55,10 +54,10 @@ if __name__ == "__main__":
     logger = get_logger(log_dir=args.logging_dir, name="exp2 data transformer")
 
     if datasplit=="train" or datasplit=="all":
-        exp2_transformer(args.train_data_orig, args.train_data_exp2, logger)
+        exp2_transformer(args.train_data_src, args.train_data_exp2, logger)
     if datasplit=="dev" or datasplit=="all":
-        exp2_transformer(args.dev_data_orig, args.dev_data_exp2, logger)
+        exp2_transformer(args.dev_data_src, args.dev_data_exp2, logger)
     if datasplit=="test" or datasplit=="all":
-        exp2_transformer(args.test_data_orig, args.test_data_exp2, logger)
+        exp2_transformer(args.test_data_src, args.test_data_exp2, logger)
     else:
         raise ValueError("Unrecognized or missing flags")

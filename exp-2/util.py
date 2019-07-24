@@ -47,7 +47,7 @@ class SQuAD(data.Dataset):
         dataset = np.load(data_path)
 
         if topic_contexts_path:
-            dataset2 = np.load(topic_contexts_path)
+            topic_contexts = np.load(topic_contexts_path)
 
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
         self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
@@ -56,8 +56,8 @@ class SQuAD(data.Dataset):
         self.y2s = torch.from_numpy(dataset['y2s']).long()
 
         if training:
-            self.context_idxs = torch.from_numpy(dataset2['context_idxs']).long()
-            self.context_char_idxs = torch.from_numpy(dataset2['context_char_idxs']).long()
+            self.context_idxs = torch.from_numpy(topic_contexts['context_idxs']).long()
+            self.context_char_idxs = torch.from_numpy(topic_contexts['context_char_idxs']).long()
         else:
             self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
             self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()

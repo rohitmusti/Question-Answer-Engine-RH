@@ -7,7 +7,7 @@ import ujson as json
 from tqdm import tqdm
 from toolkit import save, quick_clean, get_logger
 from random import randrange
-from args import get_exp1_data_gen_args
+from args import get_exp2_data_gen_args
 
 def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, dev_topic_num, test_topic_num, logger):
     """
@@ -79,7 +79,7 @@ def toy_transformer(in_file, train_file, dev_file, test_file, train_topic_num, d
     save(filename=test_file, obj=new_test_data)
 
 if __name__ == "__main__":
-    args = get_exp1_data_gen_args()
+    args = get_exp2_data_gen_args()
     log = get_logger(log_dir=args.logging_dir, name="data-gen")
     toy_transformer(in_file=args.raw_train_data, 
                     train_file=args.train_data_src, 

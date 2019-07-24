@@ -151,6 +151,8 @@ def main(args):
 
                         # Log to TensorBoard
                         log.info('Visualizing in TensorBoard...')
+                        for k, v in results.items():
+                            tbx.add_scalar(f'dev/{k}', v, step)
                         util.visualize(tbx,
                                        pred_dict=pred_dict,
                                        eval_path=args.dev_eval_file,

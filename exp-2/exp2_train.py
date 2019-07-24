@@ -78,7 +78,8 @@ def main(args):
 
     # Get data loader
     log.info('Building dataset...')
-    train_dataset = SQuAD(args.train_record_file_exp2, use_v2=True)
+    train_dataset = SQuAD(args.train_record_file_exp2, use_v2=True, 
+                          training=True, topic_contexts_path=args.exp2_topic_contexts)
     train_loader = data.DataLoader(train_dataset,
                                    batch_size=args.batch_size,
                                    shuffle=True,

@@ -226,8 +226,12 @@ def _add_common_exp2_args(parser):
                         help="File reserved for storing dev evaluation data")
     parser.add_argument("--train_record_file_exp2",
                         type=str,
-                        default="data/train/train-exp2.npz", 
+                        default="data/train/train-exp2", 
                         help="File reserved storing the processed and prepped training data")
+    parser.add_argument("--exp2_topic_contexts",
+                        type=str,
+                        default="data/train/exp2_topic_contexts.npz", 
+                        help="File reserved storing the processed and prepped topic_contexts")
     parser.add_argument("--dev_record_file_exp2",
                         type=str,
                         default="data/dev/dev-exp2.npz", 

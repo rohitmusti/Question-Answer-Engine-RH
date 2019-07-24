@@ -47,14 +47,17 @@ def convert_idx(text, tokens):
 
 def process_file(filename, data_type, word_counter, char_counter, logger, chunk_size):
     logger.info(f"Pre-processing {data_type} examples...")
+    ret_examples = []
+    ret_eval_examples = []
     examples = []
     eval_examples = {}
     topic_context_examples = []
     total = 0
     with open(filename, "r") as fh:
         source = json.load(fh)
+        chunk_tracker = chunk_size
         for topic_id, topic in tqdm(enumerate(source["data"])):
-
+            chunk_tracker -= 1
             # context processing
             topic_context = quick_clean(raw_str=topic["context"])
             topic_context_tokens = word_tokenize(topic_context)
@@ -111,9 +114,17 @@ def process_file(filename, data_type, word_counter, char_counter, logger, chunk_
                                              "spans": spans,
                                              "answers": answer_texts,
                                              "uuid": qa["id"]}
+            if chunk_tracker == 0 or n == (len(source['data'])-1):
+#                print(f"creating chunk b/c {chunk_tracker == 0} or {n == (len(source['data'])-1)}")
+#                print(f"number of examples is {chunk_size - chunk_tracker}")
+                ret_examples.append(examples)
+                ret_eval_examples.append(eval_examples)
+                examples=[]
+                eval_examples={}
+                chunk_tracker = chunk_size
 
         logger.info(f"{len(examples)} questions in total")
-    return examples, eval_examples, topic_context_examples
+    return ret_examples, ret_eval_examples, topic_context_examples
 
 def process_file_dev(filename, data_type, word_counter, char_counter, logger):
     logger.info(f"Pre-processing {data_type} examples...")
@@ -281,51 +292,57 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
                 context_char_idx[i, j] = _get_char(char)
         context_char_idxs.append(context_char_idx)
 
+    np.savez(args.exp2_topic_contexts,
+             context_idxs=np.array(ques_idxs),
+             context_char_idxs=np.array(ques_char_idxs))
+
     # question + answer feature building
     logger.info(f"Creating the {data_type} question and answer features")
-    for example in tqdm(examples):
-        total_ += 1
+    for n, chunk in enumerate(examples):
+        ques_idxs, ques_char_idxs = [], []
+        y1s, y2s, ids = [], [], []
+        for example in tqdm(chunk):
+            total_ += 1
 
-        if drop_example(example, is_test):
-            continue
+            if drop_example(example, is_test):
+                continue
 
-        total += 1
+            total += 1
 
-        ques_idx = np.zeros([ques_limit], dtype=np.int32)
-        ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
+            ques_idx = np.zeros([ques_limit], dtype=np.int32)
+            ques_char_idx = np.zeros([ques_limit, char_limit], dtype=np.int32)
 
-        for i, token in enumerate(example["ques_tokens"]):
-            ques_idx[i] = _get_word(token)
-        ques_idxs.append(ques_idx)
-
-
-        for i, token in enumerate(example["ques_chars"]):
-            for j, char in enumerate(token):
-                if j == char_limit:
-                    break
-                ques_char_idx[i, j] = _get_char(char)
-        ques_char_idxs.append(ques_char_idx)
-
-        if is_answerable(example):
-            start, end = example["y1s"][-1], example["y2s"][-1]
-        else:
-            start, end = -1, -1
-
-        y1s.append(start)
-        y2s.append(end)
-        ids.append(example["id"])
-        topic_ids.append(example["topic_context_id"])
+            for i, token in enumerate(example["ques_tokens"]):
+                ques_idx[i] = _get_word(token)
+            ques_idxs.append(ques_idx)
 
 
-    np.savez(out_file,
-             context_idxs=np.array(ques_idxs),
-             context_char_idxs=np.array(ques_char_idxs),
-             ques_idxs=np.array(ques_idxs),
-             ques_char_idxs=np.array(ques_char_idxs),
-             y1s=np.array(y1s),
-             y2s=np.array(y2s),
-             ids=np.array(ids),
-             topic_ids=np.array(topic_ids))
+            for i, token in enumerate(example["ques_chars"]):
+                for j, char in enumerate(token):
+                    if j == char_limit:
+                        break
+                    ques_char_idx[i, j] = _get_char(char)
+            ques_char_idxs.append(ques_char_idx)
+
+            if is_answerable(example):
+                start, end = example["y1s"][-1], example["y2s"][-1]
+            else:
+                start, end = -1, -1
+
+            y1s.append(start)
+            y2s.append(end)
+            ids.append(example["id"])
+            topic_ids.append(example["topic_context_id"])
+
+                                
+        logger.info("Saving file ...")
+        np.savez(f"{out_file}_{n}.npz",
+                 ques_idxs=np.array(ques_idxs),
+                 ques_char_idxs=np.array(ques_char_idxs),
+                 y1s=np.array(y1s),
+                 y2s=np.array(y2s),
+                 ids=np.array(ids),
+                 topic_ids=np.array(topic_ids))
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     return meta

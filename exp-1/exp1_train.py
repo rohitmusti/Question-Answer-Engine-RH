@@ -76,6 +76,13 @@ def main(args):
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
     # Get data loader
+
+    dev_dataset = SQuAD(args.dev_record_file_exp1, use_v2=True)
+    dev_loader = data.DataLoader(dev_dataset,
+                                 batch_size=args.batch_size,
+                                 shuffle=False,
+                                 num_workers=args.num_workers,
+                                 collate_fn=collate_fn)
     for i in range(args.num_train_chunks):
         train_rec_file = f"{args.train_record_file_exp1}_{i}.npz"
         log.info(f'Building dataset from {train_rec_file}...')
@@ -132,12 +139,6 @@ def main(args):
                         log.info(f"Evaluating at step {step}...")
                         ema.assign(model)
 
-                        dev_dataset = SQuAD(args.dev_record_file_exp1, use_v2=True)
-                        dev_loader = data.DataLoader(dev_dataset,
-                                                     batch_size=args.batch_size,
-                                                     shuffle=False,
-                                                     num_workers=args.num_workers,
-                                                     collate_fn=collate_fn)
                         results, pred_dict = evaluate(model, dev_loader, device,
                                                       args.dev_eval_file,
                                                       args.max_ans_len,

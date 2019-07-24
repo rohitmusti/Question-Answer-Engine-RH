@@ -77,8 +77,9 @@ def main(args):
 
     # Get data loader
     for i in range(args.num_train_chunks):
-        log.info('Building dataset...')
-        train_dataset = SQuAD(f"{args.train_record_file_exp1}_{i}.npz", use_v2=True)
+        train_rec_file = f"{args.train_record_file_exp1}_{i}.npz"
+        log.info(f'Building dataset from {train_rec_file}...')
+        train_dataset = SQuAD(train_rec_file, use_v2=True)
         train_loader = data.DataLoader(train_dataset,
                                        batch_size=args.batch_size,
                                        shuffle=True,
@@ -88,7 +89,7 @@ def main(args):
         # Train
         log.info('Training...')
         steps_till_eval = args.eval_steps
-        epoch = step // len(train_dataset)
+        epoch = 0
         while epoch != args.num_epochs:
             epoch += 1
             log.info(f"Starting epoch {epoch}...")

@@ -41,7 +41,6 @@ def toy_transformer(raw_data_file, train_data_file, dev_data_file, test_data_fil
         dev_topic_counter = dev_topic_num
         test_topic_counter = test_topic_num
         for topic in (source["data"]):
-            logger.info(f"Processing: {topic['title']}")
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["paragraphs"] = []

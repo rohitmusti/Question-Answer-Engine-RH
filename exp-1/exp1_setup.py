@@ -135,10 +135,14 @@ def process_file(filename, data_type, word_counter, char_counter, chunk_size=1):
     total = 0
     with open(filename, "r") as fh:
         source = json.load(fh)
-        chunk_number = len(source['data'])/chunk_size
-        for n, article in tqdm(enumerate(source["data"])):
-            chunk_number -= 1
-            for para in article["paragraphs"]:
+#        print(f"the len of the data is {len(source['data'])}")
+#        print(f"the chunk size is {chunk_size}")
+#        chunk_number = len(source['data'])/chunk_size
+#        print(f"the chunk number is {chunk_number}")
+        chunk_tracker = chunk_size
+        for n, topic in tqdm(enumerate(source["data"])):
+            chunk_tracker -= 1
+            for para in topic["paragraphs"]:
                 context = para["context"].replace(
                     "''", '" ').replace("``", '" ')
                 context_tokens = word_tokenize(context)
@@ -185,11 +189,14 @@ def process_file(filename, data_type, word_counter, char_counter, chunk_size=1):
                                                  "spans": spans,
                                                  "answers": answer_texts,
                                                  "uuid": qa["id"]}
-                if chunk_number == 0 or n == (len(source['data'])-1):
-                    ret_examples.append(examples)
-                    ret_eval_examples.append(eval_examples)
-                    examples=[]
-                    eval_examples={}
+            if chunk_tracker == 0 or n == (len(source['data'])-1):
+#                print(f"creating chunk b/c {chunk_tracker == 0} or {n == (len(source['data'])-1)}")
+#                print(f"number of examples is {chunk_size - chunk_tracker}")
+                ret_examples.append(examples)
+                ret_eval_examples.append(eval_examples)
+                examples=[]
+                eval_examples={}
+                chunk_tracker = chunk_size
                         
     return ret_examples, ret_eval_examples
 
@@ -333,11 +340,7 @@ def build_features_dev(args, examples, data_type, out_file, word2idx_dict, char2
 
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
-    logger.info(f"created {len(examples)} chunks for {data_type}")
     return meta
-
-
-
 
 def get_embedding(counter, data_type, limit=-1, emb_file=None, vec_size=None, num_vectors=None):
     logger.info(f"Pre-processing {data_type} vectors...")

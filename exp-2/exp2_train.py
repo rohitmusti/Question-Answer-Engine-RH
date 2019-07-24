@@ -98,7 +98,7 @@ def main(args):
         # Train
         log.info('Training...')
         steps_till_eval = args.eval_steps
-        epoch = step // len(train_dataset)
+        epoch = 0
         # torch.set_num_threads(7)
         for epoch in range(args.num_epochs):
             epoch += 1

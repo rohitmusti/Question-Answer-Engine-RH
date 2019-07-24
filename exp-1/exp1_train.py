@@ -90,9 +90,8 @@ def main(args):
         log.info('Training...')
         steps_till_eval = args.eval_steps
         epoch = 0
-        while epoch != args.num_epochs:
-            epoch += 1
-            log.info(f"Starting epoch {epoch}...")
+        for epoch in range(args.num_epochs):
+            log.info(f"Starting epoch {epoch+1}/{args.num_epochs}...")
             with torch.enable_grad(), \
                     tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:

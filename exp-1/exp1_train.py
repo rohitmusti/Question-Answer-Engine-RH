@@ -117,7 +117,7 @@ def main(args):
                     # Log info
                     step += batch_size
                     progress_bar.update(batch_size)
-                    progress_bar.set_postfix(epoch=epoch,
+                    progress_bar.set_postfix(epoch=(epoch+1),
                                              NLL=loss_val)
                     tbx.add_scalar(f'{args.datasplit}/NLL', loss_val, step)
                     tbx.add_scalar(f'{args.datasplit}/LR',

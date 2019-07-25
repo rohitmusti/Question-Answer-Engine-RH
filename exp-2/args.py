@@ -47,22 +47,6 @@ def get_exp2_setup_args():
                         type=int,
                         default=64,
                         help="Glove char dimension")
-    parser.add_argument('--ques_limit',
-                        type=int,
-                        default=50,
-                        help='question number of words limit.')
-    parser.add_argument('--para_limit',
-                        type=int,
-                        default=3800,
-                        help='paragraph character limit.')
-    parser.add_argument('--ans_limit',
-                        type=int,
-                        default=3800,
-                        help='answer word limit.')
-    parser.add_argument('--char_limit',
-                        type=int,
-                        default=3800,
-                        help='max number of chars to keep from a word limit.')
     args = parser.parse_args()
     return args
 
@@ -110,23 +94,6 @@ def get_exp2_training_args():
                         default='F1',
                         choices=('NLL', 'EM', 'F1'),
                         help='Name of dev metric to determine best checkpoint.')
-    parser.add_argument('--ques_limit',
-                        type=int,
-                        default=50,
-                        help='question number of words limit.')
-    parser.add_argument('--para_limit',
-                        type=int,
-                        default=3800,
-                        help='paragraph character limit.')
-    parser.add_argument('--ans_limit',
-                        type=int,
-                        default=3800,
-                        help='answer word limit.')
-    parser.add_argument('--char_limit',
-                        type=int,
-                        default=3800,
-                        help='max number of chars to keep from a word limit.')
-
 
     args = parser.parse_args()
 
@@ -274,6 +241,21 @@ def _add_common_exp2_args(parser):
                          type=int,
                          default=None,
                          help='the number of chunks you have to iterate through while training')
-
+    parser.add_argument('--ques_limit',
+                        type=int,
+                        default=50,
+                        help='question number of words limit.')
+    parser.add_argument('--para_limit',
+                        type=int,
+                        default=4000,
+                        help='paragraph character limit.')
+    parser.add_argument('--ans_limit',
+                        type=int,
+                        default=30,
+                        help='answer word limit.')
+    parser.add_argument('--char_limit',
+                        type=int,
+                        default=16,
+                        help='max number of chars to keep from a word limit.')
 
 

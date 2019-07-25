@@ -103,13 +103,12 @@ def main(args):
         for epoch in range(args.num_epochs):
             epoch += 1
             log.info(f"Starting epoch {epoch}...")
-            with torch.enable_grad(), \
-                    tqdm(total=len(train_loader.dataset)) as progress_bar:
+            with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:
                     # Setup for forward
                     cw_idxs = cw_idxs.to(device)
                     qw_idxs = qw_idxs.to(device)
-                    batch_size = cw_idxs.size(0)
+                    batch_size = qw_idxs.size(0)
                     optimizer.zero_grad()
 
                     # Forward

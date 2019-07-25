@@ -88,7 +88,7 @@ def main(args):
         train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
         log.info(f'Building dataset from {train_rec_file} ...')
         train_dataset = SQuAD(train_rec_file, use_v2=True, 
-                              training=True, topic_contexts_path=args.exp2_topic_contexts)
+                              topic_contexts_path=args.exp2_topic_contexts)
         train_loader = data.DataLoader(train_dataset,
                                        batch_size=args.batch_size,
                                        shuffle=True,

@@ -207,20 +207,22 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
 
     # context feature building
     logger.info(f"Creating the {data_type} topic_context features")
-    for topic in tqdm(topic_contexts):
+    for z, topic in tqdm(enumerate(topic_contexts)):
         context_idx = np.zeros([para_limit], dtype=np.int32)
         context_char_idx = np.zeros([para_limit, char_limit], dtype=np.int32)
 
-        for i, cw_token, cc_token in enumerate(zip(topic["context_tokens"], topic["context_chars"])):
+        i = 0
+        for cw_token, cc_token in zip(topic["context_tokens"], topic["context_chars"]):
+            i += 1
             context_idx[i] = _get_word(cw_token)
             for j, char in enumerate(cc_token):
                 if j == char_limit:
                     break
                 context_char_idx[i, j] = _get_char(char)
 
-            np.savez(f"{exp2_topic_contexts_file}-{i}.npz",
-                     context_idxs=np.array(context_idx),
-                     context_char_idxs=np.array(context_char_idx))
+        np.savez(f"{exp2_topic_contexts_file}-{z}.npz",
+                 context_idxs=np.array(context_idx),
+                 context_char_idxs=np.array(context_char_idx))
 
 
     # question + answer feature building

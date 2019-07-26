@@ -141,7 +141,9 @@ def main(args):
                             all_results = OrderedDict() 
                             dev_rec_file = f"{args.dev_record_file_exp2}_{i}.npz"
                             log.info(f'Building evaluating dataset from {dev_rec_file} ...')
-                            dev_dataset = SQuAD(dev_rec_file, args.exp2_dev_topic_contexts, use_v2=True)
+                            dev_dataset = SQuAD(dev_rec_file, 
+                                                args.exp2_dev_topic_contexts, 
+                                                use_v2=True)
                             dev_loader = data.DataLoader(dev_dataset,
                                                            batch_size=args.batch_size,
                                                            shuffle=True,

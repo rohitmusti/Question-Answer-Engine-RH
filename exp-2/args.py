@@ -213,13 +213,17 @@ def _add_common_exp2_args(parser):
                         type=str,
                         default="data/train/train-exp2", 
                         help="File reserved storing the processed and prepped training data")
-    parser.add_argument("--exp2_topic_contexts",
+    parser.add_argument("--exp2_train_topic_contexts",
                         type=str,
                         default="data/train/exp2_topic_contexts.npz", 
                         help="File reserved storing the processed and prepped topic_contexts")
+    parser.add_argument("--exp2_dev_topic_contexts",
+                        type=str,
+                        default="data/dev/exp2_topic_contexts.npz", 
+                        help="File reserved storing the processed and prepped topic_contexts")
     parser.add_argument("--dev_record_file_exp2",
                         type=str,
-                        default="data/dev/dev-exp2.npz", 
+                        default="data/dev/dev-exp2", 
                         help="File reserved storing the processed and prepped dev data")
     parser.add_argument("--dev_meta_file",
                         type=str,
@@ -241,6 +245,10 @@ def _add_common_exp2_args(parser):
                          type=int,
                          default=None,
                          help='the number of chunks you have to iterate through while training')
+    parser.add_argument('--num_dev_chunks',
+                         type=int,
+                         default=None,
+                         help='the number of chunks you have to iterate through while evaluating on dev')
     parser.add_argument('--ques_limit',
                         type=int,
                         default=50,

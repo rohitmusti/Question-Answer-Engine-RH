@@ -41,19 +41,14 @@ class SQuAD(data.Dataset):
         data_path (str): Path to .npz file containing pre-processed dataset.
         use_v2 (bool): Whether to use SQuAD 2.0 questions. Otherwise only use SQuAD 1.1.
     """
-    def __init__(self, data_path, use_v2=True, training=False, topic_contexts_path=None):
+    def __init__(self, data_path, topic_contexts, use_v2=True):
         super(SQuAD, self).__init__()
 
         dataset = np.load(data_path)
+        tc = np.load(topic_contexts)
 
-        if topic_contexts_path:
-            topic_contexts = np.load(topic_contexts_path)
-            self.context_idxs = torch.from_numpy(topic_contexts['context_idxs']).long()
-            self.context_char_idxs = torch.from_numpy(topic_contexts['context_char_idxs']).long()
-        else:
-            self.context_idxs = torch.from_numpy(dataset['context_idxs']).long()
-            self.context_char_idxs = torch.from_numpy(dataset['context_char_idxs']).long()
-
+        self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
+        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
         self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids'])
@@ -69,11 +64,11 @@ class SQuAD(data.Dataset):
 #            print(f"shape of question_idxs: {self.question_idxs.shape}")
 #            print(f"shape of question_char_idxs: {self.question_char_idxs.shape}")
             batch_size, c_len, w_len = self.context_char_idxs.size()
-            ones = torch.ones((batch_size, 1), dtype=torch.int64)
-            self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
+#            ones = torch.ones((batch_size, 1), dtype=torch.int64)
+#            self.context_idxs = torch.cat((ones, self.context_idxs), dim=1)
 
-            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
-            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
+#            ones = torch.ones((batch_size, 1, w_len), dtype=torch.int64)
+#            self.context_char_idxs = torch.cat((ones, self.context_char_idxs), dim=1)
 
             batch_size, c_len, w_len = self.question_char_idxs.size()
 

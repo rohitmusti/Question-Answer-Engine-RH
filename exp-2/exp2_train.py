@@ -76,33 +76,25 @@ def main(args):
                                weight_decay=args.learning_rate_decay)
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
-    dev_dataset = SQuAD(args.dev_record_file_exp2, use_v2=True)
-    dev_loader = data.DataLoader(dev_dataset,
-                                 batch_size=args.batch_size,
-                                 shuffle=False,
-                                 num_workers=args.num_workers,
-                                 collate_fn=collate_fn)
 
-    for i in range(args.num_train_chunks):
-    # Get data loader
-        train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
-        log.info(f'Building dataset from {train_rec_file} ...')
-        train_dataset = SQuAD(train_rec_file, use_v2=True, 
-                              topic_contexts_path=args.exp2_topic_contexts)
-        train_loader = data.DataLoader(train_dataset,
-                                       batch_size=args.batch_size,
-                                       shuffle=True,
-                                       num_workers=args.num_workers,
-                                       collate_fn=collate_fn)
+    for epoch in range(args.num_epochs):
+        log.info(f"Starting epoch {epoch}...")
+        for i in range(args.num_train_chunks):
+        # Get data loader
+            train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
+            log.info(f'Building dataset from {train_rec_file} ...')
+            train_dataset = SQuAD(train_rec_file, args.exp2_train_topic_contexts, use_v2=True)
+            train_loader = data.DataLoader(train_dataset,
+                                           batch_size=args.batch_size,
+                                           shuffle=True,
+                                           num_workers=args.num_workers,
+                                           collate_fn=collate_fn)
 
-        # Train
-        log.info('Training...')
-        steps_till_eval = args.eval_steps
-        epoch = 0
+            # Train
+            log.info('Training...')
+            steps_till_eval = args.eval_steps
+            epoch = 0
         # torch.set_num_threads(7)
-        for epoch in range(args.num_epochs):
-            epoch += 1
-            log.info(f"Starting epoch {epoch}...")
             with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:
                     # Setup for forward
@@ -116,6 +108,7 @@ def main(args):
                     y1, y2 = y1.to(device), y2.to(device)
                     loss = F.nll_loss(log_p1, y1) + F.nll_loss(log_p2, y2)
                     loss_val = loss.item()
+                    print('made it here')
 
                     # Backward
                     loss.backward()
@@ -141,23 +134,39 @@ def main(args):
                         # Evaluate and save checkpoint
                         log.info(f"Evaluating at step {step}...")
                         ema.assign(model)
-                        results, pred_dict = evaluate(model, dev_loader, device,
-                                                      args.eval_file,
-                                                      args.max_ans_len,
-                                                      use_squad_v2=True)
-                        saver.save(step, model, results[args.metric_name], device)
+
+                        for i in range(args.num_dev_chunks):
+                        # Get data loader
+                            all_pred_dicts = {}
+                            all_results = OrderedDict() 
+                            dev_rec_file = f"{args.dev_record_file_exp2}_{i}.npz"
+                            log.info(f'Building evaluating dataset from {dev_rec_file} ...')
+                            dev_dataset = SQuAD(dev_rec_file, args.exp2_dev_topic_contexts, use_v2=True)
+                            dev_loader = data.DataLoader(dev_dataset,
+                                                           batch_size=args.batch_size,
+                                                           shuffle=True,
+                                                           num_workers=args.num_workers,
+                                                           collate_fn=collate_fn)
+                            results, pred_dict = evaluate(model, dev_loader, device,
+                                                          args.eval_file,
+                                                          args.max_ans_len,
+                                                          use_squad_v2=True)
+                            all_results.update(results)
+                            all_pred_dicts.update(pred_dict)
+
+                        saver.save(step, model, all_results[args.metric_name], device)
                         ema.resume(model)
 
                         # Log to console
-                        results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in results.items())
+                        results_str = ', '.join(f'{k}: {v:05.2f}' for k, v in all_results.items())
                         log.info(f"Dev {results_str}")
 
                         # Log to TensorBoard
                         log.info('Visualizing in TensorBoard...')
-                        for k, v in results.items():
+                        for k, v in all_results.items():
                             tbx.add_scalar(f"dev/{k}", v, step)
                         util.visualize(tbx,
-                                       pred_dict=pred_dict,
+                                       pred_dict=all_pred_dicts,
                                        eval_path=args.eval_file,
                                        step=step,
                                        split='dev',

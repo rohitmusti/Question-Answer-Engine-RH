@@ -155,6 +155,9 @@ def main(args):
                             all_results.update(results)
                             all_pred_dicts.update(pred_dict)
 
+                            del dev_dataset
+                            del dev_loader
+
                         saver.save(step, model, all_results[args.metric_name], device)
                         ema.resume(model)
 

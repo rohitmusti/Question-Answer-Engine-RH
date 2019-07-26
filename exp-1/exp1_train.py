@@ -87,6 +87,7 @@ def main(args):
     log.info('Training...')
     steps_till_eval = args.eval_steps
     for epoch in range(args.num_epochs):
+        log.info(f"Starting epoch {epoch+1}/{args.num_epochs}...")
         for i in range(args.num_train_chunks):
             train_rec_file = f"{args.train_record_file_exp1}_{i}.npz"
             log.info(f'Building dataset from {train_rec_file}...')
@@ -97,7 +98,6 @@ def main(args):
                                            num_workers=args.num_workers,
                                            collate_fn=collate_fn)
 
-            log.info(f"Starting epoch {epoch+1}/{args.num_epochs}...")
             with torch.enable_grad(), \
                     tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:

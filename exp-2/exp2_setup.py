@@ -118,7 +118,7 @@ def process_file(filename, data_type, word_counter, char_counter, logger, chunk_
 #                print(f"creating chunk b/c {chunk_tracker == 0} or {n == (len(source['data'])-1)}")
 #                print(f"number of examples is {chunk_size - chunk_tracker}")
                 ret_examples.append(examples)
-                ret_eval_examples.append(eval_examples)
+                ret_eval_examples.extend(eval_examples)
                 examples=[]
                 eval_examples={}
                 chunk_tracker = chunk_size

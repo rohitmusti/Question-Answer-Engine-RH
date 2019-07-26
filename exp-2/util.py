@@ -47,8 +47,6 @@ class SQuAD(data.Dataset):
         dataset = np.load(data_path)
         tc = np.load(topic_contexts)
 
-        self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
-        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
         self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids'])
@@ -89,8 +87,13 @@ class SQuAD(data.Dataset):
     def __getitem__(self, idx):
         idx = self.valid_idxs[idx]
         # I need to write a function to get the correct context_idx or context_char_idx
-        example = (self.context_idxs[self.topic_ids[idx]],
-                   self.context_char_idxs[self.topic_ids[idx]],
+
+        tc = np.load(f"{topic_contexts}-{self.topic_ids[idx]}.npz")
+        self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
+        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
+
+        example = (self.context_idxs,
+                   self.context_char_idxs,
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],

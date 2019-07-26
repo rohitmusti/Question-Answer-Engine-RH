@@ -83,21 +83,20 @@ def main(args):
                                  shuffle=False,
                                  num_workers=args.num_workers,
                                  collate_fn=collate_fn)
-    for i in range(args.num_train_chunks):
-        train_rec_file = f"{args.train_record_file_exp1}_{i}.npz"
-        log.info(f'Building dataset from {train_rec_file}...')
-        train_dataset = SQuAD(train_rec_file, use_v2=True)
-        train_loader = data.DataLoader(train_dataset,
-                                       batch_size=args.batch_size,
-                                       shuffle=True,
-                                       num_workers=args.num_workers,
-                                       collate_fn=collate_fn)
 
-        # Train
-        log.info('Training...')
-        steps_till_eval = args.eval_steps
-        epoch = 0
-        for epoch in range(args.num_epochs):
+    log.info('Training...')
+    steps_till_eval = args.eval_steps
+    for epoch in range(args.num_epochs):
+        for i in range(args.num_train_chunks):
+            train_rec_file = f"{args.train_record_file_exp1}_{i}.npz"
+            log.info(f'Building dataset from {train_rec_file}...')
+            train_dataset = SQuAD(train_rec_file, use_v2=True)
+            train_loader = data.DataLoader(train_dataset,
+                                           batch_size=args.batch_size,
+                                           shuffle=True,
+                                           num_workers=args.num_workers,
+                                           collate_fn=collate_fn)
+
             log.info(f"Starting epoch {epoch+1}/{args.num_epochs}...")
             with torch.enable_grad(), \
                     tqdm(total=len(train_loader.dataset)) as progress_bar:

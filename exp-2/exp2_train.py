@@ -149,7 +149,7 @@ def main(args):
                                                            num_workers=args.num_workers,
                                                            collate_fn=collate_fn)
                             results, pred_dict = evaluate(model, dev_loader, device,
-                                                          args.eval_file,
+                                                          args.dev_eval_file,
                                                           args.max_ans_len,
                                                           use_squad_v2=True)
                             all_results.update(results)
@@ -171,7 +171,7 @@ def main(args):
                             tbx.add_scalar(f"dev/{k}", v, step)
                         util.visualize(tbx,
                                        pred_dict=all_pred_dicts,
-                                       eval_path=args.eval_file,
+                                       eval_path=args.dev_eval_file,
                                        step=step,
                                        split='dev',
                                        num_visuals=args.num_visuals)

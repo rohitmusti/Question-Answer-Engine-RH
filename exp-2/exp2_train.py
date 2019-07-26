@@ -172,7 +172,8 @@ def main(args):
                                        step=step,
                                        split='dev',
                                        num_visuals=args.num_visuals)
-
+            del train_dataset
+            del train_loader
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     nll_meter = util.AverageMeter()

@@ -31,7 +31,7 @@ import torch
 
 def word_tokenize(sent):
     doc = nlp(sent)
-    return [re.sub('[^a-zA-Z]', '', token.text.lower().strip()) for token in doc if not token.is_stop]
+    return [token.text for token in doc if not token.is_stop]
 
 
 def convert_idx(text, tokens):
@@ -40,8 +40,7 @@ def convert_idx(text, tokens):
     for token in tokens:
         current = text.find(token, current)
         if current < 0:
-            logger.info(f"Token {token} cannot be found")
-            raise Exception()
+            continue
         spans.append((current, current + len(token)))
         current += len(token)
     return spans

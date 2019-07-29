@@ -62,7 +62,7 @@ def get_word_embedding(args, counter, limit=-1, vec_size=300, num_vectors=219601
 def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
     total, total_ = 0, 0
     ques_idxs, ids = [], []
-    print(f"Featurizing {data_type} examples")
+    log.info(f"Featurizing {data_type} examples")
     def _get_word(word):
         for each in (word, word.lower(), word.capitalize(), word.upper()):
             if each in word2idx_dict:

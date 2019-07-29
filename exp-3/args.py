@@ -6,7 +6,7 @@ def get_exp3_featurize_args():
 
     parser.add_argument("--ques_limit",
                         type=int,
-                        default=50,
+                        default=31,
                         help="The max number of words to keep from a question.")
     parser.add_argument("--glove_file",
                         type=str,

@@ -13,6 +13,7 @@ Author:
 
 import numpy as np
 import os
+import re
 import sys
 import spacy
 import ujson as json

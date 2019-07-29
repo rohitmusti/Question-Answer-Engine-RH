@@ -9,8 +9,9 @@ def longest_question(data_src):
     with open(data_src, "r") as fh:
         source = json.load(fh)
         for question, topic_id, topic_title in tqdm(source['data']):
-            if len(question) > max_len:
-                max_len = len(question)
+            qw = question.split()
+            if len(qw) > max_len:
+                max_len = len(qw)
                 longest_question = question
                 long_tid = topic_id
                 long_tt = topic_title
@@ -23,7 +24,7 @@ def average_question(data_src):
     with open(data_src, "r") as fh:
         source = json.load(fh)
         question_count = len(source["data"])
-        question_lens = [len(question) for question, _, _ in source['data']]
+        question_lens = [len(question.split()) for question, _, _ in source['data']]
         all_lens = sum(question_lens)
         average_len = all_lens / question_count
         print(f"average_question_length: {average_len}")

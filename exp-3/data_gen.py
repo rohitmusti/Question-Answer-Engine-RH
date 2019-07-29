@@ -5,17 +5,16 @@ from tqdm import tqdm
 
 def exp3_transformer(in_file, out_file, logger):
     """
-    distill original data into at most 15 topics, with each having at most 5 paragraphs,
-    each of which has 5 questions and 5 answers
+    convert data into (question, topic_id, topic title) format
     args:
-        - in_file: the file name of the data to be transformed to experiment 2
+        - in_file: the file name of the data to be transformed to experiment 3 format
         - out_file: the file name of where the ought to be written
 
     return:
         none, the data is written to an output
     """
     new_data = {}
-    new_data['experiment'] = "toy"
+    new_data["experiment"] = "toy"
     q_count = 0
     with open(in_file, "r") as fh:
         logger.info(f"Importing: {in_file}")
@@ -23,12 +22,9 @@ def exp3_transformer(in_file, out_file, logger):
         new_data["version"] = source["version"]
         new_data["data"] = []
         for topic_id, topic in tqdm(enumerate(source["data"])):
-            topic_dict = {}
-            topic_dict["title"] = topic["title"]
-            topic_dict["questions"] = []
             for para in topic["paragraphs"]:
                 for qas in para['qas']:
-                    topic_dict["questions"].append((quick_clean(raw_str=qas["question"]), topic_id))
+                    new_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
                     q_count += 1
 
     logger.info(f"Saving new data to {out_file}")

@@ -22,7 +22,7 @@ def quick_clean(raw_str):
     return
         - the original string w/ all quotes replaced as double quotes
     """
-    return raw_str.replace("''", '" ').replace("``", '" ')
+    return raw_str.replace("''", '" ').replace("``", '" ').strip()
 
 def get_logger(log_dir, name):
     """

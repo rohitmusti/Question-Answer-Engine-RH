@@ -12,22 +12,44 @@ def get_exp3_featurize_args():
                         type=str,
                         default="./data/glove.840.300d.txt",
                         help="The file containing the word vectors.")
+    parser.add_argument("--word_emb_file",
+                        type=str,
+                        default="./data/word-emb.json",
+                        help="The file containing word embedding maps.")
+    parser.add_argument("--train_in_file",
+                        type=str,
+                        default="./data/clean-train-exp3.json",
+                        help="The file containing the cleand and shrunken train data.")
+    parser.add_argument("--dev_in_file",
+                        type=str,
+                        default="./data/clean-dev-exp3.json",
+                        help="The file containing the cleand and shrunken dev data.")
+    parser.add_argument("--train_feature_file",
+                        type=str,
+                        default="./data/train-prepped-exp3.npz",
+                        help="The file containing the featurized train data.")
+    parser.add_argument("--dev_feature_file",
+                        type=str,
+                        default="./data/dev-prepped-exp3.npz",
+                        help="The file containing the featurized dev data.")
+    parser.add_argument("--train_title_id_map_file",
+                        type=str,
+                        default="./data/train-title-toppic-id-map.json",
+                        help="The file containing the mapping from topic_id to topic for the training data.")
+    parser.add_argument("--dev_title_id_map_file",
+                        type=str,
+                        default="./data/dev-title-toppic-id-map.json",
+                        help="The file containing the mapping from topic_id to topic for the dev data.")
+    parser.add_argument("--train_eval_file",
+                        type=str,
+                        default="./data/train-eval.json",
+                        help="The file containing data required to evaluate on the train set.")
+    parser.add_argument("--dev_eval_file",
+                        type=str,
+                        default="./data/dev-eval.json",
+                        help="The file containing data required to evaluate on the dev set.")
     
     args = parser.parse_args()
-    args.train_in_file = "./data/clean-train-exp3.json"
-    args.train_feature_file = "./data/train-prepped-exp3.npz"
-    args.train_topic_title_id_map_file = "./data/train-title-topic-id-map.json"
-    args.train_eval_examples_file = "./data/train-eval-examples.json"
-    args.train_feature_file = "./data/train-features.npz"
-    args.dev_in_file = "./data/clean-dev-exp3.json"
-    args.dev_feature_file = "./data/dev-prepped-exp3.npz"
-    args.dev_topic_title_id_map_file = "./data/dev-title-topic-id-map.json"
-    args.dev_eval_examples_file = "./data/dev-eval-examples.json"
-
-    args.word_emb_file = "./data/word-emb.json"
-    else:
-        raise ValueError(f'Unrecognized metric name: "{args.data_split}"')
-
     return args
 
 def get_exp3_transformer_args():

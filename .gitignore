@@ -7,4 +7,5 @@
 */logs/*
 */*.vscode
 */checkpoints/*
+*/scratch.py
 *.json

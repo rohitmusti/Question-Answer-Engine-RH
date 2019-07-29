@@ -30,7 +30,7 @@ import torch
 
 def word_tokenize(sent):
     doc = nlp(sent)
-    return [token.text for token in doc]
+    return [re.sub('[^a-zA-Z]', '', token.text.lower().strip()) for token in doc if not token.is_stop]
 
 
 def convert_idx(text, tokens):

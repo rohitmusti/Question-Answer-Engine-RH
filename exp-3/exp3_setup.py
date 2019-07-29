@@ -3,16 +3,16 @@ from tqdm import tqdm
 from collections import Counter
 import spacy
 import numpy as np
+import re
 
 from toolkit import get_logger, save
 from args import get_exp3_featurize_args
 
 def word_tokenize(sent):
     doc = nlp(sent)
-    return [token.text for token in doc]
+    return [re.sub('[^a-zA-Z]', '', token.text.lower().strip()) for token in doc if not token.is_stop]
 
 def pre_process(args, in_file,  word_counter, logger):
-    max_len = 0
     examples = []
     eval_examples = {}
     topic_title_id_map = {}
@@ -85,7 +85,7 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
     np.savez(out_file,
              qw_idxs=np.array(ques_idxs),
              ids=np.array(ids))
-    logger.info(f"Built and saved {total}/{total_} fully featurized examples")
+    logger.info(f"Built and saved {total_}/{total} fully featurized examples")
             
             
 if __name__=="__main__":
@@ -100,6 +100,10 @@ if __name__=="__main__":
                                                               logger=log)
     save(filename=args.train_topic_title_id_map_file, obj=topic_title_id_map)
     save(filename=args.train_eval_file, obj=eval_examples)
+
+    word_emb_mat, word2idx_dict = get_word_embedding(args=args, counter=word_counter,
+                                                     logger=log)
+    save(args.word_emb_file, word_emb_mat)
     
     dev_examples, dev_eval_examples, dev_topic_title_id_map = pre_process(args=args, 
                                                               in_file=args.dev_in_file,
@@ -110,9 +114,6 @@ if __name__=="__main__":
     save(filename=args.dev_eval_file, obj=dev_eval_examples)
 
 
-    word_emb_mat, word2idx_dict = get_word_embedding(args=args, counter=word_counter,
-                                                     logger=log)
-    save(args.word_emb_file, word_emb_mat)
     
     featurize(args=args, examples=examples, out_file=args.train_feature_file,
               word2idx_dict=word2idx_dict, data_type="train", logger=log)

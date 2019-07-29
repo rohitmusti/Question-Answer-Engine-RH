@@ -6,11 +6,11 @@ def get_exp3_featurize_args():
 
     parser.add_argument("--ques_limit",
                         type=int,
-                        default=40,
+                        default=50,
                         help="The max number of words to keep from a question.")
     parser.add_argument("--glove_file",
                         type=str,
-                        default="./data/glove.840.300d.txt",
+                        default="./data/glove.840B.300d.txt",
                         help="The file containing the word vectors.")
     parser.add_argument("--word_emb_file",
                         type=str,
@@ -32,13 +32,13 @@ def get_exp3_featurize_args():
                         type=str,
                         default="./data/dev-prepped-exp3.npz",
                         help="The file containing the featurized dev data.")
-    parser.add_argument("--train_title_id_map_file",
+    parser.add_argument("--train_topic_title_id_map_file",
                         type=str,
-                        default="./data/train-title-toppic-id-map.json",
+                        default="./data/train-topic-title-toppic-id-map.json",
                         help="The file containing the mapping from topic_id to topic for the training data.")
-    parser.add_argument("--dev_title_id_map_file",
+    parser.add_argument("--dev_topic_title_id_map_file",
                         type=str,
-                        default="./data/dev-title-toppic-id-map.json",
+                        default="./data/dev-topic-title-toppic-id-map.json",
                         help="The file containing the mapping from topic_id to topic for the dev data.")
     parser.add_argument("--train_eval_file",
                         type=str,

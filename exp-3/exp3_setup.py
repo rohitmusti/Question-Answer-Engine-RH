@@ -45,7 +45,7 @@ def get_word_embedding(args, counter, limit=-1, vec_size=300, num_vectors=219601
             vector = list(map(float, array[-vec_size:]))
             if word in counter and counter[word] > limit:
                 embedding_dict[word] = vector
-    logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding {data_type} embedding vector")
+    logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding embedding vector")
 
     NULL = "--NULL--"
     OOV = "--OOV--"
@@ -60,7 +60,7 @@ def get_word_embedding(args, counter, limit=-1, vec_size=300, num_vectors=219601
     return emb_mat, token2idx_dict
 
 def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
-    total = 0
+    total, total_ = 0, 0
     ques_idxs, ids = [], []
     print(f"Featurizing {data_type} examples")
     def _get_word(word):
@@ -70,16 +70,22 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
         return 1
     for example in tqdm(examples):
         total += 1
-        ques_idx = np.zeros([args.ques_limit])
+        ques_idx = np.zeros([args.ques_limit], dtype=np.int32)
+
+        if len(example['qw_tokens']) > args.ques_limit:
+            continue
+
+        total_ += 1
+
         for i, token in enumerate(example["qw_tokens"]):
-            ques_idx.append(_get_word(token))
+                ques_idx[i] = _get_word(token)
         ques_idxs.append(ques_idx)
         ids.append(example['id'])
 
     np.savez(out_file,
              qw_idxs=np.array(ques_idxs),
              ids=np.array(ids))
-    logger.info(f"Built and saved {total} fully featurized examples")
+    logger.info(f"Built and saved {total}/{total_} fully featurized examples")
             
             
 if __name__=="__main__":
@@ -93,15 +99,15 @@ if __name__=="__main__":
                                                               word_counter=word_counter, 
                                                               logger=log)
     save(filename=args.train_topic_title_id_map_file, obj=topic_title_id_map)
-    save(filename=args.train_eval_examples_file, obj=eval_examples)
+    save(filename=args.train_eval_file, obj=eval_examples)
     
     dev_examples, dev_eval_examples, dev_topic_title_id_map = pre_process(args=args, 
-                                                              in_file=args.train_in_file,
+                                                              in_file=args.dev_in_file,
                                                               word_counter=word_counter, 
                                                               logger=log)
 
     save(filename=args.dev_topic_title_id_map_file, obj=dev_topic_title_id_map)
-    save(filename=args.dev_eval_examples_file, obj=dev_eval_examples)
+    save(filename=args.dev_eval_file, obj=dev_eval_examples)
 
 
     word_emb_mat, word2idx_dict = get_word_embedding(args=args, counter=word_counter,

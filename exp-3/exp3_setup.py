@@ -34,8 +34,12 @@ def pre_process(args, in_file,  word_counter, logger):
 
     return examples, eval_examples, topic_title_id_map
 
-def get_word_embedding(args, counter, limit=-1, vec_size=300, num_vectors=2196017, logger=None):
-    logger.info(f"Pre-processing {args.data_split} vectors...")
+def get_word_embedding(args, counter, logger=None, limit=-1, vec_size=300, num_vectors=2196017):
+    """
+    creates two dictionaries, one maps words to idxs and the other dictionary maps idx to vectors
+    why not just use one? probably for memory/efficiency reasons; I am not really sure
+    """
+    logger.info(f"Pre-processing word vectors...")
     embedding_dict = {}
     filtered_elements = [k for k, v in counter.items() if v > limit]
     with open(args.glove_file, "r", encoding="utf-8") as fh:
@@ -48,12 +52,11 @@ def get_word_embedding(args, counter, limit=-1, vec_size=300, num_vectors=219601
     logger.info(f"{len(embedding_dict)} / {len(filtered_elements)} tokens have corresponding embedding vector")
 
     NULL = "--NULL--"
-    OOV = "--OOV--"
-    token2idx_dict = {token: idx for idx, token in enumerate(embedding_dict.keys(), 2)}
+    # assign every word a number, reserving 0 for NULl 
+    # each word is represented as a vector of size 300
+    token2idx_dict = {token: idx for idx, token in enumerate(embedding_dict.keys(), 1)}
     token2idx_dict[NULL] = 0
-    token2idx_dict[OOV] = 1
     embedding_dict[NULL] = [0. for _ in range(vec_size)]
-    embedding_dict[OOV] = [0. for _ in range(vec_size)]
     idx2emb_dict = {idx: embedding_dict[token]
                     for token, idx in token2idx_dict.items()}
     emb_mat = [idx2emb_dict[idx] for idx in range(len(idx2emb_dict))]
@@ -101,7 +104,8 @@ if __name__=="__main__":
     save(filename=args.train_topic_title_id_map_file, obj=topic_title_id_map)
     save(filename=args.train_eval_file, obj=eval_examples)
 
-    word_emb_mat, word2idx_dict = get_word_embedding(args=args, counter=word_counter,
+    word_emb_mat, word2idx_dict = get_word_embedding(args=args, 
+                                                     counter=word_counter,
                                                      logger=log)
     save(args.word_emb_file, word_emb_mat)
     

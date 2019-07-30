@@ -1,5 +1,25 @@
 import argparse
 
+def get_exp3_train_args():
+    parser = argparse.ArgumentParser("Arguments for training data")
+    _add_common_exp3_args(parser)
+    parser.add_argument("--LSTM_hidden_size",
+                        type=int,
+                        default=100,
+                        help="The number of hidden features to keep in the LSTM.")
+    parser.add_argument("--LSTM_num_layers",
+                        type=int,
+                        default=1,
+                        help="The number of LSTMs to stack together.")
+    parser.add_argument("--LSTM_bias",
+                        type=bool,
+                        default=True,
+                        help="Whether to apply LSTMs.")
+    parser.add_argument("--LSTM_dropout",
+                        type=float,
+                        default=0.2,
+                        help="Dropout rate.")
+
 def get_exp3_featurize_args():
     parser = argparse.ArgumentParser("Arguments for featurizing data in prep for training")
     _add_common_exp3_args(parser)

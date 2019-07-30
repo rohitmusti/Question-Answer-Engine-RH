@@ -1,10 +1,27 @@
 import ujson as json
 import numpy as np
-import torch
+import torch 
 import torch.utils.data as data
 import logging
 from tqdm import tqdm
 import os
+
+class qcd(data.Dataset):
+    def __init__(self, data_path):
+        """
+        idea: sentiment as a feature
+        """
+        dataset = np.load(data_path)
+        self.qw_idxs = torch.from_numpy(dataset['qw_idxs']).long()
+        self.ids = torch.from_numpy(dataset['ids']).long()
+        # NOTE: every idx is valid so no need for the valid idx array they used
+    def __getitem__(self, idx):
+        example = {self.qw_idxs[idx],
+                   self.ids[idx]}
+        return example
+    
+    def __len__(self):
+        return len(self.ids)
 
 def save(filename, obj):
     """

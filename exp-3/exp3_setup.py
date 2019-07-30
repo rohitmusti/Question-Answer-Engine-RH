@@ -10,7 +10,7 @@ from args import get_exp3_featurize_args
 
 def word_tokenize(sent):
     doc = nlp(sent)
-    return [re.sub('[^a-zA-Z]', '', token.text.lower().strip()) for token in doc if not token.is_stop]
+    return [re.sub('[^a-zA-Z]', '', token.text.lower().strip()) for token in doc]
 
 def pre_process(args, in_file,  word_counter, logger):
     examples = []

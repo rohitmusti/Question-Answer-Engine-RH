@@ -25,6 +25,30 @@ class qcd(data.Dataset):
     def __len__(self):
         return len(self.ids)
 
+def collate_fn(examples):
+    """
+    Adapted from:
+        https://github.com/yunjey/seq2seq-dataloader
+    """
+    def merge_0d(scalars, dtype=torch.int64):
+        return torch.tensor(scalars, dtype=dtype)
+
+    def merge_1d(arrays, dtype=torch.int64, pad_value=0):
+        lengths = [(a != pad_value).sum() for a in arrays]
+        padded = torch.zeros(len(arrays), max(lengths), dtype=dtype)
+        for i, seq in enumerate(arrays):
+            end = lengths[i]
+            padded[i, :end] = seq[:end]
+        return padded
+    qw_idxs, ids, topic_ids = zip(*examples)
+    qw_idxs = merge_1d(qw_idxs)
+    ids = merge_0d(ids)
+    topic_ids = merge_0d(topic_ids)
+
+    return (qw_idxs, ids, topic_ids)
+
+
+
 def save(filename, obj):
     """
     just saves the file, nothing fancy

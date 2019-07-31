@@ -23,7 +23,7 @@ def exp2_transformer(in_file, out_file, logger):
             topic_contexts = [para["context"] for para in topic["paragraphs"]]
             topic_contexts = " ".join(topic_contexts)
             if len(topic_contexts.split()) < 8000:
-                topic_dict["context"] = 
+                topic_dict["context"] = topic_contexts
             else:
                 continue
             for para in topic["paragraphs"]:

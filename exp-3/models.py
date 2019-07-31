@@ -29,6 +29,13 @@ class classifier(nn.Module):
         # print(f"word vector length: {num_word}")
         qw_vec = qw_vec.permute(0, 2, 1)
         lstm_out = self.lstm(qw_vec)
+        f1_out = self.full_1(lstm_out)
+        f2_out = self.full_2(f1_out)
+        c_out = self.conv(f2_out)
+        p_out = self.pool(c_out)
+        f3_out = self.full_3(p_out)
+        f4_out = self.full_4(p_out)
+        out = self.out(f4_out)
 
         return lstm_out
 

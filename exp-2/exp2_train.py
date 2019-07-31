@@ -157,6 +157,8 @@ def main(args):
 
                             del dev_dataset
                             del dev_loader
+                            del results
+                            del pred_dict
 
                         saver.save(step, model, all_results[args.metric_name], device)
                         ema.resume(model)
@@ -175,6 +177,9 @@ def main(args):
                                        step=step,
                                        split='dev',
                                        num_visuals=args.num_visuals)
+                    del loss
+                    del log_p1
+                    del log_p2
             del train_dataset
             del train_loader
 

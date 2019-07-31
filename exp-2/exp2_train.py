@@ -77,23 +77,23 @@ def main(args):
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
 
-    for epoch in range(args.num_epochs):
-        log.info(f"Starting epoch {epoch}...")
-        for i in range(args.num_train_chunks):
-        # Get data loader
-            train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
-            log.info(f'Building dataset from {train_rec_file} ...')
-            train_dataset = SQuAD(train_rec_file, args.exp2_train_topic_contexts, use_v2=True)
-            train_loader = data.DataLoader(train_dataset,
-                                           batch_size=args.batch_size,
-                                           shuffle=True,
-                                           num_workers=args.num_workers,
-                                           collate_fn=collate_fn)
+    for i in range(args.num_train_chunks):
+    # Get data loader
+        train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
+        log.info(f'Building dataset from {train_rec_file} ...')
+        train_dataset = SQuAD(train_rec_file, args.exp2_train_topic_contexts, use_v2=True)
+        train_loader = data.DataLoader(train_dataset,
+                                       batch_size=args.batch_size,
+                                       shuffle=True,
+                                       num_workers=args.num_workers,
+                                       collate_fn=collate_fn)
 
-            # Train
-            log.info('Training...')
-            steps_till_eval = args.eval_steps
-            epoch = 0
+        # Train
+        log.info('Training...')
+        steps_till_eval = args.eval_steps
+        epoch = 0
+        for epoch in range(args.num_epochs):
+            log.info(f"Starting epoch {epoch}...")
         # torch.set_num_threads(7)
             with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:

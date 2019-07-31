@@ -14,10 +14,12 @@ class qcd(data.Dataset):
         dataset = np.load(data_path)
         self.qw_idxs = torch.from_numpy(dataset['qw_idxs']).long()
         self.ids = torch.from_numpy(dataset['ids']).long()
+        self.topic_ids = torch.from_numpy(dataset['topic_ids']).long()
         # NOTE: every idx is valid so no need for the valid idx array they used
     def __getitem__(self, idx):
         example = {self.qw_idxs[idx],
-                   self.ids[idx]}
+                   self.ids[idx],
+                   self.topic_ids[idx]}
         return example
     
     def __len__(self):

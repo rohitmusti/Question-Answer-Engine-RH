@@ -27,6 +27,7 @@ def pre_process(args, in_file,  word_counter, logger):
                 word_counter[token] += 1
             topic_title_id_map[topic_id] = topic_title
             example = {"qw_tokens": qw_tokens,
+                       "topic_id": topic_id,
                        "id": total}
             eval_examples[str(total)] = {"question": question,
                                         "topic_id": topic_id}
@@ -64,7 +65,7 @@ def get_word_embedding(args, counter, logger=None, limit=-1, vec_size=300, num_v
 
 def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
     total, total_ = 0, 0
-    ques_idxs, ids = [], []
+    ques_idxs, topic_ids, ids = [], [], []
     log.info(f"Featurizing {data_type} examples")
     def _get_word(word):
         for each in (word, word.lower(), word.capitalize(), word.upper()):
@@ -84,10 +85,12 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
                 ques_idx[i] = _get_word(token)
         ques_idxs.append(ques_idx)
         ids.append(example['id'])
+        topic_ids.append(example['topic_id'])
 
     np.savez(out_file,
              qw_idxs=np.array(ques_idxs),
-             ids=np.array(ids))
+             ids=np.array(ids),
+             topic_ids=np.array(topic_ids))
     logger.info(f"Built and saved {total_}/{total} fully featurized examples")
             
             

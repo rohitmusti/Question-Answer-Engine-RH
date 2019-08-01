@@ -81,6 +81,8 @@ def main(args):
             batch_size = qw_idxs.size(0)
             topic_ids = topic_ids.to(device)
             lengths = lengths.to(device)
+            optimizer.zero_grad()
+
             targets = [torch.zeros(442) for _ in topic_ids]
             targets = torch.stack(targets)
             for tid, t in zip(topic_ids, targets):

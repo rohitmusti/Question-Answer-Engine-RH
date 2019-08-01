@@ -74,48 +74,51 @@ def main(args):
     step = 0
     steps_till_eval = args.eval_steps
 
+    for epoch in range(30):
+        log.info(f"Starting epoch {epoch+1}")
+        with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
+            for qw_idxs, ids, topic_ids, lengths in train_loader:
+                qw_idxs = qw_idxs.to(device)
+                batch_size = qw_idxs.size(0)
+                topic_ids = topic_ids.to(device)
+                lengths = lengths.to(device)
+                optimizer.zero_grad()
 
-    with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
-        for qw_idxs, ids, topic_ids, lengths in train_loader:
-            qw_idxs = qw_idxs.to(device)
-            batch_size = qw_idxs.size(0)
-            topic_ids = topic_ids.to(device)
-            lengths = lengths.to(device)
-            optimizer.zero_grad()
+                targets = [torch.zeros(442) for _ in topic_ids]
+                targets = torch.stack(targets)
+                for tid, t in zip(topic_ids, targets):
+                    t[tid] = 1
+                res = model(qw_idxs, lengths)
 
-            targets = [torch.zeros(442) for _ in topic_ids]
-            targets = torch.stack(targets)
-            for tid, t in zip(topic_ids, targets):
-                t[tid] = 1
-            res = model(qw_idxs, lengths)
+                # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss or nn.BCEWithLogitsLoss
+                # not really sure why this is working and the others aren't
+        #        loss = nn.CrossEntropyLoss()
+                loss = nn.BCELoss()
+       #         loss = nn.BCEWithLogitsLoss()
+                loss_output = loss(res, targets)
+                loss_output.backward()
+                loss_val = loss_output.item()
+                optimizer.step()
+                scheduler.step(step//batch_size)
+                ema(model, step//batch_size)
 
-            # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss or nn.BCEWithLogitsLoss
-            # not really sure why this is working and the others aren't
-    #        loss = nn.CrossEntropyLoss()
-            loss = nn.BCELoss()
-   #         loss = nn.BCEWithLogitsLoss()
-            loss_output = loss(res, targets)
-            loss_output.backward()
-            loss_val = loss_output.item()
-            optimizer.step()
-            scheduler.step(step//batch_size)
-            ema(model, step//batch_size)
+                step += batch_size
+                steps_till_eval -= batch_size
+                progress_bar.update(batch_size)
+                progress_bar.set_postfix(BCELoss=(loss_val))
+                progress_bar.set_postfix(Epoch=(epoch + 1))
 
-            step += batch_size
-            steps_till_eval -= batch_size
-            progress_bar.update(batch_size)
-            progress_bar.set_postfix(BCEWithLogits=(loss_val*100))
+                if steps_till_eval <= 0:
+                    steps_till_eval = args.eval_steps
 
-            if steps_till_eval <= 0:
-                steps_till_eval = args.eval_steps
+                    log.info(f"Evaluating at step: {step}")
 
-                log.info(f"Evaluating at step: {step}")
+                    ema.assign(model)
+                    results, pred = evaluate(model, dev_loader, device,
+                                            args.dev_eval_file)
+                    log.info(f"BCE loss: {loss_val} at step {step} in epoch {epoch+1}")
 
-                ema.assign(model)
-                results, pred = evaluate(model, dev_loader, device,
-                                        args.dev_eval_file)
-
-                # TODO: Finish writing the evaluation script and the tensorboard logging
+                    # TODO: Finish writing the evaluation script and the tensorboard logging
 
 def evaluate(model, data_loader, device, eval_file):
     averager = AverageMeter()

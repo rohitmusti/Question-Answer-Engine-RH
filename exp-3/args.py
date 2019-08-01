@@ -43,6 +43,10 @@ def get_exp3_train_args():
                         type=float,
                         default=0,
                         help='learning_rate_decay.')
+    parser.add_argument('--eval_steps',
+                        type=int,
+                        default=10000,
+                        help='Number of steps between evaluations.')
     args = parser.parse_args()
     return args
 

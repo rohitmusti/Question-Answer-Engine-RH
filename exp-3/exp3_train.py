@@ -52,12 +52,12 @@ def main(args):
     # setting up the datasets
     train_dataset = qcd(data_path=args.train_feature_file)
     train_loader = data.DataLoader(train_dataset,
-                                   shuffle=True, # should eventually be reset to True
+                                   shuffle=True, 
                                    batch_size=args.batch_size,
                                    collate_fn=collate_fn)
     dev_dataset = qcd(data_path=args.dev_feature_file)
     dev_loader = data.DataLoader(dev_dataset,
-                                   shuffle=True, # should eventually be reset to True
+                                   shuffle=False, 
                                    batch_size=args.batch_size,
                                    collate_fn=collate_fn)
 
@@ -72,8 +72,7 @@ def main(args):
                                weight_decay=args.learning_rate_decay)
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
     step = 0
-    eval_steps = 10000
-    steps_till_eval = eval_steps
+    steps_till_eval = args.eval_steps
 
 
     with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
@@ -106,14 +105,15 @@ def main(args):
             progress_bar.set_postfix(BCEWithLogits=(loss_val*100))
 
             if steps_till_eval <= 0:
-                steps_till_eval = eval_steps
+                steps_till_eval = args.eval_steps
 
                 log.info(f"Evaluating at step: {step}")
 
                 ema.assign(model)
-
                 results, pred = evaluate(model, dev_loader, device,
                                         args.dev_eval_file)
+
+                # TODO: Finish writing the evaluation script and the tensorboard logging
 
 def evaluate(model, data_loader, device, eval_file):
     averager = AverageMeter()

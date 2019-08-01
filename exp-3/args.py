@@ -31,6 +31,18 @@ def get_exp3_train_args():
                         type=int,
                         default=5,
                         help='The default random seed.')
+    parser.add_argument('--ema_decay',
+                        type=float,
+                        default=0.999,
+                        help='Decay rate for exponential moving average of parameters.')
+    parser.add_argument('--learning_rate',
+                        type=float,
+                        default=0.0005,
+                        help='Learning rate.')
+    parser.add_argument('--learning_rate_decay',
+                        type=float,
+                        default=0,
+                        help='learning_rate_decay.')
     args = parser.parse_args()
     return args
 

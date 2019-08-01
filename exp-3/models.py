@@ -24,7 +24,7 @@ class classifier(nn.Module):
         self.pool = nn.MaxPool1d(kernel_size=2) # not really sure waht the kernel size is
         self.full_3 = nn.Linear(in_features=498, out_features=1)
         self.full_4 = nn.Linear(in_features=1, out_features=442)
-        self.out = nn.LogSoftmax()
+        self.out = nn.LogSoftmax(dim=1)
 
     def forward(self, qw_idxs, lengths):
         
@@ -42,7 +42,7 @@ class classifier(nn.Module):
         # here I need to sort the elements in each batch by length 
         # and then do a pack padded sequence on them
 
-        orig_len = qw_vec.size(1)
+        # orig_len = qw_vec.size(1)
         lengths, sort_index = lengths.sort(0, descending=True)
         qw_vec = Variable(qw_vec[sort_index])
         qw_vec = pack_padded_sequence(input=qw_vec, lengths=lengths, batch_first=True).float()
@@ -72,9 +72,9 @@ class classifier(nn.Module):
 
         f3_out = self.full_3(p_out)
         f4_out = self.full_4(f3_out)
+        f4_out = torch.squeeze(f4_out)
 
-        out = self.out(f4_out)
-        out = torch.squeeze(out)
+        out = self.out(f4_out).float()
 
         return out
 

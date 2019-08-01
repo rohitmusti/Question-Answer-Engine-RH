@@ -33,19 +33,21 @@ def collate_fn(examples):
     def merge_0d(scalars, dtype=torch.int64):
         return torch.tensor(scalars, dtype=dtype)
 
-    def merge_1d(arrays, dtype=torch.int64, pad_value=0):
+    def merge_1d(arrays, dtype=torch.int64, pad_value=0, pad_length=31):
         lengths = [(a != pad_value).sum() for a in arrays]
-        padded = torch.zeros(len(arrays), max(lengths), dtype=dtype)
+        padded = torch.zeros(len(arrays), pad_length, dtype=dtype)
         for i, seq in enumerate(arrays):
             end = lengths[i]
             padded[i, :end] = seq[:end]
-        return padded
+        return padded, torch.tensor(lengths)
     qw_idxs, ids, topic_ids = zip(*examples)
-    qw_idxs = merge_1d(qw_idxs)
+    qw_idxs, lengths = merge_1d(qw_idxs)
     ids = merge_0d(ids)
+    print(f"topic_ids: {topic_ids}")
     topic_ids = merge_0d(topic_ids)
+    print(f"topic_ids: {topic_ids}")
 
-    return (qw_idxs, ids, topic_ids)
+    return (qw_idxs, ids, topic_ids, lengths)
 
 
 

@@ -27,8 +27,8 @@ def pre_process(args, in_file,  word_counter, logger):
                 word_counter[token] += 1
             topic_title_id_map[topic_id] = topic_title
             example = {"qw_tokens": qw_tokens,
-                       "topic_id": topic_id,
-                       "id": total}
+                       "id": total,
+                       "topic_id": topic_id}
             eval_examples[str(total)] = {"question": question,
                                         "topic_id": topic_id}
             examples.append(example)
@@ -87,6 +87,11 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
         ids.append(example['id'])
         topic_ids.append(example['topic_id'])
 
+    for i in topic_ids:
+        if i >= 442 or i < 0:
+            raise ValueError("There is a topic_id that is outside the possible range")
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"There is are {len(ids) - len(set(ids))} incorrect ids")
     np.savez(out_file,
              qw_idxs=np.array(ques_idxs),
              ids=np.array(ids),

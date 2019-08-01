@@ -23,6 +23,14 @@ def get_exp3_train_args():
                         type=int,
                         default=442,
                         help="the number of possible categories, equivalent to to the number of nodes of the output layer")
+    parser.add_argument('--random_seed',
+                        type=int,
+                        default=3716,
+                        help='The default random seed.')
+    parser.add_argument('--batch_size',
+                        type=int,
+                        default=5,
+                        help='The default random seed.')
     args = parser.parse_args()
     return args
 

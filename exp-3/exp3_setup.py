@@ -4,6 +4,7 @@ from collections import Counter
 import spacy
 import numpy as np
 import re
+import torch
 
 from toolkit import get_logger, save
 from args import get_exp3_featurize_args
@@ -87,15 +88,27 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
         ids.append(example['id'])
         topic_ids.append(example['topic_id'])
 
+    # some error checking
+    ques_idxs = np.asarray(ques_idxs)
+    ids = np.asarray(ids)
+    topic_ids = np.asarray(topic_ids)
     for i in topic_ids:
         if i >= 442 or i < 0:
             raise ValueError("There is a topic_id that is outside the possible range")
+    if len(set(topic_ids)) != 442 and len(set(topic_ids)) != 35:
+        raise ValueError(f"There is are either {len(set(topic_ids))-442} or \
+                           {len(set(topic_ids))-442}  incorrect ids")
     if len(ids) != len(set(ids)):
         raise ValueError(f"There is are {len(ids) - len(set(ids))} incorrect ids")
+
     np.savez(out_file,
-             qw_idxs=np.array(ques_idxs),
-             ids=np.array(ids),
-             topic_ids=np.array(topic_ids))
+             qw_idxs=ques_idxs,
+             ids=ids,
+             topic_ids=topic_ids)
+    torch.save({"qw_idxs":torch.from_numpy(ques_idxs),
+                "ids":torch.from_numpy(ids),
+                "topic_ids":torch.from_numpy(topic_ids)}, 
+                f"./data/torch-test-{data_type}")
     logger.info(f"Built and saved {total_}/{total} fully featurized examples")
             
             

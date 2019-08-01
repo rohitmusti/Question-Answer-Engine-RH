@@ -45,7 +45,7 @@ def main(args):
     # setting up the datasets
     train_dataset = qcd(data_path=args.train_feature_file)
     train_loader = data.DataLoader(train_dataset,
-                                   shuffle=False, # should eventually be reset to True
+                                   shuffle=True, # should eventually be reset to True
                                    batch_size=args.batch_size,
                                    collate_fn=collate_fn)
 
@@ -59,25 +59,23 @@ def main(args):
 
     for qw_idxs, ids, topic_ids, lengths in train_loader:
         # qw_idxs = qw_idxs.double()
-        print(qw_idxs)
-        print(ids)
-        print(topic_ids)
-        print(lengths)
+        print(qw_idxs.size())
+        print(ids.size())
+        print(topic_ids.size())
         qw_idxs = qw_idxs.to(device)
         topic_ids = topic_ids.to(device)
         lengths = lengths.to(device)
         targets = [torch.zeros(442) for _ in topic_ids]
         targets = torch.stack(targets)
-        print(topic_ids)
         for tid, t in zip(topic_ids, targets):
             t[tid] = 1
-        print(targets)
+#        print(targets)
         res = model(qw_idxs, lengths)
 
 
         # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss
 
-        print(res) # to be deleted
+#        print(res) # to be deleted
         count += 1 # to be deleted
         if count > 2: # to be deleted
             break # to be deleted

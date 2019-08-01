@@ -15,11 +15,30 @@ class qcd(data.Dataset):
         self.qw_idxs = torch.from_numpy(dataset['qw_idxs']).long()
         self.ids = torch.from_numpy(dataset['ids']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids']).long()
+
+#        dataset = torch.load("./data/torch-test-train")
+#        temp_qw_idxs = dataset['qw_idxs'].long()
+#        temp_ids = dataset['ids'].long()
+#        temp_topic_ids = dataset['topic_ids'].long()
+#
+#        print(f"QW_IDXS match: {torch.equal(self.qw_idxs, temp_qw_idxs)}")
+#        print(f"IDS match: {torch.equal(self.ids, temp_ids)}")
+#        print(f"TOPIC_IDS match: {torch.equal(self.topic_ids, temp_topic_ids)}")
+
         # NOTE: every idx is valid so no need for the valid idx array they used
     def __getitem__(self, idx):
-        example = {self.qw_idxs[idx],
-                   self.ids[idx],
-                   self.topic_ids[idx]}
+        temp_qw_idx = self.qw_idxs[idx]
+        temp_id = self.ids[idx]
+        temp_tid = self.topic_ids[idx]
+        print(temp_qw_idx)
+        print(temp_id)
+        print(temp_tid)
+        if temp_tid >= 442 or temp_tid < 0:
+            raise ValueError("The value for the topic index {self.topic_ids[idx]} is outside the allowed range")
+        example = {temp_qw_idx,
+                   temp_id,
+                   temp_tid}
+        print(example)
         return example
     
     def __len__(self):
@@ -40,12 +59,14 @@ def collate_fn(examples):
             end = lengths[i]
             padded[i, :end] = seq[:end]
         return padded, torch.tensor(lengths)
+
     qw_idxs, ids, topic_ids = zip(*examples)
+    print(f"qw_idxs: {qw_idxs}")
+    print(f"ids: {ids}")
+    print(f"topic_ids: {topic_ids}")
     qw_idxs, lengths = merge_1d(qw_idxs)
     ids = merge_0d(ids)
-    print(f"topic_ids: {topic_ids}")
     topic_ids = merge_0d(topic_ids)
-    print(f"topic_ids: {topic_ids}")
 
     return (qw_idxs, ids, topic_ids, lengths)
 

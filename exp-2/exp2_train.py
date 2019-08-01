@@ -180,8 +180,8 @@ def main(args):
                     del loss
                     del log_p1
                     del log_p2
-            del train_dataset
-            del train_loader
+        del train_dataset
+        del train_loader
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     nll_meter = util.AverageMeter()

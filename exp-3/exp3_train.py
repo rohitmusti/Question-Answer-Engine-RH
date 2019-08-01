@@ -58,10 +58,6 @@ def main(args):
     count = 0 # to be deleted
 
     for qw_idxs, ids, topic_ids, lengths in train_loader:
-        # qw_idxs = qw_idxs.double()
-        print(qw_idxs.size())
-        print(ids.size())
-        print(topic_ids.size())
         qw_idxs = qw_idxs.to(device)
         topic_ids = topic_ids.to(device)
         lengths = lengths.to(device)
@@ -69,8 +65,9 @@ def main(args):
         targets = torch.stack(targets)
         for tid, t in zip(topic_ids, targets):
             t[tid] = 1
-#        print(targets)
+        print(targets)
         res = model(qw_idxs, lengths)
+        print(res)
 
 
         # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss

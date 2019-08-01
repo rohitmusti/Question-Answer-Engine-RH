@@ -30,16 +30,17 @@ class qcd(data.Dataset):
         temp_qw_idx = self.qw_idxs[idx]
         temp_id = self.ids[idx]
         temp_tid = self.topic_ids[idx]
-        print(temp_qw_idx)
-        print(temp_id)
-        print(temp_tid)
+        # print(temp_qw_idx)
+        # print(temp_id)
+        # print(temp_tid)
         if temp_tid >= 442 or temp_tid < 0:
             raise ValueError("The value for the topic index {self.topic_ids[idx]} is outside the allowed range")
-        example = {temp_qw_idx,
-                   temp_id,
-                   temp_tid}
-        print(example)
-        return example
+        # using this dictionary method results in non-deterministic computing
+        # example = {temp_qw_idx,
+        #            temp_id,
+        #            temp_tid}
+        # print(example)
+        return temp_qw_idx, temp_id, temp_tid
     
     def __len__(self):
         return len(self.ids)
@@ -61,9 +62,9 @@ def collate_fn(examples):
         return padded, torch.tensor(lengths)
 
     qw_idxs, ids, topic_ids = zip(*examples)
-    print(f"qw_idxs: {qw_idxs}")
-    print(f"ids: {ids}")
-    print(f"topic_ids: {topic_ids}")
+#    print(f"qw_idxs: {qw_idxs}")
+#    print(f"ids: {ids}")
+#    print(f"topic_ids: {topic_ids}")
     qw_idxs, lengths = merge_1d(qw_idxs)
     ids = merge_0d(ids)
     topic_ids = merge_0d(topic_ids)

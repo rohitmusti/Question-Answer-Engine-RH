@@ -24,7 +24,7 @@ class classifier(nn.Module):
         self.pool = nn.MaxPool1d(kernel_size=2) # not really sure waht the kernel size is
         self.full_3 = nn.Linear(in_features=498, out_features=1)
         self.full_4 = nn.Linear(in_features=1, out_features=442)
-        self.out = nn.LogSoftmax(dim=1)
+        self.out = nn.Sigmoid()
 
     def forward(self, qw_idxs, lengths):
         

@@ -90,8 +90,8 @@ def main(args):
             # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss or nn.BCEWithLogitsLoss
             # not really sure why this is working and the others aren't
     #        loss = nn.CrossEntropyLoss()
-    #        loss = nn.BCELoss()
-            loss = nn.BCEWithLogitsLoss()
+            loss = nn.BCELoss()
+   #         loss = nn.BCEWithLogitsLoss()
             loss_output = loss(res, targets)
             loss_output.backward()
             loss_val = loss_output.item()
@@ -140,6 +140,8 @@ def evaluate(model, data_loader, device, eval_file):
                 loss = nn.BCEWithLogitsLoss()
                 loss_output = loss(res, targets)
                 averager.update(loss_output.item(), batch_size)
+
+    return None, None
 
 
                 

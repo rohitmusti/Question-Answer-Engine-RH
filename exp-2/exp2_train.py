@@ -77,23 +77,23 @@ def main(args):
     scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
 
 
-    for i in range(args.num_train_chunks):
-    # Get data loader
-        train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
-        log.info(f'Building dataset from {train_rec_file} ...')
-        train_dataset = SQuAD(train_rec_file, args.exp2_train_topic_contexts, use_v2=True)
-        train_loader = data.DataLoader(train_dataset,
-                                       batch_size=args.batch_size,
-                                       shuffle=True,
-                                       num_workers=args.num_workers,
-                                       collate_fn=collate_fn)
+    for epoch in range(args.num_epochs):
+        log.info(f"Starting epoch {epoch}...")
+        for i in range(args.num_train_chunks):
+        # Get data loader
+            train_rec_file = f"{args.train_record_file_exp2}_{i}.npz"
+            log.info(f'Building dataset from {train_rec_file} ...')
+            train_dataset = SQuAD(train_rec_file, args.exp2_train_topic_contexts, use_v2=True)
+            train_loader = data.DataLoader(train_dataset,
+                                           batch_size=args.batch_size,
+                                           shuffle=True,
+                                           num_workers=args.num_workers,
+                                           collate_fn=collate_fn)
 
-        # Train
-        log.info('Training...')
-        steps_till_eval = args.eval_steps
-        epoch = 0
-        for epoch in range(args.num_epochs):
-            log.info(f"Starting epoch {epoch}...")
+            # Train
+            log.info('Training...')
+            steps_till_eval = args.eval_steps
+            epoch = 0
         # torch.set_num_threads(7)
             with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
                 for cw_idxs, cc_idxs, qw_idxs, qc_idxs, y1, y2, ids in train_loader:
@@ -159,6 +159,7 @@ def main(args):
                             del dev_loader
                             del results
                             del pred_dict
+                            torch.cuda.empty_cache()
 
                         saver.save(step, model, all_results[args.metric_name], device)
                         ema.resume(model)
@@ -177,11 +178,10 @@ def main(args):
                                        step=step,
                                        split='dev',
                                        num_visuals=args.num_visuals)
-                    del loss
-                    del log_p1
-                    del log_p2
-        del train_dataset
-        del train_loader
+                    torch.cuda.empty_cache()
+            del train_dataset
+            del train_loader
+            torch.cuda.empty_cache()
 
 def evaluate(model, data_loader, device, eval_file, max_len, use_squad_v2):
     nll_meter = util.AverageMeter()

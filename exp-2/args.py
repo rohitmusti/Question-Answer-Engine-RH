@@ -53,6 +53,18 @@ def get_exp2_setup_args():
 def get_exp2_training_args():
     parser = argparse.ArgumentParser("Arguments for running exp2 training")
     _add_common_exp2_args(parser)
+    parser.add_argument('--starting_step',
+                        type=int,
+                        default=0,
+                        help='the step to start at')
+    parser.add_argument('--starting_epoch',
+                        type=int,
+                        default=0,
+                        help='the epoch to start at')
+    parser.add_argument('--starting_train_set',
+                        type=int,
+                        default=0,
+                        help='the epoch to start at')
     parser.add_argument('--drop_prob',
                         type=float,
                         default=0.2,

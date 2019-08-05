@@ -47,6 +47,10 @@ def get_exp3_train_args():
                         type=int,
                         default=10000,
                         help='Number of steps between evaluations.')
+    parser.add_argument('--max_checkpoints',
+                        type=int,
+                        default=5,
+                        help='Maximum number of checkpoints allowed to be saved.')
     args = parser.parse_args()
     return args
 

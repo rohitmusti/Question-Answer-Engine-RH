@@ -12,7 +12,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as sched
 import torch.utils.data as data
 
-from toolkit import qcd, collate_fn, get_logger, EMA, get_save_dir, AverageMeter
+from toolkit import qcd, collate_fn, get_logger, EMA, get_save_dir, AverageMeter, CheckpointSaver
 from args import get_exp3_train_args
 from models import classifier
 
@@ -23,8 +23,14 @@ def main(args):
     # setting up logging
     log = get_logger(args.logging_dir, exp_name)
 
+
     # setting a save directory
     save_dir = get_save_dir("./checkpoints", exp_name, training=True, id_max=200)
+
+    # setting up saver
+
+    saver = CheckpointSaver(save_dir=save_dir, max_checkpoints=args.max_checkpoints,
+                            metric_name="BCELoss", log=log)
 
     # setting the random seed
     log.info(f"Using random seed {args.random_seed}...")
@@ -81,8 +87,8 @@ def main(args):
                 qw_idxs = qw_idxs.to(device)
                 batch_size = qw_idxs.size(0)
                 if batch_size != args.batch_size:
-                    continue
                     log.info('Did not process because did not meet batch_size threshold')
+                    continue
                 topic_ids = topic_ids.to(device)
                 lengths = lengths.to(device)
                 optimizer.zero_grad()
@@ -120,6 +126,8 @@ def main(args):
                     results, pred = evaluate(model, dev_loader, device,
                                             args.dev_eval_file)
                     log.info(f"BCE loss: {loss_val} at step {step} in epoch {epoch+1}")
+                    saver.save(model=model, step=step, epoch=epoch, 
+                               metric_val=loss_val, device=device)
 
                     # TODO: Finish writing the evaluation script and the tensorboard logging
 

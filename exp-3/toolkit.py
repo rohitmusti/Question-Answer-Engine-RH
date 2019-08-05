@@ -245,3 +245,67 @@ def get_logger(log_dir, name):
     logger.addHandler(console_handler)
 
     return logger
+
+class CheckpointSaver:
+    def __init__(self, save_dir, max_checkpoints, metric_name, log=None):
+        self.save_dir = save_dir
+        self.max_checkpoints = max_checkpoints
+        self.metric_name = metric_name
+        self.checkpoints = []
+        self.log = log
+        self.best_val = None
+        self._print(f"Saver will minimize {metric_name}...")
+    
+    def _is_best(self, metric_val):
+        if metric_val is None:
+            return False
+        elif self.best_val is None :
+            self.best_val = metric_val
+            self.log.info(f"The best value has been updated to {metric_val}")
+            return True
+        elif self.best_val <= metric_val:
+            return False
+        elif metric_val < self.best_val:
+            self.best_val = metric_val
+            self.log.info(f"The best value has been updated to {metric_val}")
+            return True
+        else:
+            return False
+    
+    def _print(self, message):
+        self.log.info(message)
+
+    def save(self, model, step, epoch, metric_val, device):
+        ckpt_dict = {
+            'model_name': model.__class__.__name__,
+            'model_state': model.cpu().state_dict(),
+            'step': step,
+            'epoch': epoch,
+            'BCELoss Val': metric_val
+        }
+
+        if self._is_best(metric_val):
+            checkpoint_path = os.path.join(self.save_dir, f'best.pth.tar')
+            torch.save(ckpt_dict, checkpoint_path)
+            self._print(f"Saved best checkpoint: {checkpoint_path}")
+
+        checkpoint_path = os.path.join(self.save_dir, f'step_{step}.pth.tar')
+        torch.save(ckpt_dict, checkpoint_path)
+        self._print(f"Saved {step} checkpoint: {checkpoint_path}")
+
+        self.checkpoints.append((checkpoint_path, metric_val))
+
+        if len(self.checkpoints) > self.max_checkpoints:
+            lowest = 100000000
+            worst = 0
+            for i, tup in enumerate(self.checkpoints):
+                if lowest > tup[1]:
+                    lowest = tup[1]
+                    worst = i
+            self.checkpoints.remove(self.checkpoints[worst])
+            self.log.info(f'Removed worst checkpoint with loss of {tup[1]}')
+
+
+        
+
+        

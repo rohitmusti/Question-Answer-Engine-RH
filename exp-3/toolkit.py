@@ -7,7 +7,7 @@ from tqdm import tqdm
 import os
 
 class qcd(data.Dataset):
-    def __init__(self, data_path):
+    def __init__(self, data_path, num_categories):
         """
         idea: sentiment as a feature
         """
@@ -15,6 +15,7 @@ class qcd(data.Dataset):
         self.qw_idxs = torch.from_numpy(dataset['qw_idxs']).long()
         self.ids = torch.from_numpy(dataset['ids']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids']).long()
+        self.num_categories = num_categories
 
 #        dataset = torch.load("./data/torch-test-train")
 #        temp_qw_idxs = dataset['qw_idxs'].long()
@@ -33,7 +34,7 @@ class qcd(data.Dataset):
         # print(temp_qw_idx)
         # print(temp_id)
         # print(temp_tid)
-        if temp_tid >= 442 or temp_tid < 0:
+        if temp_tid >= self.num_categories or temp_tid < 0:
             raise ValueError("The value for the topic index {self.topic_ids[idx]} is outside the allowed range")
         # using this dictionary method results in non-deterministic computing
         # example = {temp_qw_idx,

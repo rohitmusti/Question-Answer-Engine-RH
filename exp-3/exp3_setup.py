@@ -92,14 +92,6 @@ def featurize(args, examples, out_file, word2idx_dict, data_type, logger=None):
     ques_idxs = np.asarray(ques_idxs)
     ids = np.asarray(ids)
     topic_ids = np.asarray(topic_ids)
-    for i in topic_ids:
-        if i >= 442 or i < 0:
-            raise ValueError("There is a topic_id that is outside the possible range")
-    if len(set(topic_ids)) != 442 and len(set(topic_ids)) != 35:
-        raise ValueError(f"There is are either {len(set(topic_ids))-442} or \
-                           {len(set(topic_ids))-442}  incorrect ids")
-    if len(ids) != len(set(ids)):
-        raise ValueError(f"There is are {len(ids) - len(set(ids))} incorrect ids")
 
     np.savez(out_file,
              qw_idxs=ques_idxs,

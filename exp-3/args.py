@@ -19,17 +19,21 @@ def get_exp3_train_args():
                         type=float,
                         default=0.2,
                         help="Dropout rate.")
-    parser.add_argument("--num_categories",
+    parser.add_argument("--word_vec_size",
                         type=int,
-                        default=442,
-                        help="the number of possible categories, equivalent to to the number of nodes of the output layer")
+                        default=300,
+                        help="the size of each word vector")
+    parser.add_argument("--num_epochs",
+                        type=int,
+                        default=200,
+                        help="the number of epochs")
     parser.add_argument('--random_seed',
                         type=int,
                         default=3716,
                         help='The default random seed.')
     parser.add_argument('--batch_size',
                         type=int,
-                        default=5,
+                        default=32,
                         help='The default random seed.')
     parser.add_argument('--ema_decay',
                         type=float,
@@ -37,7 +41,7 @@ def get_exp3_train_args():
                         help='Decay rate for exponential moving average of parameters.')
     parser.add_argument('--learning_rate',
                         type=float,
-                        default=0.005,
+                        default=0.007,
                         help='Learning rate.')
     parser.add_argument('--learning_rate_decay',
                         type=float,
@@ -49,7 +53,7 @@ def get_exp3_train_args():
                         help='Number of steps between evaluations.')
     parser.add_argument('--max_checkpoints',
                         type=int,
-                        default=5,
+                        default=15,
                         help='Maximum number of checkpoints allowed to be saved.')
     args = parser.parse_args()
     return args
@@ -68,7 +72,7 @@ def get_exp3_featurize_args():
                         help="The file containing the cleand and shrunken train data.")
     parser.add_argument("--dev_in_file",
                         type=str,
-                        default="./data/clean-dev-exp3.json",
+                        default="./data/clean-test-exp3.json",
                         help="The file containing the cleand and shrunken dev data.")
     
     args = parser.parse_args()
@@ -91,7 +95,7 @@ def get_exp3_transformer_args():
                         help="The output file of where the data set up for exp3 is stored. Ready to be featurized.")
     parser.add_argument("--test_out_file",
                         type=str,
-                        default="./data/clean-test-exp3.json",
+                        default="./data/clean-dev-exp3.json",
                         help="The output file of where the data set up for exp3 is stored. Ready to be featurized.")
     args = parser.parse_args()
     return args
@@ -139,3 +143,7 @@ def _add_common_exp3_args(parser):
                         type=int,
                         default=31,
                         help="The max number of words to keep from a question.")
+    parser.add_argument("--num_categories",
+                        type=int,
+                        default=477,
+                        help="the number of possible categories, equivalent to to the number of nodes of the output layer")

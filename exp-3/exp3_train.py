@@ -27,8 +27,10 @@ def main(args):
     # setting a save directory
     save_dir = get_save_dir("./checkpoints", exp_name, training=True, id_max=200)
 
+    # setting up tensor board
+    tbx = SummaryWriter(save_dir)
+    
     # setting up saver
-
     saver = CheckpointSaver(save_dir=save_dir, max_checkpoints=args.max_checkpoints,
                             metric_name="BCELoss", log=log)
 
@@ -56,12 +58,12 @@ def main(args):
     word_vectors = torch.from_numpy(word_vectors)
 
     # setting up the datasets
-    train_dataset = qcd(data_path=args.train_feature_file)
+    train_dataset = qcd(data_path=args.train_feature_file, num_categories=args.num_categories)
     train_loader = data.DataLoader(train_dataset,
                                    shuffle=True, 
                                    batch_size=args.batch_size,
                                    collate_fn=collate_fn)
-    dev_dataset = qcd(data_path=args.dev_feature_file)
+    dev_dataset = qcd(data_path=args.dev_feature_file, num_categories=args.num_categories)
     dev_loader = data.DataLoader(dev_dataset,
                                    shuffle=False, 
                                    batch_size=args.batch_size,
@@ -123,19 +125,34 @@ def main(args):
                     log.info(f"Evaluating at step: {step}")
 
                     ema.assign(model)
-                    results, pred = evaluate(model, dev_loader, device,
-                                            args.dev_eval_file)
-                    log.info(f"BCE loss: {loss_val} at step {step} in epoch {epoch+1}")
+                    perc_correct, vis_examples, avg_loss = evaluate(model, dev_loader, device,
+                                                                    args.dev_eval_file)
+                    log.info(f"Out of Sample BCE loss: {avg_loss} at step {step} in epoch {epoch+1}, resulting in {perc_correct} percent correct")
+
+                    tbx.add_scalar("BCE Loss", loss_val, step)
+                    tbx.add_scalar("Percent Accuracy", perc_correct, step)
+
+
+                    for i, example in enumerate(vis_examples):
+                        tbl_fmt = (f'- **Question:** {example["question"]}\n'
+                                   + f'- **Topic ID:** {example["answer"]}\n'
+                                   + f'- **Prediction:** {example["prediction"]}')
+
+                        tbx.add_text(tag=f'{i}_of_{len(vis_examples)}',
+                                     text_string=tbl_fmt,
+                                     global_step=step)
+    
                     saver.save(model=model, step=step, epoch=epoch, 
                                metric_val=loss_val, device=device)
 
                     # TODO: Finish writing the evaluation script and the tensorboard logging
 
 def evaluate(model, data_loader, device, eval_file):
-    averager = AverageMeter()
-    results = {}
     pred_dict = {}
     model.eval()
+    loss_val_acc = 0
+    counter = 0
+
     with open(eval_file, "r") as fh:
         truth = json.load(fh)
         with torch.no_grad():
@@ -146,18 +163,55 @@ def evaluate(model, data_loader, device, eval_file):
                 topic_ids = topic_ids.to(device)
                 lengths = lengths.to(device)
 
-                targets = [torch.zeros(442) for _ in topic_ids]
+                targets = [torch.zeros(args.num_categories) for _ in topic_ids]
                 targets = torch.stack(targets)
                 for tid, t in zip(topic_ids, targets):
                     t[tid] = 1
 
                 res = model(qw_idxs, lengths)
 
-                loss = nn.BCEWithLogitsLoss()
-                loss_output = loss(res, targets)
-                averager.update(loss_output.item(), batch_size)
+                loss = nn.BCELoss()
 
-    return None, None
+                loss_output = loss(res, targets)
+                loss_val = loss_output.item()
+                loss_val_acc += loss_val
+                counter += 1
+
+                temp_pred_dict = {str(int(idx)): int(torch.argmax(i)) for i, idx in zip(res, ids)}
+
+                pred_dict.update(temp_pred_dict)
+
+        correct = 0
+        total_covered = 0
+        vis_examples = []
+        num_cor = 0
+        num_incor = 0
+
+
+        for i in pred_dict:
+            if i in truth:
+                if truth[i] == pred_dict[i]:
+                    if num_cor < 3:
+                        vis_examples.append({'question': truth[i]['question'],
+                                            'answer': truth[i]['topic_id'],
+                                            'prediction':pred_dict[i]})
+                        num_cor += 1
+
+                    correct += 1
+                else:
+
+                    if num_incor < 3:
+                        vis_examples.append({'question': truth[i]['question'],
+                                            'answer': truth[i]['topic_id'],
+                                            'prediction':pred_dict[i]})
+                        num_incor += 1
+
+                total_covered += 1
+
+        perc_correct = correct/total_covered
+        average_loss = loss_val_acc/counter
+
+    return perc_correct, vis_examples, average_loss
 
 
                 

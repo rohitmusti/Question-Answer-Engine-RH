@@ -13,20 +13,21 @@ class classifier(nn.Module):
         #                     dropout=0.2)
 
         # 300 size input because that is the size of each individual word vector
-        self.lstm = nn.LSTM(input_size=300, hidden_size=args.hidden_size, 
+        self.lstm = nn.LSTM(input_size=args.word_vec_size, hidden_size=args.hidden_size, 
                             num_layers=args.LSTM_num_layers, bias=True, 
                             dropout = (args.LSTM_dropout if args.LSTM_num_layers > 1 else 0) ) 
         self.full_1 = nn.Linear(in_features=args.hidden_size, out_features=args.hidden_size)
         self.full_2 = nn.Linear(in_features=args.hidden_size, out_features=args.hidden_size)
         self.conv = nn.Conv1d(in_channels=1, 
                               out_channels=1,
-                              kernel_size=5) # kernel size is prob 3 I think I'm approaching this incorrectly
+                              kernel_size=args.batch_size) # kernel size is prob 3 I think I'm approaching this incorrectly
         self.pool = nn.MaxPool1d(kernel_size=2) # not really sure waht the kernel size is
-        self.full_3 = nn.Linear(in_features=498, out_features=1)
+        self.full_3 = nn.Linear(in_features=484, out_features=1)
         self.full_4 = nn.Linear(in_features=1, out_features=args.num_categories)
         self.out = nn.Sigmoid()
 
     def forward(self, qw_idxs, lengths):
+
         
         qw_vec = self.embedding(qw_idxs)
 
@@ -66,6 +67,7 @@ class classifier(nn.Module):
         f1_out = self.full_1(h_n)
         f2_out = self.full_2(f1_out)
         f2_out = torch.unsqueeze(f2_out, dim=1)
+
 
         c_out = self.conv(f2_out)
         p_out = self.pool(c_out)

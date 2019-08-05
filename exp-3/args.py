@@ -37,7 +37,7 @@ def get_exp3_train_args():
                         help='Decay rate for exponential moving average of parameters.')
     parser.add_argument('--learning_rate',
                         type=float,
-                        default=0.0005,
+                        default=0.005,
                         help='Learning rate.')
     parser.add_argument('--learning_rate_decay',
                         type=float,
@@ -73,13 +73,21 @@ def get_exp3_featurize_args():
 def get_exp3_transformer_args():
     parser = argparse.ArgumentParser("Arguments for transforming data into a useful form for classification")
     _add_common_exp3_args(parser)
-    parser.add_argument("--in_file",
+    parser.add_argument("--in_file_1",
                         type=str,
                         default="./data/train-v2.0.json",
                         help="The input file of raw data to be transformed. Designed for SQuAD v2.0")
-    parser.add_argument("--out_file",
+    parser.add_argument("--in_file_2",
+                        type=str,
+                        default="./data/dev-v2.0.json",
+                        help="The input file of raw data to be transformed. Designed for SQuAD v2.0")
+    parser.add_argument("--train_out_file",
                         type=str,
                         default="./data/clean-train-exp3.json",
+                        help="The output file of where the data set up for exp3 is stored. Ready to be featurized.")
+    parser.add_argument("--test_out_file",
+                        type=str,
+                        default="./data/clean-test-exp3.json",
                         help="The output file of where the data set up for exp3 is stored. Ready to be featurized.")
     args = parser.parse_args()
     return args

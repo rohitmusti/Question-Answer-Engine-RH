@@ -74,17 +74,20 @@ def main(args):
     step = 0
     steps_till_eval = args.eval_steps
 
-    for epoch in range(30):
+    for epoch in range(100):
         log.info(f"Starting epoch {epoch+1}")
         with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
             for qw_idxs, ids, topic_ids, lengths in train_loader:
                 qw_idxs = qw_idxs.to(device)
                 batch_size = qw_idxs.size(0)
+                if batch_size != args.batch_size:
+                    continue
+                    log.info('Did not process because did not meet batch_size threshold')
                 topic_ids = topic_ids.to(device)
                 lengths = lengths.to(device)
                 optimizer.zero_grad()
 
-                targets = [torch.zeros(442) for _ in topic_ids]
+                targets = [torch.zeros(args.num_categories) for _ in topic_ids]
                 targets = torch.stack(targets)
                 for tid, t in zip(topic_ids, targets):
                     t[tid] = 1
@@ -105,8 +108,8 @@ def main(args):
                 step += batch_size
                 steps_till_eval -= batch_size
                 progress_bar.update(batch_size)
-                progress_bar.set_postfix(BCELoss=(loss_val))
-                progress_bar.set_postfix(Epoch=(epoch + 1))
+                progress_bar.set_postfix(BCELoss=(loss_val),
+                                         Epoch=(epoch + 1))
 
                 if steps_till_eval <= 0:
                     steps_till_eval = args.eval_steps

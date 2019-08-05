@@ -23,7 +23,7 @@ class classifier(nn.Module):
                               kernel_size=5) # kernel size is prob 3 I think I'm approaching this incorrectly
         self.pool = nn.MaxPool1d(kernel_size=2) # not really sure waht the kernel size is
         self.full_3 = nn.Linear(in_features=498, out_features=1)
-        self.full_4 = nn.Linear(in_features=1, out_features=442)
+        self.full_4 = nn.Linear(in_features=1, out_features=args.num_categories)
         self.out = nn.Sigmoid()
 
     def forward(self, qw_idxs, lengths):

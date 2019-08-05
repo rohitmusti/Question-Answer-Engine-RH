@@ -13,11 +13,15 @@ def exp3_transformer(in_file_1, in_file_2,  train_out_file, test_out_file, logge
     return:
         none, the data is written to an output
     """
-    new_data = {}
-    new_data["experiment"] = "toy"
+    train_new_data = {}
+    train_new_data["experiment"] = "exp3"
+    test_new_data = {}
+    test_new_data["experiment"] = "exp3"
+
     q_count = 0
+
     with open(in_file_1, "r") as fh:
-        logger.info(f"Importing: {in_file}")
+        logger.info(f"Importing: {in_file_1}")
         source = json.load(fh)
         train_new_data["version"] = source["version"]
         train_new_data["data"] = []
@@ -28,29 +32,41 @@ def exp3_transformer(in_file_1, in_file_2,  train_out_file, test_out_file, logge
             for para in topic["paragraphs"]:
                 for qas in para['qas']:
                     if test_count < 5:
-                        test_count += 1
                         test_new_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
+                        test_count += 1
                     else:
-                        train_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
+                        train_new_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
                     q_count += 1
+        topic_id = len(source['data'])
 
     with open(in_file_2, "r") as fh:
-        logger.info(f"Importing: {in_file}")
+        logger.info(f"Importing: {in_file_2}")
         source = json.load(fh)
-        for topic_id, topic in tqdm(enumerate(source["data"])):
+        for topic in tqdm(source["data"]):
             test_count = 0
+
             for para in topic["paragraphs"]:
                 for qas in para['qas']:
                     if test_count < 5:
-                        test_count += 1
                         test_new_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
+                        test_count += 1
                     else:
-                        train_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
+                        train_new_data["data"].append((quick_clean(raw_str=qas["question"]), topic_id, topic["title"]))
                     q_count += 1
+            topic_id += 1
 
-    logger.info(f"Saving new data to {out_file}")
+#    print('tests, should all be true')
+#    print(topic_id)
+#    print(len(train_new_data))
+#    print(len(test_new_data))
+#    print(len(train_new_data) == len(test_new_data))
+#    print(train_new_data.keys() == test_new_data.keys())
+#    print(len(train_new_data.keys()) == len(set(train_new_data.keys())))
+#    print(len(test_new_data.keys()) == len(set(test_new_data.keys())))
+
+    logger.info(f"Saving new train data to {train_out_file}")
     save(filename=train_out_file, obj=train_new_data)
-    logger.info(f"Saving new data to {out_file}")
+    logger.info(f"Saving new test data to {test_out_file}")
     save(filename=test_out_file, obj=test_new_data)
 
 if __name__ == "__main__":

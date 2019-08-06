@@ -24,7 +24,7 @@ class classifier(nn.Module):
         self.pool = nn.MaxPool1d(kernel_size=2) # not really sure waht the kernel size is
         self.full_3 = nn.Linear(in_features=484, out_features=1)
         self.full_4 = nn.Linear(in_features=1, out_features=args.num_categories)
-        self.out = nn.Sigmoid()
+        self.out = nn.Softmax()
 
     def forward(self, qw_idxs, lengths):
 
@@ -76,7 +76,7 @@ class classifier(nn.Module):
         f4_out = self.full_4(f3_out)
         f4_out = torch.squeeze(f4_out)
 
-        out = self.out(f4_out).float()
+        out = self.out(f4_out).long()
 
         return out
 

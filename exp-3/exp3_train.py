@@ -104,8 +104,9 @@ def main(args):
                 # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss or nn.BCEWithLogitsLoss
                 # not really sure why this is working and the others aren't
         #        loss = nn.CrossEntropyLoss()
-                loss = nn.BCELoss()
+       #         loss = nn.BCELoss()
        #         loss = nn.BCEWithLogitsLoss()
+                loss=nn.NLLLoss()
                 loss_output = loss(res, targets)
                 loss_output.backward()
                 loss_val = loss_output.item()
@@ -116,7 +117,7 @@ def main(args):
                 step += batch_size
                 steps_till_eval -= batch_size
                 progress_bar.update(batch_size)
-                progress_bar.set_postfix(BCELoss=(loss_val),
+                progress_bar.set_postfix(NLL=(loss_val),
                                          Epoch=(epoch + 1))
 
                 if steps_till_eval <= 0:
@@ -129,7 +130,7 @@ def main(args):
                                                                     args.dev_eval_file)
                     log.info(f"Out of Sample BCE loss: {avg_loss} at step {step} in epoch {epoch+1}, resulting in {perc_correct} percent correct")
 
-                    tbx.add_scalar("BCE Loss", loss_val, step)
+                    tbx.add_scalar("NLL Loss", loss_val, step)
                     tbx.add_scalar("Percent Accuracy", perc_correct, step)
 
 
@@ -170,7 +171,7 @@ def evaluate(model, data_loader, device, eval_file):
 
                 res = model(qw_idxs, lengths)
 
-                loss = nn.BCELoss()
+                loss = nn.NLLLoss()
 
                 loss_output = loss(res, targets)
                 loss_val = loss_output.item()

@@ -221,8 +221,7 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
         context_idxs.append(context_idx)
 
     np.savez(f"{exp2_topic_contexts_file}.npz",
-             context_idxs=np.array(context_idxs),
-             context_char_idxs=np.array(context_char_idxs))
+             context_idxs=np.array(context_idxs))
 
 
     # question + answer feature building

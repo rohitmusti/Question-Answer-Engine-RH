@@ -54,7 +54,6 @@ class SQuAD(data.Dataset):
         self.y2s = torch.from_numpy(dataset['y2s']).long()
 
         self.context_idxs = torch.from_numpy(tc['context_idxs'])
-        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs'])
 
 
 
@@ -96,7 +95,6 @@ class SQuAD(data.Dataset):
         # self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
 
         example = (self.context_idxs[idx].long(),
-                   self.context_char_idxs[idx].long(),
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],

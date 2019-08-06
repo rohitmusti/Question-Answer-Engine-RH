@@ -26,7 +26,7 @@ def exp2_transformer(in_file, out_file, logger):
             
             for para in topic["paragraphs"]:
 
-                if num_pars >= 50:
+                if num_pars >= 10:
                     break
 
                 num_pars += 1

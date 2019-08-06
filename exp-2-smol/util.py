@@ -45,13 +45,16 @@ class SQuAD(data.Dataset):
         super(SQuAD, self).__init__()
 
         dataset = np.load(data_path)
-        self.topic_contexts=topic_contexts
+        tc = np.load(f"{topic_contexts}.npz")
 
         self.question_idxs = torch.from_numpy(dataset['ques_idxs']).long()
         self.question_char_idxs = torch.from_numpy(dataset['ques_char_idxs']).long()
         self.topic_ids = torch.from_numpy(dataset['topic_ids'])
         self.y1s = torch.from_numpy(dataset['y1s']).long()
         self.y2s = torch.from_numpy(dataset['y2s']).long()
+
+        self.context_idxs = torch.from_numpy(tc['context_idxs'])
+        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs'])
 
 
 
@@ -88,12 +91,12 @@ class SQuAD(data.Dataset):
         idx = self.valid_idxs[idx]
         # I need to write a function to get the correct context_idx or context_char_idx
 
-        tc = np.load(f"{self.topic_contexts}-{self.topic_ids[idx]}.npz")
-        self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
-        self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
+        # tc = np.load(f"{self.topic_contexts}-{self.topic_ids[idx]}.npz")
+        # self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
+        # self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
 
-        example = (self.context_idxs,
-                   self.context_char_idxs,
+        example = (self.context_idxs[idx].long(),
+                   self.context_char_idxs[idx].long(),
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],

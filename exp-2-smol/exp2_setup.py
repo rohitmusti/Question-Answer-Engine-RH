@@ -217,10 +217,12 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
                 if j == char_limit:
                     break
                 context_char_idx[i, j] = _get_char(char)
+            context_char_idxs.append(context_char_idx)
+        context_idxs.append(context_idx)
 
-        np.savez(f"{exp2_topic_contexts_file}-{z}.npz",
-                 context_idxs=np.array(context_idx),
-                 context_char_idxs=np.array(context_char_idx))
+    np.savez(f"{exp2_topic_contexts_file}.npz",
+             context_idxs=np.array(context_idxs),
+             context_char_idxs=np.array(context_char_idxs))
 
 
     # question + answer feature building

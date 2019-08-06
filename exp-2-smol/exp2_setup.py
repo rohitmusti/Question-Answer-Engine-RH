@@ -226,9 +226,9 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
 
     # question + answer feature building
     logger.info(f"Creating the {data_type} question and answer features")
+    ques_idxs, ques_char_idxs = [], []
+    y1s, y2s, ids, topic_ids = [], [], [], []
     for n, chunk in enumerate(examples):
-        ques_idxs, ques_char_idxs = [], []
-        y1s, y2s, ids, topic_ids = [], [], [], []
         for example in tqdm(chunk):
             total_ += 1
 
@@ -263,14 +263,15 @@ def build_features(args, examples, topic_contexts, data_type, out_file, word2idx
             topic_ids.append(example['topic_context_id'])
 
                                 
-        logger.info("Saving file ...")
-        np.savez(f"{out_file}_{n}.npz",
-                 ques_idxs=np.array(ques_idxs),
-                 ques_char_idxs=np.array(ques_char_idxs),
-                 y1s=np.array(y1s),
-                 y2s=np.array(y2s),
-                 ids=np.array(ids),
-                 topic_ids=np.array(topic_ids))
+    logger.info("Saving file ...")
+    np.savez(f"{out_file}.npz",
+             ques_idxs=np.array(ques_idxs),
+             ques_char_idxs=np.array(ques_char_idxs),
+             y1s=np.array(y1s),
+             y2s=np.array(y2s),
+             ids=np.array(ids),
+             topic_ids=np.array(topic_ids))
+
     logger.info(f"Built {total} / {total_} instances of features in total")
     meta["total"] = total
     logger.info(f"created {len(examples)} chunks for {data_type}")

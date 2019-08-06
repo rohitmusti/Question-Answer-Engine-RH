@@ -94,7 +94,7 @@ class SQuAD(data.Dataset):
         # self.context_idxs = torch.from_numpy(tc['context_idxs']).long()
         # self.context_char_idxs = torch.from_numpy(tc['context_char_idxs']).long()
 
-        example = (self.context_idxs[idx].long(),
+        example = (self.context_idxs[self.topic_ids[idx]].long(),
                    self.question_idxs[idx],
                    self.question_char_idxs[idx],
                    self.y1s[idx],

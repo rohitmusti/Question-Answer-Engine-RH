@@ -20,15 +20,17 @@ def exp2_transformer(in_file, out_file, logger):
             topic_dict = {}
             topic_dict["title"] = topic["title"]
             topic_dict["qas"] = []
-            topic_contexts = [para["context"] for para in topic["paragraphs"]]
-            if len(topic_contexts) > 100:
-                continue
-            topic_contexts = " ".join(topic_contexts)
-            if len(topic_contexts.split()) < 8000:
-                topic_dict["context"] = topic_contexts
-            else:
-                continue
+            topic_contexts = []
+            # topic_contexts = [para["context"] for para in topic["paragraphs"]]
+            num_pars = 0
+            
             for para in topic["paragraphs"]:
+
+                if num_pars >= 50:
+                    break
+
+                num_pars += 1
+                topic_contexts.append(para['context'])
                 paragraph = {}
                 paragraph["qas"] = []
                 for qas in para['qas']:
@@ -48,6 +50,10 @@ def exp2_transformer(in_file, out_file, logger):
                             qas_dict["answers"].append(answer_dict)
                     topic_dict["qas"].append(qas_dict)
                 context_buffer += len(para['context']) + 1
+
+            topic_contexts = " ".join(topic_contexts)
+            topic_dict["context"] = topic_contexts
+
             new_data["data"].append(topic_dict)
 
     logger.info(f"Processed {counter} question, answer pairs")

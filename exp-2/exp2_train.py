@@ -74,7 +74,11 @@ def main(args):
     # Get optimizer and scheduler
     optimizer = optim.Adadelta(model.parameters(), args.learning_rate,
                                weight_decay=args.learning_rate_decay)
-    scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    # scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    scheduler = sched.ReduceLROnPlateau(optimizer=optimizer,
+                                        mode="min", factor=0.1,
+                                        patience=2, verbose=True, cooldown=0 
+                                        min_lr=0.0005)
 
 
     for epoch in range(args.num_epochs):

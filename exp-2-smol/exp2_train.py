@@ -77,7 +77,7 @@ def main(args):
     # scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
     scheduler = sched.ReduceLROnPlateau(optimizer=optimizer,
                                         mode="min", factor=0.1,
-                                        patience=2, verbose=True, cooldown=0,
+                                        patience=2, verbose=True, cooldown=1,
                                         min_lr=0.0005)
 
     train_rec_file = f"{args.train_record_file_exp2}.npz"

@@ -31,9 +31,9 @@ def main(args):
     
     print('retrieving embeddings for train...')
     t_x = []
-    c = 0
     for word_array in t_raw["qw_idxs"]:
         nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
+        c = 0
         for word in word_array:
             for i in word_vectors[word]:
                 nwa[c] = i
@@ -45,6 +45,7 @@ def main(args):
     c = 0
     for word_array in d_raw["qw_idxs"]:
         nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
+        c = 0
         for word in word_array:
             for i in word_vectors[word]:
                 nwa[c] = i

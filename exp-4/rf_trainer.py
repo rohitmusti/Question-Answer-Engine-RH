@@ -32,11 +32,12 @@ def main(args):
     t_x = []
     for word_array in t_raw["qw_idxs"]:
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
-        print(len(word_array))
         for word in word_array:
             nwa = np.add(nwa, word_vectors[word])
         nwa = np.divide(nwa, len(word_array))
         t_x.append(np.asarray(nwa))
+    print(len(t_x))
+    print(len(t_x[0]))
 
     print('retrieving embeddings for dev...')
     d_x = []

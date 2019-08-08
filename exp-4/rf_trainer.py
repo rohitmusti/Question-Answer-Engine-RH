@@ -35,7 +35,7 @@ def main(args):
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
             nwa = np.add(nwa, word_vectors[word])
-        nwa = np.divide(nwa, len(word_array))
+        # nwa = np.divide(nwa, len(word_array))
         t_x.append(np.asarray(nwa))
 
     print('retrieving embeddings for dev...')
@@ -44,7 +44,7 @@ def main(args):
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
             nwa = np.add(nwa, word_vectors[word])
-        nwa = np.divide(nwa, len(word_array))
+        # nwa = np.divide(nwa, len(word_array))
         d_x.append(np.asarray(nwa))
 
 
@@ -57,7 +57,7 @@ def main(args):
     d_Y = pd.DataFrame(d_raw['topic_ids'], columns=['topic_ids'])
 
     print('training...')
-    forest = RandomForestClassifier(n_estimators=100000, n_jobs=os.cpu_count(), verbose=True)
+    forest = RandomForestClassifier(n_estimators=1000, n_jobs=os.cpu_count(), verbose=True)
     forest = forest.fit(t_X, t_raw['topic_ids'])
     predictions = forest.predict(d_X)
     prediction = pd.DataFrame(predictions, columns=['predictions']).to_csv('prediction.csv')

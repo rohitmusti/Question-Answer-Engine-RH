@@ -57,7 +57,7 @@ def main(args):
     d_Y = pd.DataFrame(d_raw['topic_ids'], columns=['topic_ids'])
 
     print('training...')
-    forest = RandomForestClassifier(n_estimators=100, n_jobs=os.cpu_count(), verbose=True)
+    forest = RandomForestClassifier(n_estimators=100000, n_jobs=os.cpu_count(), verbose=True)
     forest = forest.fit(t_X, t_raw['topic_ids'])
     predictions = forest.predict(d_X)
     prediction = pd.DataFrame(predictions, columns=['predictions']).to_csv('prediction.csv')

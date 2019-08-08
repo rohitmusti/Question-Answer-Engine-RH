@@ -31,33 +31,35 @@ def main(args):
     
     print('retrieving embeddings for train...')
     t_x = []
+    c = 0
     for word_array in t_raw["qw_idxs"]:
-        nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
+        nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa = np.add(nwa, word_vectors[word])
-        # nwa = np.divide(nwa, len(word_array))
+            nwa[c:c+31] = word_vectors[word]
+            c += 31
         t_x.append(np.asarray(nwa))
 
     print('retrieving embeddings for dev...')
     d_x = []
+    c = 0
     for word_array in d_raw["qw_idxs"]:
-        nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
+        nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa = np.add(nwa, word_vectors[word])
-        # nwa = np.divide(nwa, len(word_array))
+            nwa[c:c+31] = word_vectors[word]
+            c += 31
         d_x.append(np.asarray(nwa))
 
 
     print('creating dataframes...')
     t_X = pd.DataFrame(t_x,
-                      columns=[str(i+1) for i in range(300)])
+                      columns=[str(i+1) for i in range(300*31)])
     d_X = pd.DataFrame(d_x,
-                      columns=[str(i+1) for i in range(300)])
+                      columns=[str(i+1) for i in range(300*31)])
     t_Y = pd.DataFrame(t_raw['topic_ids'], columns=['topic_ids'])
     d_Y = pd.DataFrame(d_raw['topic_ids'], columns=['topic_ids'])
 
     print('training...')
-    forest = RandomForestClassifier(n_estimators=1000, n_jobs=os.cpu_count(), verbose=True)
+    forest = RandomForestClassifier(n_estimators=100, n_jobs=os.cpu_count(), verbose=True)
     forest = forest.fit(t_X, t_raw['topic_ids'])
     predictions = forest.predict(d_X)
     prediction = pd.DataFrame(predictions, columns=['predictions']).to_csv('prediction.csv')

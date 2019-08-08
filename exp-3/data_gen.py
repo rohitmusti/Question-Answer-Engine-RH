@@ -1,6 +1,6 @@
 from args import get_exp3_transformer_args
 from toolkit import get_logger, quick_clean, save
-import ujson as json
+import json as json
 from tqdm import tqdm
 
 def exp3_transformer(in_file_1, in_file_2,  train_out_file, test_out_file, logger):

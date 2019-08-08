@@ -7,6 +7,14 @@ class classifier(nn.Module):
     def __init__(self, args, word_vectors):
         super(classifier, self).__init__()
 
+        self.lstm_2 = nn.LSTM(input_size=args.word_vec_size, hidden_size=args.hidden_size, 
+                            num_layers=args.LSTM_num_layers,  
+                            bidirectional=True,
+                            dropout = (args.LSTM_dropout if args.LSTM_num_layers > 1 else 0) ) 
+
+        self.drop_2 = nn.Dropout(args.LSTM_dropout)
+        self.fc = nn.Linear(args.hidden_size*args.LSTM_num_layers*2, args.num_categories)
+
         self.embedding = nn.Embedding.from_pretrained(embeddings=word_vectors)
         # self.lstm = nn.LSTM(input_size=args.ques_limit, hidden_size=args.hidden_size,
         #                     num_layers=args.LSTM_num_layers, bias=True,
@@ -43,7 +51,7 @@ class classifier(nn.Module):
         # here I need to sort the elements in each batch by length 
         # and then do a pack padded sequence on them
 
-        # orig_len = qw_vec.size(1)
+        orig_len = qw_vec.size(1)
         lengths, sort_index = lengths.sort(0, descending=True)
         qw_vec = Variable(qw_vec[sort_index])
         qw_vec = pack_padded_sequence(input=qw_vec, lengths=lengths, batch_first=True).float()
@@ -53,7 +61,20 @@ class classifier(nn.Module):
         # the hidden state is the best representation of the information I think
         # might be worth setting up another experiment that uses the actual last output
 
-        lstm_out, (h_n, c_n) = self.lstm(qw_vec)
+        lstm_out, (h_n, c_n) = self.lstm_2(qw_vec)
+        # lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True, total_length=orig_len)
+        # _, unsort_idx = sort_index.sort(0)
+        # lstm_out = lstm_out[unsort_idx]
+        # print(lstm_out.size())
+        # print(h_n.size())
+        # print(c_n.size())
+        drop_out = self.drop_2(h_n)
+        drop_out =  torch.cat([drop_out[i,:,:] for i in range(drop_out.shape[0])], dim=1)
+        # print(drop_out.size())
+
+        l_out = self.fc(drop_out)
+        return l_out
+	
 
         # it turns that b/c I was using the hidden state I didn't need this, but
         # I am keeping it just in case it becomes necessary
@@ -76,8 +97,7 @@ class classifier(nn.Module):
         f4_out = self.full_4(f3_out)
         f4_out = torch.squeeze(f4_out)
 
-        out = self.out(f4_out).long()
 
-        return out
+        return f4_out
 
 

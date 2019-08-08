@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import ujson as json
+import json as json
 from tqdm import tqdm
 from tensorboardX import SummaryWriter
 
@@ -43,12 +43,9 @@ def main(args):
 
     # grabbing a gpu if it is available
     gpu_ids = []
-    if torch.cuda.is_available():
-        gpu_ids += [gpu_id for gpu_id in range(torch.cuda.device_count())]
-        device = torch.device(f'cuda:{gpu_ids[0]}')
-        torch.cuda.set_device(device)
-    else:
-        device = torch.device('cpu')
+    gpu_ids += [gpu_id for gpu_id in range(torch.cuda.device_count())]
+    device = torch.device(f'cuda:{gpu_ids[0]}')
+    torch.cuda.set_device(device)
 
     log.info(f"Using device type: {device}")
 
@@ -76,13 +73,16 @@ def main(args):
     model.train() 
     ema = EMA(model, args.ema_decay)
 
-    optimizer = optim.Adadelta(model.parameters(), args.learning_rate,
-                               weight_decay=args.learning_rate_decay)
-    scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    # optimizer = optim.Adadelta(model.parameters(), args.learning_rate,
+    #                            weight_decay=args.learning_rate_decay)
+    # scheduler = sched.LambdaLR(optimizer, lambda s: 1.)  # Constant LR
+    optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
     step = 0
     steps_till_eval = args.eval_steps
 
-    for epoch in range(100):
+    log.info(f"Vars: {json.dumps(vars(args), indent=4, sort_keys=True)}")
+
+    for epoch in range(args.num_epochs):
         log.info(f"Starting epoch {epoch+1}")
         with torch.enable_grad(), tqdm(total=len(train_loader.dataset)) as progress_bar:
             for qw_idxs, ids, topic_ids, lengths in train_loader:
@@ -95,10 +95,10 @@ def main(args):
                 lengths = lengths.to(device)
                 optimizer.zero_grad()
 
-                targets = [torch.zeros(args.num_categories) for _ in topic_ids]
-                targets = torch.stack(targets)
-                for tid, t in zip(topic_ids, targets):
-                    t[tid] = 1
+                # targets = [torch.zeros(args.num_categories) for _ in topic_ids]
+                # targets = torch.stack(targets).to(device)
+                # for tid, t in zip(topic_ids, targets):
+                #     t[tid] = 1
                 res = model(qw_idxs, lengths)
 
                 # for loss, either nn.softmax_cross_entropy_with_logits or nn.BCELoss or nn.BCEWithLogitsLoss
@@ -106,12 +106,11 @@ def main(args):
         #        loss = nn.CrossEntropyLoss()
        #         loss = nn.BCELoss()
        #         loss = nn.BCEWithLogitsLoss()
-                loss=nn.NLLLoss()
-                loss_output = loss(res, targets)
+                loss_output = F.nll_loss(F.log_softmax(res, dim=1), topic_ids)
                 loss_output.backward()
                 loss_val = loss_output.item()
                 optimizer.step()
-                scheduler.step(step//batch_size)
+                # scheduler.step(step//batch_size)
                 ema(model, step//batch_size)
 
                 step += batch_size
@@ -145,8 +144,12 @@ def main(args):
     
                     saver.save(model=model, step=step, epoch=epoch, 
                                metric_val=loss_val, device=device)
+                    ema.resume(model)
+                    model.to(device)
+                    model.train()
 
-                    # TODO: Finish writing the evaluation script and the tensorboard logging
+
+                    log.info(f"resuming training on device {device}")
 
 def evaluate(model, data_loader, device, eval_file):
     pred_dict = {}
@@ -160,20 +163,16 @@ def evaluate(model, data_loader, device, eval_file):
             for qw_idxs, ids, topic_ids, lengths in data_loader:
 
                 qw_idxs = qw_idxs.to(device)
-                batch_size = qw_idxs.size(0)
-                topic_ids = topic_ids.to(device)
                 lengths = lengths.to(device)
-
-                targets = [torch.zeros(args.num_categories) for _ in topic_ids]
-                targets = torch.stack(targets)
-                for tid, t in zip(topic_ids, targets):
-                    t[tid] = 1
+                batch_size = qw_idxs.size(0)
+                if batch_size != args.batch_size:
+                    print('Did not process because did not meet batch_size threshold')
+                    continue
+                topic_ids = topic_ids.to(device)
 
                 res = model(qw_idxs, lengths)
 
-                loss = nn.NLLLoss()
-
-                loss_output = loss(res, targets)
+                loss_output = F.nll_loss(F.log_softmax(res, dim=1), topic_ids)
                 loss_val = loss_output.item()
                 loss_val_acc += loss_val
                 counter += 1

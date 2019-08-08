@@ -72,7 +72,7 @@ def get_exp3_featurize_args():
                         help="The file containing the cleand and shrunken train data.")
     parser.add_argument("--dev_in_file",
                         type=str,
-                        default="./data/clean-test-exp3.json",
+                        default="./data/clean-dev-exp3.json",
                         help="The file containing the cleand and shrunken dev data.")
     
     args = parser.parse_args()

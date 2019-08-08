@@ -1,4 +1,4 @@
-import ujson as json
+import json as json
 import numpy as np
 import torch 
 import torch.utils.data as data
@@ -68,7 +68,7 @@ def collate_fn(examples):
 #    print(f"topic_ids: {topic_ids}")
     qw_idxs, lengths = merge_1d(qw_idxs)
     ids = merge_0d(ids)
-    topic_ids = merge_0d(topic_ids)
+    topic_ids = merge_0d(topic_ids, dtype=torch.long)
 
     return (qw_idxs, ids, topic_ids, lengths)
 

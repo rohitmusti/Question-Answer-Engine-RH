@@ -1,4 +1,4 @@
-import ujson as json
+import json as json
 from tqdm import tqdm
 from collections import Counter
 import spacy

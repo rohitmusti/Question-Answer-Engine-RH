@@ -6,6 +6,21 @@ from sklearn.ensemble import RandomForestClassifier
 
 from args import get_exp3_train_args
 
+def make_feature_vec(words, num_features):
+    """
+    Average the word vectors for a set of words
+    """
+    feature_vec = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
+    nwords = 0.
+
+    for word in words:
+        if word in index2word_set: 
+            nwords = nwords + 1.
+            feature_vec = np.add(feature_vec,model[word])
+    
+    feature_vec = np.divide(feature_vec, nwords)
+    return feature_vec
+
 def main(args):
     t_raw = np.load(args.train_feature_file)
     d_raw = np.load(args.dev_feature_file)
@@ -16,25 +31,27 @@ def main(args):
     print('retrieving embeddings for train...')
     t_x = []
     for word_array in t_raw["qw_idxs"]:
-        nwa = []
+        nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa.append(word_vectors[word])
+            nwa = np.add(nwa, model[word])
+        nwa = np.divide(nwa, len(word_array))
         t_x.append(np.asarray(nwa))
 
     print('retrieving embeddings for dev...')
     d_x = []
     for word_array in d_raw["qw_idxs"]:
-        nwa = []
+        nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa.append(word_vectors[word])
+            nwa = np.add(nwa, model[word])
+        nwa = np.divide(nwa, len(word_array))
         d_x.append(np.asarray(nwa))
 
 
     print('creating dataframes...')
     t_X = pd.DataFrame(t_x,
-                      columns=[str(i+1) for i in range(31)])
+                      columns=[str(i+1) for i in range(300)])
     d_X = pd.DataFrame(np.array(d_raw['qw_idxs']),
-                      columns=[str(i+1) for i in range(31)])
+                      columns=[str(i+1) for i in range(300)])
     t_Y = pd.DataFrame(t_raw['topic_ids'], columns=['topic_ids'])
     d_Y = pd.DataFrame(d_raw['topic_ids'], columns=['topic_ids'])
 

@@ -57,7 +57,7 @@ def main(args):
 
     print('training...')
     forest = RandomForestClassifier(n_estimators = 100)
-    forest = forest.fit(t_X, t_Y)
+    forest = forest.fit(t_X, t_raw['topic_ids'])
 
     
     

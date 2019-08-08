@@ -36,8 +36,6 @@ def main(args):
             nwa = np.add(nwa, word_vectors[word])
         nwa = np.divide(nwa, len(word_array))
         t_x.append(np.asarray(nwa))
-    print(len(t_x))
-    print(len(t_x[0]))
 
     print('retrieving embeddings for dev...')
     d_x = []
@@ -52,7 +50,7 @@ def main(args):
     print('creating dataframes...')
     t_X = pd.DataFrame(t_x,
                       columns=[str(i+1) for i in range(300)])
-    d_X = pd.DataFrame(np.array(d_raw['qw_idxs']),
+    d_X = pd.DataFrame(d_x,
                       columns=[str(i+1) for i in range(300)])
     t_Y = pd.DataFrame(t_raw['topic_ids'], columns=['topic_ids'])
     d_Y = pd.DataFrame(d_raw['topic_ids'], columns=['topic_ids'])

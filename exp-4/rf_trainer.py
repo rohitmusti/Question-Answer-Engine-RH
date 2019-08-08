@@ -35,8 +35,9 @@ def main(args):
     for word_array in t_raw["qw_idxs"]:
         nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa[c:c+31] = word_vectors[word]
-            c += 31
+            for i in word_vectors[word]:
+                nwa[c] = i
+                c += 1
         t_x.append(np.asarray(nwa))
 
     print('retrieving embeddings for dev...')
@@ -45,8 +46,9 @@ def main(args):
     for word_array in d_raw["qw_idxs"]:
         nwa = np.zeros((300*31,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa[c:c+31] = word_vectors[word]
-            c += 31
+            for i in word_vectors[word]:
+                nwa[c] = i
+                c += 1
         d_x.append(np.asarray(nwa))
 
 

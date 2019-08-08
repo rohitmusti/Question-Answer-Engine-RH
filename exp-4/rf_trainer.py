@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import ujson as json
+import json as json
 from tqdm import tqdm
 from sklearn.ensemble import RandomForestClassifier
 
@@ -32,6 +32,7 @@ def main(args):
     t_x = []
     for word_array in t_raw["qw_idxs"]:
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
+        print(len(word_array))
         for word in word_array:
             nwa = np.add(nwa, word_vectors[word])
         nwa = np.divide(nwa, len(word_array))

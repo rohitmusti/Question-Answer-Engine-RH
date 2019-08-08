@@ -33,7 +33,7 @@ def main(args):
     for word_array in t_raw["qw_idxs"]:
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa = np.add(nwa, model[word])
+            nwa = np.add(nwa, word_array[word])
         nwa = np.divide(nwa, len(word_array))
         t_x.append(np.asarray(nwa))
 
@@ -42,7 +42,7 @@ def main(args):
     for word_array in d_raw["qw_idxs"]:
         nwa = np.zeros((300,),dtype="float32")  # pre-initialize (for speed)
         for word in word_array:
-            nwa = np.add(nwa, model[word])
+            nwa = np.add(nwa, word_array[word])
         nwa = np.divide(nwa, len(word_array))
         d_x.append(np.asarray(nwa))
 
